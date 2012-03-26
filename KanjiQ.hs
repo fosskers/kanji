@@ -7,7 +7,10 @@ module KanjiQ where
 
 import qualified Data.Set as S
 
-type Kanji = Char
+data Kanji = Kanji Char deriving (Eq, Ord)
+
+instance Show Kanji where
+    show (Kanji c) = [c]
 
 data Q = Q {allKanjiInSet :: S.Set Kanji, qNumber :: Double} deriving (Eq, Show)
 
@@ -34,25 +37,20 @@ allQs = do
   let kanjiLists = map toKanjiList allKanjiByQ
       withQNums  = zip kanjiLists qNumbers
   return . map (\(ks,n) -> makeQ ks n) $ withQNums
-      where toKanjiList = map toKanji . lines
+      where toKanjiList = map (toKanji . head) . lines
 
 readKanjiFiles :: IO [String]
 readKanjiFiles = mapM readFile kanjiFilePaths
 
-toKanji :: String -> Kanji
-toKanji [] = error "Could not convert: Empty String given."
-toKanji k  = head k
-
--- Custom show function for Kanji.
-showK :: Kanji -> String
-showK k = [k]
+toKanji :: Char -> Kanji
+toKanji k  = Kanji k
 
 whatQ :: Kanji -> [Q] -> Either String Double
 whatQ k qs = checkQs qs
     where checkQs (q:qs') = if kanjiInQ k q
                             then Right $ qNumber q
                             else checkQs qs'
-          checkQs []     = Left $ (showK k) ++ " is not in any 級"
+          checkQs []     = Left $ (show k) ++ " is not in any 級"
 
 kanjiInQ :: Kanji -> Q -> Bool
 kanjiInQ k q = S.member k . allKanjiInSet $ q

@@ -3,56 +3,56 @@
 -- 級 is pronounced `kyuu`, hence the appearance of the 
 -- letter `q` in this library.
 
-{- ON Q NUMBERS
-All level numbers will be stored as Doubles.
-Levels 10 to 3 will essentially be integers,
-while 準2 and above will be respectively:
-2.5, 2, 1.5, 1
--}
-
-{- 漢検漢字と教育漢字
-There is an important link:
-Level 10 to level 5 perfectly match
-the elementary school curriculum Kanji
-for each grade year.
--}
-
 module KanjiQ where
 
 import qualified Data.Set as S
 
-type Kanji = String
+type Kanji = Char
 
-data Q = Q {allKanji :: S.Set Kanji, qNumber :: Double} deriving (Eq, Show)
+data Q = Q {allKanjiInSet :: S.Set Kanji, qNumber :: Double} deriving (Eq, Show)
 
 makeQ :: [Kanji] -> Double -> Q
 makeQ ks n = Q (S.fromDistinctAscList ks) n
 
--- Lists of Kanji of various levels.
--- USE `fromDistinctAscList` !!!
-tenthQ     = undefined
-ninthQ     = undefined
-eigthQ     = undefined
-seventhQ   = undefined
-sixthQ     = undefined
-fifthQ     = undefined
-forthQ     = undefined
-thirdQ     = undefined
-preSecondQ = undefined
-secondQ    = undefined
-preFirstQ  = undefined
-firstQ     = undefined
+-- Base path to the Kanji data files.
+basePath :: String 
+basePath = "./data/"
 
-allQs :: [Q]
-allQs = [tenthQ, ninthQ, eigthQ, seventhQ, sixthQ, fifthQ, forthQ
-        ,thirdQ, preSecondQ, secondQ, preFirstQ, firstQ]
+kanjiFiles :: [String]
+kanjiFiles = ["tenthQ.txt", "ninthQ.txt", "eigthQ.txt", "seventhQ.txt",
+              "sixthQ.txt", "fifthQ.txt"]
+
+kanjiFilePaths :: [String]
+kanjiFilePaths = map (basePath ++) kanjiFiles
+
+qNumbers :: [Double]
+qNumbers = [10,9,8,7,6,5,4,3,2.5,2,1.5,1]
+
+allQs :: IO [Q]
+allQs = do
+  allKanjiByQ <- readKanjiFiles
+  let kanjiLists = map toKanjiList allKanjiByQ
+      withQNums  = zip kanjiLists qNumbers
+  return . map (\(ks,n) -> makeQ ks n) $ withQNums
+      where toKanjiList = map toKanji . lines
+
+readKanjiFiles :: IO [String]
+readKanjiFiles = mapM readFile kanjiFilePaths
+
+toKanji :: String -> Kanji
+toKanji [] = error "Could not convert: Empty String given."
+toKanji k  = head k
+
+-- Custom show function for Kanji.
+showK :: Kanji -> String
+showK k = [k]
+
+whatQ :: Kanji -> [Q] -> Either String Double
+whatQ k qs = checkQs qs
+    where checkQs (q:qs') = if kanjiInQ k q
+                            then Right $ qNumber q
+                            else checkQs qs'
+          checkQs []     = Left $ (showK k) ++ " is not in any 級"
 
 kanjiInQ :: Kanji -> Q -> Bool
-kanjiInQ k q = S.member k . allKanji $ q
-
-whatQ :: Kanji -> Either String Double
-whatQ k = checkQs allQs
-    where checkQs (q:qs) = if kanjiInQ k q
-                           then Right $ qNumber q
-                           else checkQs qs
-          checkQs []     = Left $ k ++ " is not in any 級"
+kanjiInQ k q = S.member k . allKanjiInSet $ q

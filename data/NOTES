@@ -1,0 +1,26 @@
+NOTES ON THESE KANJI LISTS
+--------------------------
+Levels 10 to 5 are identical to the Kanji learned at each grade
+in Japanese elementary schools. These are known as 教育漢字
+(kyouiku kanji) and a list of them is freely available on Wikipedia. 
+
+ORDERING OF THE KANJI
+---------------------
+Within the files, the Kanji are ordered by their Unicode (UTF-8) numbers.
+This is necessary and taken for granted in the program itself, where Sets
+of Kanji are built with the assumption that their inputs are in order.
+
+
+はい、日本語
+
+漢字のリストについて
+--------------------
+10級から5級の漢字は小学校のそれぞれの学年で習う漢字と一致し、
+教育漢字と言い、そのままWikipediaに載っているので取らせてもらった。
+
+漢字の順番
+----------
+ファイルの中で、漢字はUnicode(UTF-8)番号順になっている。
+プログラムの中ではSets(Data.Setから)がよく使われていて、
+ファイルの入力とSetsの利用がより効率的になるようにこの漢字の
+順番が当然だという風にプログラムの仕組みができている。

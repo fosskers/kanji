@@ -6,6 +6,7 @@
 module KanjiQ where
 
 import qualified Data.Set as S
+import Data.Char (ord)
 
 data Kanji = Kanji Char deriving (Eq, Ord)
 
@@ -23,13 +24,33 @@ basePath = "./data/"
 
 kanjiFiles :: [String]
 kanjiFiles = ["tenthQ.txt", "ninthQ.txt", "eigthQ.txt", "seventhQ.txt",
-              "sixthQ.txt", "fifthQ.txt", "fourthQ.txt"]
+              "sixthQ.txt", "fifthQ.txt", "fourthQ.txt", "thirdQ.txt"]
 
 kanjiFilePaths :: [String]
 kanjiFilePaths = map (basePath ++) kanjiFiles
 
 qNumbers :: [Double]
 qNumbers = [10,9,8,7,6,5,4,3,2.5,2,1.5,1]
+
+isKanji :: Char -> Bool
+isKanji c = lowLimit <= c' && c' <= highLimit
+    where c' = ord c
+          lowLimit  = 19968  -- This is `一`
+          highLimit = 40959  -- I don't have the right fonts to display this.
+
+toKanji :: Char -> Kanji
+toKanji k = Kanji k 
+
+-- Most useful function.
+whatQ :: Kanji -> [Q] -> Maybe Double
+whatQ k qs = checkQs qs
+    where checkQs (q:qs') = if kanjiInQ k q
+                            then Just $ qNumber q
+                            else checkQs qs'
+          checkQs []      = Nothing
+
+kanjiInQ :: Kanji -> Q -> Bool
+kanjiInQ k q = S.member k . allKanjiInSet $ q
 
 allQs :: IO [Q]
 allQs = do
@@ -41,16 +62,3 @@ allQs = do
 
 readKanjiFiles :: IO [String]
 readKanjiFiles = mapM readFile kanjiFilePaths
-
-toKanji :: Char -> Kanji
-toKanji k  = Kanji k
-
-whatQ :: Kanji -> [Q] -> Maybe Double
-whatQ k qs = checkQs qs
-    where checkQs (q:qs') = if kanjiInQ k q
-                            then Just $ qNumber q
-                            else checkQs qs'
-          checkQs []      = Nothing
-
-kanjiInQ :: Kanji -> Q -> Bool
-kanjiInQ k q = S.member k . allKanjiInSet $ q

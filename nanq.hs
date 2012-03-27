@@ -15,7 +15,7 @@ main = do
           case opts of
             ([JapOutput],(ks:_)) -> (japPass,japFail,ks)
             ([],(ks:_))          -> (engPass,engFail,ks)
-  results <- mapM (nanQ pass fail . toKanji) ks
+  results <- mapM (nanQ pass fail . toKanji) . filter isKanji $ ks
   mapM_ putStrLn results
       where japPass k n = "「" ++ (show k) ++ "」は" ++ (show n) ++ "級の漢字"
             japFail k   = "「" ++ (show k) ++ "」はどの級の漢字でもない"

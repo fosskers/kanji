@@ -45,12 +45,12 @@ readKanjiFiles = mapM readFile kanjiFilePaths
 toKanji :: Char -> Kanji
 toKanji k  = Kanji k
 
-whatQ :: Kanji -> [Q] -> Either String Double
+whatQ :: Kanji -> [Q] -> Maybe Double
 whatQ k qs = checkQs qs
     where checkQs (q:qs') = if kanjiInQ k q
-                            then Right $ qNumber q
+                            then Just $ qNumber q
                             else checkQs qs'
-          checkQs []     = Left $ (show k) ++ " is not in any 級"
+          checkQs []      = Nothing
 
 kanjiInQ :: Kanji -> Q -> Bool
 kanjiInQ k q = S.member k . allKanjiInSet $ q

@@ -13,9 +13,11 @@ data Kanji = Kanji Char deriving (Eq, Ord)
 instance Show Kanji where
     show (Kanji c) = [c]
 
-data Q = Q {allKanjiInSet :: S.Set Kanji, qNumber :: Double} deriving (Eq, Show)
+type QNum = Double
 
-makeQ :: [Kanji] -> Double -> Q
+data Q = Q {allKanjiInSet :: S.Set Kanji, qNumber :: QNum} deriving (Eq, Show)
+
+makeQ :: [Kanji] -> QNum -> Q
 makeQ ks n = Q (S.fromDistinctAscList ks) n
 
 -- Base path to the Kanji data files.
@@ -29,28 +31,8 @@ kanjiFiles = ["tenthQ.txt", "ninthQ.txt", "eigthQ.txt", "seventhQ.txt",
 kanjiFilePaths :: [String]
 kanjiFilePaths = map (basePath ++) kanjiFiles
 
-qNumbers :: [Double]
+qNumbers :: [QNum]
 qNumbers = [10,9,8,7,6,5,4,3,2.5,2,1.5,1]
-
-isKanji :: Char -> Bool
-isKanji c = lowLimit <= c' && c' <= highLimit
-    where c' = ord c
-          lowLimit  = 19968  -- This is `一`
-          highLimit = 40959  -- I don't have the right fonts to display this.
-
-toKanji :: Char -> Kanji
-toKanji k = Kanji k 
-
--- Most useful function.
-whatQ :: Kanji -> [Q] -> Maybe Double
-whatQ k qs = checkQs qs
-    where checkQs (q:qs') = if kanjiInQ k q
-                            then Just $ qNumber q
-                            else checkQs qs'
-          checkQs []      = Nothing
-
-kanjiInQ :: Kanji -> Q -> Bool
-kanjiInQ k q = S.member k . allKanjiInSet $ q
 
 allQs :: IO [Q]
 allQs = do
@@ -63,4 +45,35 @@ allQs = do
 readKanjiFiles :: IO [String]
 readKanjiFiles = mapM readFile kanjiFilePaths
 
--- This is a diff test!!!
+isKanji :: Char -> Bool
+isKanji c = lowLimit <= c' && c' <= highLimit
+    where c' = ord c
+          lowLimit  = 19968  -- This is `一`
+          highLimit = 40959  -- I don't have the right fonts to display this.
+
+toKanji :: Char -> Kanji
+toKanji k = if isKanji k then Kanji k else error $ k : " is not a Kanji!"
+
+-- Find out what Level a Kanji belongs to.
+whatQ :: [Q] -> Kanji -> Maybe QNum
+whatQ qs k = checkQs qs
+    where checkQs (q:qs') = if isKanjiInQ q k
+                            then Just $ qNumber q
+                            else checkQs qs'
+          checkQs []      = Nothing
+
+isKanjiInQ :: Q -> Kanji -> Bool
+isKanjiInQ q k = S.member k . allKanjiInSet $ q
+
+-- Find the average Level of a given set of Kanji.
+averageQ :: [Q] -> [Kanji] -> Double
+averageQ qs ks = average $ map getQNum ks
+    where getQNum k = case whatQ qs k of
+                        Just qn -> qn
+                        Nothing -> 0  -- Not found means it's a tough Kanji.
+          average ns = (sum ns) / (fromIntegral $ length ns) 
+
+areSameQ :: [Q] -> Kanji -> Kanji -> Bool
+areSameQ qs k1 k2 = compareQs (whatQ qs k1) (whatQ qs k2)
+    where compareQs (Just q1) (Just q2) = q1 == q2
+          compareQs _ _ = False

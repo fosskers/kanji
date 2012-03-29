@@ -62,3 +62,5 @@ allQs = do
 
 readKanjiFiles :: IO [String]
 readKanjiFiles = mapM readFile kanjiFilePaths
+
+-- This is a diff test!!!

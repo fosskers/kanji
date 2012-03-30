@@ -1,27 +1,32 @@
--- TODO: Make a help option.
-
 import System.Environment (getArgs)
 import System.Console.GetOpt
 import KanjiQ
 
-data Flag = Average | JapOutput
+data Flag = Help | Average | JapOutput
 
 options :: [OptDescr Flag]
-options = [ Option ['a'] ["average"] (NoArg Average) aDesc
+options = [ Option ['h'] ["help"] (NoArg Help) hDesc
+          , Option ['a'] ["average"] (NoArg Average) aDesc
           , Option ['j'] ["japanese"] (NoArg JapOutput) jDesc 
           ]
-    where jDesc = "Output is given in Japanese instead of English." ++
-                  "出力の際は日本語"
-          aDesc = "Find the average level of some given line of Japanese" ++
-                  "日本語の文の平均的な級を求める"
+    where hDesc = "Shows this help message."
+          aDesc = "Find the average level of some given line of Japanese." ++
+                  "\n日本語の文の平均的な級を求める"
+          jDesc = "Output is given in Japanese instead of English." ++
+                  "\n出力の際は日本語"
+          
+usageMsg :: String
+usageMsg = "Usage : nanq [OPTION] <kanji>"
 
 main = do
   args <- getArgs
   opts <- processOpts args
   case opts of
-    ([Average],(ks:_))   -> findAverageQ ks
+    ([Help],_)           -> putStrLn $ usageInfo usageMsg options
+    (_,[])               -> argError "No Kanji given."
+    ([Average],  (ks:_)) -> findAverageQ ks
     ([JapOutput],(ks:_)) -> findQ japPass japFail ks
-    ([],(ks:_))          -> findQ engPass engFail ks
+    ([],         (ks:_)) -> findQ engPass engFail ks  -- English by default.
     where japPass k n = "「" ++ (show k) ++ "」は" ++ (show n) ++ "級の漢字"
           japFail k   = "「" ++ (show k) ++ "」はどの級の漢字でもない"
           engPass k n = (show k) ++ " is a Level " ++ (show n) ++ " Kanji"
@@ -30,10 +35,11 @@ main = do
 processOpts :: [String] -> IO ([Flag],[String])
 processOpts args =
     case getOpt Permute options args of
-      (_,[],_)          -> error $ "No Kanji given." ++ usageMsg
       (opts,nonopts,[]) -> return (opts,nonopts)
-      (_,_,errors)      -> error $ "Flag related error." ++ usageMsg
-    where usageMsg = "\nUsage : nanq [OPTION] \"<kanji>\""
+      (_,_,errors)      -> argError "Bad flag used."
+
+argError :: String -> a
+argError msg = error $ usageInfo (msg ++ "\n" ++ usageMsg) options
 
 findAverageQ :: String -> IO ()
 findAverageQ ks = do

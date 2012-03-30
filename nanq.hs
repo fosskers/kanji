@@ -27,6 +27,7 @@ main = do
     ([Average],  (ks:_)) -> findAverageQ ks
     ([JapOutput],(ks:_)) -> findQ japPass japFail ks
     ([],         (ks:_)) -> findQ engPass engFail ks  -- English by default.
+    (conflictingFlags,_) -> argError "Conflicting flags given."
     where japPass k n = "「" ++ (show k) ++ "」は" ++ (show n) ++ "級の漢字"
           japFail k   = "「" ++ (show k) ++ "」はどの級の漢字でもない"
           engPass k n = (show k) ++ " is a Level " ++ (show n) ++ " Kanji"

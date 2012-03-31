@@ -1,6 +1,4 @@
--- GIT TEST
--- ANOTHER GIT TEST
--- YET ANOTHER SUBTLE CHANGE
+-- THIS IS SOMETHING DIFFERENT
 
 import System.Environment (getArgs)
 import System.Console.GetOpt

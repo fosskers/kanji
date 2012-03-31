@@ -74,6 +74,12 @@ averageQ qs ks = average $ map getQNum ks
                         Nothing -> 0  -- Not found means it's a tough Kanji.
           average ns = (sum ns) / (fromIntegral $ length ns) 
 
+percentSpread :: [Kanji] -> [(Kanji,Float)]
+percentSpread ks = map getPercent quantities
+    where getPercent (k,q) = (k, 100 * (fromIntegral q) / totalKanji)
+          quantities = kanjiQuantities ks
+          totalKanji = fromIntegral $ foldl (\acc (_,q) -> q + acc) 0 quantities
+
 -- Determines how many times each Kanji appears in given set of them.
 kanjiQuantities :: [Kanji] -> [(Kanji,Int)]
 kanjiQuantities = map (\ks -> (head ks, length ks)) . group . sort

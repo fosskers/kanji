@@ -1,4 +1,5 @@
 -- GIT TEST
+-- ANOTHER GIT TEST
 
 import System.Environment (getArgs)
 import System.Console.GetOpt

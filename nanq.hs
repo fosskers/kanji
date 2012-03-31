@@ -1,5 +1,3 @@
--- quick test
-
 import System.Environment (getArgs)
 import System.Console.GetOpt
 import KanjiQ

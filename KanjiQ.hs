@@ -6,6 +6,7 @@
 module KanjiQ where
 
 import qualified Data.Set as S
+import Data.List (sort, group)    
 import Data.Char (ord)
 
 data Kanji = Kanji Char deriving (Eq, Ord)
@@ -72,6 +73,10 @@ averageQ qs ks = average $ map getQNum ks
                         Just qn -> qn
                         Nothing -> 0  -- Not found means it's a tough Kanji.
           average ns = (sum ns) / (fromIntegral $ length ns) 
+
+-- Determines how many times each Kanji appears in given set of them.
+kanjiQuantities :: [Kanji] -> [(Kanji,Int)]
+kanjiQuantities = map (\ks -> (head ks, length ks)) . group . sort
 
 areSameQ :: [Q] -> Kanji -> Kanji -> Bool
 areSameQ qs k1 k2 = compareQs (whatQ qs k1) (whatQ qs k2)

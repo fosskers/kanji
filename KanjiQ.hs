@@ -27,7 +27,8 @@ basePath = "./data/"
 
 kanjiFiles :: [String]
 kanjiFiles = ["tenthQ.txt", "ninthQ.txt", "eigthQ.txt", "seventhQ.txt",
-              "sixthQ.txt", "fifthQ.txt", "fourthQ.txt", "thirdQ.txt"]
+              "sixthQ.txt", "fifthQ.txt", "fourthQ.txt", "thirdQ.txt",
+              "preSecondQ.txt"]
 
 kanjiFilePaths :: [String]
 kanjiFilePaths = map (basePath ++) kanjiFiles

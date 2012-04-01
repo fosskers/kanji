@@ -1,3 +1,6 @@
+-- TODO: Make a qDistribution function.
+-- TODO: Write a README
+
 import System.IO (hGetContents, stdin)
 import System.Environment (getArgs)
 import System.Console.GetOpt

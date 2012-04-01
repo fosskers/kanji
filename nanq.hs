@@ -1,6 +1,3 @@
--- BUG: `-h` option doesn't technically work anymore.
---      `getInput` is the source of the problem.
-
 import System.IO (hGetContents, stdin)
 import System.Environment (getArgs)
 import System.Console.GetOpt
@@ -33,12 +30,12 @@ usageMsg = "Usage : nanq [OPTION] (kanji / file)"
 main = do
   args <- getArgs
   opts <- processOpts args
-  cleanedOpts <- getInput opts
+  cleanedOpts <- cleanOpts opts
   case cleanedOpts of
     ([Help],_)          -> putStrLn $ usageInfo usageMsg options
     ([Average],  input) -> findAverageQ input
-    ([JapOutput],input) -> findQ japPass japFail input
-    ([],         input) -> findQ engPass engFail input
+    ([JapOutput],input) -> findQs japPass japFail input
+    ([],         input) -> findQs engPass engFail input
     (flagsInConflict,_) -> argError "Conflicting flags given."
     where japPass k n = "「" ++ (show k) ++ "」は" ++ (show n) ++ "級の漢字"
           japFail k   = "「" ++ (show k) ++ "」はどの級の漢字でもない"
@@ -52,15 +49,15 @@ processOpts args =
       (_,_,errors)      -> argError "Bad flag used."
 
 -- Determine how the input is to be received, and get it.
-getInput :: ([Flag],[String]) -> IO ([Flag],String)
-getInput (opts,[])
+cleanOpts :: ([Flag],[String]) -> IO ([Flag],String)
+cleanOpts (opts,nonopts)
+    | Help `elem` opts      = return ([Help],"")  -- Disregards everything else.
     | PipeInput `elem` opts = do input <- hGetContents stdin
                                  return (delete PipeInput opts, input)
-    | otherwise             = argError "No Kanji / file given!"
-getInput (opts,(source:_))
-    | FileInput `elem` opts = do input <- readFile source
+    | null nonopts          = argError "No Kanji / file given!"
+    | FileInput `elem` opts = do input <- readFile $ head nonopts
                                  return (delete FileInput opts, input)
-    | otherwise             = return (opts,source)
+    | otherwise             = return (opts, head nonopts)
 
 argError :: String -> a
 argError msg = error $ usageInfo (msg ++ "\n" ++ usageMsg) options
@@ -70,8 +67,8 @@ findAverageQ ks = do
   qs <- allQs
   print . averageQ qs . map toKanji . filter isKanji $ ks
 
-findQ :: (Kanji -> Double -> String) -> (Kanji -> String) -> String -> IO ()
-findQ pass fail ks = do
+findQs :: (Kanji -> Double -> String) -> (Kanji -> String) -> String -> IO ()
+findQs pass fail ks = do
   results <- mapM (nanQ pass fail . toKanji) . filter isKanji $ ks
   mapM_ putStrLn results
 

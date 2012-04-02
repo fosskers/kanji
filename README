@@ -1,0 +1,101 @@
+NANQ
+----
+Author:  Colin Woodbury
+Contact: colingw@gmail.com
+
+NanQ is a Japanese Kanji analysation program written in Haskell.
+Its main function is to tell what Kanji belong to what Level
+of the 漢字検定, or in English, the Japanese National Kanji
+Examination. 
+
+NanQ can be used to:
+ - determine what Level individual Kanji belong to, should a user
+   become curious.
+ - determine the average Level (difficulty, in other words)
+   of a group of Kanji.
+ - apply the above to whole files of Japanese.
+ - display the results of all the above in Japanese or English.
+
+NanQ will in future be able to:
+ - tell how much of a group of Kanji belongs to each Level,
+   as a percentage.
+
+INSTALLING NANQ
+---------------
+First, get the source and data files from:
+
+https://github.com/fosskers/nanq
+
+Then, moving to the directory where you placed the source files,
+compile NanQ as follows:
+
+  ghc nanq.hs -O2
+
+As of April 02 2012, there is not yet any build script or the like,
+and the executable needs to be in the same folder as the `data`
+folder. This will change eventually.
+
+USING NANQ
+----------
+As the executable needs to be in the same folder as the `data`
+folder, I use the current hack in my .bashrc to run NanQ.
+
+alias nanq='cd pathToExecutable/ && ./nanq'
+
+Again, this will be changed so NanQ can be run normally
+without any extra work after install.
+
+Assuming you've made it so that you can run the executable,
+the following command-line options are available:
+
+-Legend-
+CMP? - Is this option _compoundable_ with other options?
+OR?  - Does this option _over-ride_ other options?
+       If it does, other options and arguments may be added,
+       but they will all be thrown away in favour of the
+       over-riding option.
+
+ <option>      <CMP?> <OR?>  <description>
+ *no option*     N/A   N/A   Takes a line of Japanese straight from the
+     		             command line and gives the Level of each Kanji.
+ -a, --average   YES   NO    Given Japanese input, finds the average Level of
+     		             all Kanji present.
+ -h, --help      YES   YES   Prints a message explaining these options.
+ -f, --file      YES   NO    Get input from a given file.
+ -p, --pipe      YES   NO    Get input from stdin.
+ -j, --japanese  YES   NO    Gives output in Japanese where available.
+
+-Examples-
+*Single Kanji*
+nanq 日
+>>> 日 is a Level 10.0 Kanji
+nanq -j 日
+>>> 「日」は10.0級の漢字
+
+*A Japanese sentence*
+nanq これは日本語
+>>> 日 is a Level 10.0 Kanji
+    本 is a Level 10.0 Kanji
+    語 is a Level 9.0 Kanji
+
+*Averages*
+nanq -a この文は難しくない
+>>> 7.5
+nanq -a 此の文は難儀だと思える
+>>> 5.63
+
+*Reading from a file (and also finding the average)*
+nanq -fa file.txt
+
+*Reading from stdin (and getting output in Japanese)*
+cat file.txt | nanq -pj
+
+IF NOTHING ELSE
+---------------
+If nothing else, there are lists of Kanji divided by Level in text
+files in the `data` folder. The Kanji are sorted in the order of
+their Unicode numbers. Feel free to use these lists as you wish,
+as after much searching I was able to find no similar compilation
+of lists that is _easily accessable_. The company that creates
+the Kanji Examination offers pretty PDFs, but no dead simple
+text files.

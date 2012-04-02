@@ -31,6 +31,8 @@ compile NanQ as follows:
 
   ghc nanq.hs -O2
 
+Of course you need Haskell installed in order for this to work.
+
 As of April 02 2012, there is not yet any build script or the like,
 and the executable needs to be in the same folder as the `data`
 folder. This will change eventually.

@@ -6,6 +6,8 @@ import Data.List (delete, nub)
 import System.Console.GetOpt
 import KanjiQ
 
+data Language = Jap | Eng deriving (Eq)
+
 data Flag = FileInput | PipeInput | Help | Average |
             Unknowns  | JapOutput deriving (Eq)
 
@@ -38,16 +40,11 @@ main = do
   opts <- processOpts args
   cleanedOpts <- cleanOpts opts
   case cleanedOpts of
-    ([Help],_)          -> putStrLn $ usageInfo usageMsg options
-    ([Average],  input) -> findAverageQ input
-    ([JapOutput],input) -> findQs japPass japFail input
-    ([],         input) -> findQs engPass engFail input
-    ([Unknowns], input) -> findUnknowns input
-    (flagsInConflict,_) -> argError "Conflicting flags given."
-    where japPass k n = "「" ++ (show k) ++ "」は" ++ (show n) ++ "級の漢字"
-          japFail k   = "「" ++ (show k) ++ "」はどの級の漢字でもない"
-          engPass k n = (show k) ++ " is a Level " ++ (show n) ++ " Kanji"
-          engFail k   = (show k) ++ " is not in any level."
+    ([Help],_,_)            -> putStrLn $ usageInfo usageMsg options
+    ([Average],_,    input) -> findAverageQ input
+    ([],        lang,input) -> findQs lang input
+    ([Unknowns],lang,input) -> findUnknowns lang input
+    (flagsInConflict,_,_)   -> argError "Conflicting flags given."
 
 processOpts :: [String] -> IO ([Flag],[String])
 processOpts args =
@@ -55,16 +52,19 @@ processOpts args =
       (opts,nonopts,[]) -> return (opts,nonopts)
       (_,_,errors)      -> argError "Bad flag used."
 
--- Determine how the input is to be received, and get it.
-cleanOpts :: ([Flag],[String]) -> IO ([Flag],String)
-cleanOpts (opts,nonopts)
-    | Help `elem` opts      = return ([Help],"")  -- Disregards everything else.
-    | PipeInput `elem` opts = do input <- hGetContents stdin
-                                 return (delete PipeInput opts, input)
-    | null nonopts          = argError "No Kanji / file given!"
-    | FileInput `elem` opts = do input <- readFile $ head nonopts
-                                 return (delete FileInput opts, input)
-    | otherwise             = return (opts, head nonopts)
+-- Determine input source and output language.
+cleanOpts :: ([Flag],[String]) -> IO ([Flag],Language,String)
+cleanOpts (opts,nonopts) = clean opts nonopts Eng  -- English by default.
+    where clean opts nonopts lang 
+            | JapOutput `elem` opts = clean (without JapOutput) nonopts Jap
+            | Help `elem` opts      = return ([Help],lang,"")
+            | PipeInput `elem` opts = do input <- hGetContents stdin
+                                         return (without PipeInput,lang,input)
+            | null nonopts          = argError "No Kanji / file given!"
+            | FileInput `elem` opts = do input <- readFile $ head nonopts
+                                         return (without FileInput,lang,input)
+            | otherwise             = return (opts,lang,head nonopts)
+            where without x = delete x opts
 
 argError :: String -> a
 argError msg = error $ usageInfo (msg ++ "\n" ++ usageMsg) options
@@ -74,10 +74,15 @@ findAverageQ ks = do
   qs <- allQs
   print . averageQ qs . allToKanji $ ks
 
-findQs :: (Kanji -> Double -> String) -> (Kanji -> String) -> String -> IO ()
-findQs pass fail ks = do
-  results <- mapM (nanQ pass fail) $ allToKanji ks
+findQs :: Language -> String -> IO ()
+findQs lang ks = do
+  results <- mapM (nanQ (getPass lang) (getFail lang)) $ allToKanji ks
   mapM_ putStrLn results
+    where
+      getPass Eng = \k n -> (show k) ++ " is a Level " ++ (show n) ++ " Kanji."
+      getPass Jap = \k n -> "「" ++ (show k) ++ "」は" ++ (show n) ++ "級の漢字"
+      getFail Eng = \k -> (show k) ++ " is not in any level."
+      getFail Jap = \k -> "「" ++ (show k) ++ "」はどの級の漢字でもない"
 
 nanQ :: (Kanji -> Double -> String) -> (Kanji -> String) -> Kanji -> IO String
 nanQ pass fail k = do
@@ -86,14 +91,18 @@ nanQ pass fail k = do
     Just qNum -> return $ pass k qNum
     Nothing   -> return $ fail k
 
-findUnknowns :: String -> IO ()
-findUnknowns ks = do
+findUnknowns :: Language -> String -> IO ()
+findUnknowns lang ks = do
   qs <- allQs
   let unknowns = nub . filter (isUnknown qs) . allToKanji $ ks
   case unknowns of
-    [] -> putStrLn "No Kanji of unknown Level found."
-    _  -> putStrLn "The following Kanji of unknown Level were found:" >>
+    [] -> putStrLn (fail lang)
+    _  -> putStrLn (pass lang) >>
           mapM_ print unknowns
+    where fail Eng = "No Kanji of unknown Level found."
+          fail Jap = "級を明確にできない漢字は見つからなかった"
+          pass Eng = "The following Kanji of unknown Level were found:"
+          pass Jap = "級を明確にできなかった漢字は："
 
 allToKanji :: String -> [Kanji]
 allToKanji = map toKanji . filter isKanji

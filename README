@@ -50,22 +50,21 @@ without any extra work after install.
 Assuming you've made it so that you can run the executable,
 the following command-line options are available:
 
--Legend-
-CMP? - Is this option _compoundable_ with other options?
-OR?  - Does this option _over-ride_ other options?
-       If it does, other options and arguments may be added,
-       but they will all be thrown away in favour of the
-       over-riding option.
+ *no option*     Takes a line of Japanese straight from the
+     		   command line and gives the Level of each Kanji.
+ -a, --average   Given Japanese input, finds the average Level of
+     		   all Kanji present.
+ -u, --unknowns  Reports Kanji whose Level could not be determined.
+ -h, --help      Prints a message explaining these options.
+ -f, --file      Get input from a given file.
+ -p, --pipe      Get input from stdin.
+ -j, --japanese  Gives output in Japanese where available.
 
- <option>      <CMP?> <OR?>  <description>
- *no option*     N/A   N/A   Takes a line of Japanese straight from the
-     		             command line and gives the Level of each Kanji.
- -a, --average   YES   NO    Given Japanese input, finds the average Level of
-     		             all Kanji present.
- -h, --help      YES   YES   Prints a message explaining these options.
- -f, --file      YES   NO    Get input from a given file.
- -p, --pipe      YES   NO    Get input from stdin.
- -j, --japanese  YES   NO    Gives output in Japanese where available.
+-Notes on CLOs-
+Either `-f` or `-p` can be used on top of any other option.
+`-j` will change output to Japanese and can be combined with any option.
+`-h` will over-ride any other options or arguments, discarding them and
+printing a help message.
 
 -Examples-
 *Single Kanji*

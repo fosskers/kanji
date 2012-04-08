@@ -85,6 +85,16 @@ percentSpread ks = map getPercent quantities
 kanjiQuantities :: [Kanji] -> [(Kanji,Int)]
 kanjiQuantities = map (\ks -> (head ks, length ks)) . group . sort
 
+-- Is the Level of a given Kanji known?
+isKnown :: [Q] -> Kanji -> Bool
+isKnown qs k = case whatQ qs k of
+                   Just _  -> True
+                   Nothing -> False
+
+isUnknown :: [Q] -> Kanji -> Bool
+isUnknown qs = not . isKnown qs
+
+-- Not used.
 areSameQ :: [Q] -> Kanji -> Kanji -> Bool
 areSameQ qs k1 k2 = compareQs (whatQ qs k1) (whatQ qs k2)
     where compareQs (Just q1) (Just q2) = q1 == q2

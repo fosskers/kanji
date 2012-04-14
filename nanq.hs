@@ -1,9 +1,11 @@
 -- TODO: Make a qDistribution function.
+-- Use printF to make the output of `average` make more sense.
 
 import System.IO (hGetContents, stdin)
 import System.Environment (getArgs)
 import Data.List (delete, nub)
 import System.Console.GetOpt
+import Text.Printf (printf)
 import KanjiQ
 
 data Language = Jap | Eng deriving (Eq)
@@ -41,7 +43,7 @@ main = do
   cleanedOpts <- cleanOpts opts
   case cleanedOpts of
     ([Help],_,_)            -> putStrLn $ usageInfo usageMsg options
-    ([Average],_,    input) -> findAverageQ input
+    ([Average], lang,input) -> findAverageQ lang input
     ([],        lang,input) -> findQs lang input
     ([Unknowns],lang,input) -> findUnknowns lang input
     (flagsInConflict,_,_)   -> argError "Conflicting flags given."
@@ -69,20 +71,22 @@ cleanOpts (opts,nonopts) = clean opts nonopts Eng  -- English by default.
 argError :: String -> a
 argError msg = error $ usageInfo (msg ++ "\n" ++ usageMsg) options
 
-findAverageQ :: String -> IO ()
-findAverageQ ks = do
+findAverageQ :: Language -> String -> IO ()
+findAverageQ lang ks = do
   qs <- allQs
-  print . averageQ qs . allToKanji $ ks
+  printf (getMsg lang ++ "%.2f\n") . averageQ qs . allToKanji $ ks
+      where getMsg Eng = "Average Level: "
+            getMsg Jap = "平均の級："
 
 findQs :: Language -> String -> IO ()
 findQs lang ks = do
-  results <- mapM (nanQ (getPass lang) (getFail lang)) $ allToKanji ks
+  results <- mapM (nanQ (pass lang) (fail lang)) $ allToKanji ks
   mapM_ putStrLn results
     where
-      getPass Eng = \k n -> (show k) ++ " is a Level " ++ (show n) ++ " Kanji."
-      getPass Jap = \k n -> "「" ++ (show k) ++ "」は" ++ (show n) ++ "級の漢字"
-      getFail Eng = \k -> (show k) ++ " is not in any level."
-      getFail Jap = \k -> "「" ++ (show k) ++ "」はどの級の漢字でもない"
+      pass Eng = \k n -> (show k) ++ " is a Level " ++ (show n) ++ " Kanji."
+      pass Jap = \k n -> "「" ++ (show k) ++ "」は" ++ (show n) ++ "級の漢字"
+      fail Eng = \k -> (show k) ++ " is not in any level."
+      fail Jap = \k -> "「" ++ (show k) ++ "」はどの級の漢字でもない"
 
 nanQ :: (Kanji -> Double -> String) -> (Kanji -> String) -> Kanji -> IO String
 nanQ pass fail k = do

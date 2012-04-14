@@ -76,10 +76,10 @@ averageQ qs ks = average $ map getQNum ks
           average ns = (sum ns) / (fromIntegral $ length ns) 
 
 percentSpread :: [Kanji] -> [(Kanji,Float)]
-percentSpread ks = map getPercent quantities
+percentSpread ks = map getPercent kQuants
     where getPercent (k,q) = (k, 100 * (fromIntegral q) / totalKanji)
-          quantities = kanjiQuantities ks
-          totalKanji = fromIntegral $ foldl (\acc (_,q) -> q + acc) 0 quantities
+          kQuants = kanjiQuantities ks
+          totalKanji = fromIntegral $ foldl (\acc (_,q) -> q + acc) 0 kQuants
 
 -- Determines how many times each Kanji appears in given set of them.
 kanjiQuantities :: [Kanji] -> [(Kanji,Int)]

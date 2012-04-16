@@ -1,9 +1,9 @@
 -- TODO: Make a qDistribution function.
--- Use printF to make the output of `average` make more sense.
 
 import System.IO (hGetContents, stdin)
 import System.Environment (getArgs)
 import Data.List (delete, nub)
+import Data.Maybe (fromJust)
 import System.Console.GetOpt
 import Text.Printf (printf)
 import KanjiQ
@@ -37,6 +37,16 @@ options = [ Option ['f'] ["file"]     (NoArg FileInput) fDesc
 usageMsg :: String
 usageMsg = "Usage : nanq [OPTION] (kanji / file)"
 
+japQNames :: [(QNum,String)]
+japQNames = zip qNumbers ["10級","9級","8級","7級","6級","5級","4級",
+                       "3級", "準2級","2級","準1級","1級"]
+
+engQNames :: [(QNum,String)]
+engQNames = zip qNumbers ["Tenth Level","Ninth Level","Eighth Level",
+                          "Seventh Level","Sixth Level","Fifth Level",
+                          "Forth Level","Third Level", "Pre-Second Level",
+                          "Second Level","Pre-First Level","First Level"]
+                          
 main = do
   args <- getArgs
   opts <- processOpts args
@@ -83,10 +93,13 @@ findQs lang ks = do
   results <- mapM (nanQ (pass lang) (fail lang)) $ allToKanji ks
   mapM_ putStrLn results
     where
-      pass Eng = \k n -> (show k) ++ " is a Level " ++ (show n) ++ " Kanji."
-      pass Jap = \k n -> "「" ++ (show k) ++ "」は" ++ (show n) ++ "級の漢字"
+      pass Eng = \k n -> (show k) ++ " is a " ++ (eQName n) ++ " Kanji."
+      pass Jap = \k n -> "「" ++ (show k) ++ "」は" ++ (jQName n) ++ "の漢字"
       fail Eng = \k -> (show k) ++ " is not in any level."
       fail Jap = \k -> "「" ++ (show k) ++ "」はどの級の漢字でもない"
+      eQName n = getQName n engQNames
+      jQName n = getQName n japQNames
+      getQName n names = fromJust $ n `lookup` names
 
 nanQ :: (Kanji -> Double -> String) -> (Kanji -> String) -> Kanji -> IO String
 nanQ pass fail k = do

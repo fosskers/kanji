@@ -30,7 +30,7 @@ kanjiFiles = ["tenthQ.txt", "ninthQ.txt", "eigthQ.txt", "seventhQ.txt",
               "sixthQ.txt", "fifthQ.txt", "fourthQ.txt", "thirdQ.txt",
               "preSecondQ.txt", "secondQ.txt"]
 
-kanjiFilePaths :: [String]
+kanjiFilePaths :: [FilePath]
 kanjiFilePaths = map (basePath ++) kanjiFiles
 
 qNumbers :: [QNum]

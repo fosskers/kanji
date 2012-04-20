@@ -67,23 +67,26 @@ whatQ qs k = checkQs qs
 isKanjiInQ :: Q -> Kanji -> Bool
 isKanjiInQ q k = S.member k . allKanjiInSet $ q
 
+getQNum :: [Q] -> Kanji -> QNum
+getQNum qs k = case whatQ qs k of
+                 Just qn -> qn
+                 Nothing -> 0  -- Not found means it's a tough Kanji.
+
 -- Find the average Level of a given set of Kanji.
 averageQ :: [Q] -> [Kanji] -> Double
-averageQ qs ks = average $ map getQNum ks
-    where getQNum k = case whatQ qs k of
-                        Just qn -> qn
-                        Nothing -> 0  -- Not found means it's a tough Kanji.
-          average ns = (sum ns) / (fromIntegral $ length ns) 
-
-percentSpread :: [Kanji] -> [(Kanji,Float)]
-percentSpread ks = map getPercent kQuants
-    where getPercent (k,q) = (k, 100 * (fromIntegral q) / totalKanji)
-          kQuants = kanjiQuantities ks
-          totalKanji = fromIntegral $ foldl (\acc (_,q) -> q + acc) 0 kQuants
+averageQ qs ks = average $ map (getQNum qs) ks
+    where average ns = (sum ns) / (fromIntegral $ length ns) 
 
 -- Determines how many times each Kanji appears in given set of them.
 kanjiQuantities :: [Kanji] -> [(Kanji,Int)]
 kanjiQuantities = map (\ks -> (head ks, length ks)) . group . sort
+
+-- How much of each Level is represented by a group of Kanji?
+qDistribution :: [Q] -> [Kanji] -> [(QNum,Float)]
+qDistribution qs ks = map toNumPercentPair $ group sortedQNums
+    where sortedQNums = sort $ map (getQNum qs) ks
+          toNumPercentPair qns = (head qns, length' qns / length' sortedQNums)
+          length' n = fromIntegral $ length n
 
 -- Is the Level of a given Kanji known?
 isKnown :: [Q] -> Kanji -> Bool
@@ -99,3 +102,9 @@ areSameQ :: [Q] -> Kanji -> Kanji -> Bool
 areSameQ qs k1 k2 = compareQs (whatQ qs k1) (whatQ qs k2)
     where compareQs (Just q1) (Just q2) = q1 == q2
           compareQs _ _ = False
+
+percentSpread :: [Kanji] -> [(Kanji,Float)]
+percentSpread ks = map getPercent kQuants
+    where getPercent (k,q) = (k, 100 * (fromIntegral q) / totalKanji)
+          kQuants    = kanjiQuantities ks
+          totalKanji = fromIntegral $ foldl (\acc (_,q) -> q + acc) 0 kQuants

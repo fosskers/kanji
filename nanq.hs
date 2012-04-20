@@ -1,5 +1,3 @@
--- TODO: Make a qDistribution function.
-
 import System.IO (hGetContents, stdin)
 import System.Environment (getArgs)
 import Data.List (delete, nub)
@@ -10,8 +8,8 @@ import KanjiQ
 
 data Language = Jap | Eng deriving (Eq)
 
-data Flag = FileInput | PipeInput | Help | Average |
-            Unknowns  | LevelDist | JapOutput deriving (Eq)
+data Flag = FileInput | PipeInput | Help     | Average |
+            Unknowns  | LevelDist | KDensity | JapOutput deriving (Eq)
 
 options :: [OptDescr Flag]
 options = [ Option ['f'] ["file"]      (NoArg FileInput) fDesc
@@ -20,6 +18,7 @@ options = [ Option ['f'] ["file"]      (NoArg FileInput) fDesc
           , Option ['a'] ["average"]   (NoArg Average)   aDesc
           , Option ['u'] ["unknowns"]  (NoArg Unknowns)  uDesc
           , Option ['d'] ["leveldist"] (NoArg LevelDist) lDesc
+          , Option ['k'] ["density"]   (NoArg KDensity)  kDesc
           , Option ['j'] ["japanese"]  (NoArg JapOutput) jDesc 
           ]
     where fDesc = "Takes input from a given file." ++
@@ -34,6 +33,8 @@ options = [ Option ['f'] ["file"]      (NoArg FileInput) fDesc
                   "\n級を明確にできなかった漢字を報告"
           lDesc = "Find the % distribution of levels in given Japanese." ++
                   "\nどの級の漢字がどれ程出ているか、パーセントで出力"
+          kDesc = "Determines how much of the input is made of Kanji." ++
+                  "\n入力は何パーセント漢字でできているか出力"
           jDesc = "Output is given in Japanese instead of English." ++
                   "\n出力の際は日本語"
           
@@ -55,11 +56,12 @@ main = do
   opts <- processOpts args
   cleanedOpts <- cleanOpts opts
   case cleanedOpts of
-    ([Help],_,_)             -> putStrLn $ usageInfo usageMsg options
+    ([Help],_,_)             -> putStr $ usageInfo usageMsg options
     ([Average],  lang,input) -> findAverageQ lang input
     ([],         lang,input) -> findQs lang input
     ([Unknowns], lang,input) -> findUnknowns lang input
     ([LevelDist],lang,input) -> findPercentDistribution lang input
+    ([KDensity], lang,input) -> howMuchIsKanji lang input
     (flagsInConflict,_,_)    -> argError "Conflicting flags given."
 
 processOpts :: [String] -> IO ([Flag],[String])
@@ -136,6 +138,15 @@ findPercentDistribution lang ks = do
             getName names msg qn = case qn `lookup` names of
                                      Just name -> name
                                      Nothing   -> msg
+
+howMuchIsKanji :: Language -> String -> IO ()
+howMuchIsKanji lang ks = printf "%s: %.2f%%\n" msg percent
+    where percent = 100 * (length' asKanji / length' ks :: Float)
+          length' = fromIntegral . length
+          asKanji = allToKanji ks
+          msg     = getMsg lang
+          getMsg Eng = "Kanji Density"
+          getMsg Jap = "漢字率"
 
 allToKanji :: String -> [Kanji]
 allToKanji = map toKanji . filter isKanji

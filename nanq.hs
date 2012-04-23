@@ -165,7 +165,7 @@ howMuchIsElementaryKanji :: Language -> String -> IO ()
 howMuchIsElementaryKanji lang ks = do
   qs <- allQs
   let distributions = qDistribution qs $ allToKanji ks
-      elementaryQs  = filter (\(qn,_) -> qn `elem` [6,7,8,9,10]) distributions
+      elementaryQs  = filter (\(qn,_) -> qn `elem` [5..10]) distributions
       percentSum    = 100 * foldl (\acc (_,p) -> acc + p) 0 elementaryQs
   printf (getMsg lang) percentSum
       where getMsg Eng = "Input Kanji is %.2f%% Elementary School Kanji.\n"

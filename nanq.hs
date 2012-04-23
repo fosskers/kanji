@@ -8,18 +8,20 @@ import KanjiQ
 
 data Language = Jap | Eng deriving (Eq)
 
-data Flag = FileInput | PipeInput | Help     | Average |
-            Unknowns  | LevelDist | KDensity | JapOutput deriving (Eq)
+data Flag = FileInput | PipeInput | Help      | Average    |
+            Unknowns  | LevelDist | KDensity  | Elementary |
+            JapOutput deriving (Eq)
 
 options :: [OptDescr Flag]
-options = [ Option ['f'] ["file"]      (NoArg FileInput) fDesc
-          , Option ['p'] ["pipe"]      (NoArg PipeInput) pDesc
-          , Option ['h'] ["help"]      (NoArg Help)      hDesc
-          , Option ['a'] ["average"]   (NoArg Average)   aDesc
-          , Option ['u'] ["unknowns"]  (NoArg Unknowns)  uDesc
-          , Option ['d'] ["leveldist"] (NoArg LevelDist) lDesc
-          , Option ['k'] ["density"]   (NoArg KDensity)  kDesc
-          , Option ['j'] ["japanese"]  (NoArg JapOutput) jDesc 
+options = [ Option ['f'] ["file"]       (NoArg FileInput)  fDesc
+          , Option ['p'] ["pipe"]       (NoArg PipeInput)  pDesc
+          , Option ['h'] ["help"]       (NoArg Help)       hDesc
+          , Option ['a'] ["average"]    (NoArg Average)    aDesc
+          , Option ['u'] ["unknowns"]   (NoArg Unknowns)   uDesc
+          , Option ['d'] ["leveldist"]  (NoArg LevelDist)  lDesc
+          , Option ['k'] ["density"]    (NoArg KDensity)   kDesc
+          , Option ['e'] ["elementary"] (NoArg Elementary) eDesc
+          , Option ['j'] ["japanese"]   (NoArg JapOutput)  jDesc 
           ]
     where fDesc = "Takes input from a given file." ++
                   "\n入力は指定のファイルから"
@@ -35,6 +37,9 @@ options = [ Option ['f'] ["file"]      (NoArg FileInput) fDesc
                   "\nどの級の漢字がどれ程出ているか、パーセントで出力"
           kDesc = "Determines how much of the input is made of Kanji." ++
                   "\n入力は何パーセント漢字でできているか出力"
+          eDesc = "Determines how much of the input is made of Kanji" ++
+                  "\nlearnt in Elementary School in Japan." ++
+                  "\n入力は何パーセント小学校で習う漢字でできているか出力"
           jDesc = "Output is given in Japanese instead of English." ++
                   "\n出力の際は日本語"
           
@@ -56,13 +61,14 @@ main = do
   opts <- processOpts args
   cleanedOpts <- cleanOpts opts
   case cleanedOpts of
-    ([Help],_,_)             -> putStr $ usageInfo usageMsg options
-    ([Average],  lang,input) -> findAverageQ lang input
-    ([],         lang,input) -> findQs lang input
-    ([Unknowns], lang,input) -> findUnknowns lang input
-    ([LevelDist],lang,input) -> findPercentDistribution lang input
-    ([KDensity], lang,input) -> howMuchIsKanji lang input
-    (flagsInConflict,_,_)    -> argError "Conflicting flags given."
+    ([Help],_,_)              -> putStr $ usageInfo usageMsg options
+    ([Average],   lang,input) -> findAverageQ lang input
+    ([],          lang,input) -> findQs lang input
+    ([Unknowns],  lang,input) -> findUnknowns lang input
+    ([LevelDist], lang,input) -> findPercentDistribution lang input
+    ([KDensity],  lang,input) -> howMuchIsKanji lang input
+    ([Elementary],lang,input) -> howMuchIsElementaryKanji lang input
+    (flagsInConflict,_,_)     -> argError "Conflicting flags given."
 
 processOpts :: [String] -> IO ([Flag],[String])
 processOpts args =
@@ -148,5 +154,15 @@ howMuchIsKanji lang ks = printf "%s: %.2f%%\n" msg percent
           getMsg Eng = "Kanji Density"
           getMsg Jap = "漢字率"
 
+howMuchIsElementaryKanji :: Language -> String -> IO ()
+howMuchIsElementaryKanji lang ks = do
+  qs <- allQs
+  let distributions = qDistribution qs $ allToKanji ks
+      elementaryQs  = filter (\(qn,_) -> qn `elem` [6,7,8,9,10]) distributions
+      percentSum    = 100 * foldl (\acc (_,p) -> acc + p) 0 elementaryQs
+  printf (getMsg lang) percentSum
+      where getMsg Eng = "Input Kanji is %.2f%% Elementary School Kanji.\n"
+            getMsg Jap = "入力した漢字は「%.2f%%」小学校で習う漢字。\n"
+  
 allToKanji :: String -> [Kanji]
 allToKanji = map toKanji . filter isKanji

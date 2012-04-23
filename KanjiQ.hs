@@ -16,7 +16,7 @@ instance Show Kanji where
 
 type QNum = Double
 
-data Q = Q {allKanjiInSet :: S.Set Kanji, qNumber :: QNum} deriving (Eq, Show)
+data Q = Q {allKanjiInSetOf :: S.Set Kanji, qNumberOf :: QNum} deriving (Eq, Show)
 
 makeQ :: [Kanji] -> QNum -> Q
 makeQ ks n = Q (S.fromDistinctAscList ks) n
@@ -60,17 +60,22 @@ toKanji k = if isKanji k then Kanji k else error $ k : " is not a Kanji!"
 whatQ :: [Q] -> Kanji -> Maybe QNum
 whatQ qs k = checkQs qs
     where checkQs (q:qs') = if isKanjiInQ q k
-                            then Just $ qNumber q
+                            then Just $ qNumberOf q
                             else checkQs qs'
           checkQs []      = Nothing
 
 isKanjiInQ :: Q -> Kanji -> Bool
-isKanjiInQ q k = S.member k . allKanjiInSet $ q
+isKanjiInQ q k = S.member k . allKanjiInSetOf $ q
 
 getQNum :: [Q] -> Kanji -> QNum
 getQNum qs k = case whatQ qs k of
                  Just qn -> qn
                  Nothing -> 0  -- Not found means it's a tough Kanji.
+
+getQ :: [Q] -> QNum -> Maybe Q
+getQ [] _      = Nothing
+getQ (q:qs) qn | qNumberOf q == qn = Just q
+               | otherwise         = getQ qs qn
 
 -- Find the average Level of a given set of Kanji.
 averageQ :: [Q] -> [Kanji] -> Double
@@ -97,12 +102,12 @@ isKnown qs k = case whatQ qs k of
 isUnknown :: [Q] -> Kanji -> Bool
 isUnknown qs = not . isKnown qs
 
--- Not used.
 areSameQ :: [Q] -> Kanji -> Kanji -> Bool
 areSameQ qs k1 k2 = compareQs (whatQ qs k1) (whatQ qs k2)
     where compareQs (Just q1) (Just q2) = q1 == q2
           compareQs _ _ = False
 
+-- Gives the percent distribution of _each Kanji_ in a set of them.
 percentSpread :: [Kanji] -> [(Kanji,Float)]
 percentSpread ks = map getPercent kQuants
     where getPercent (k,q) = (k, 100 * (fromIntegral q) / totalKanji)

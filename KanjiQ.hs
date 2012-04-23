@@ -8,7 +8,7 @@ module KanjiQ where
 import qualified Data.Set as S
 import Data.List (sort, group)    
 import Data.Char (ord)
-
+import Kanji
 data Kanji = Kanji Char deriving (Eq, Ord)
 
 instance Show Kanji where
@@ -37,6 +37,12 @@ kanjiFilePaths = map (basePath ++) kanjiFiles
 qNumbers :: [QNum]
 qNumbers = [10,9,8,7,6,5,4,3,2.5,2,1.5,1]
 
+allQsPure :: [Q]
+allQsPure = zipWith Q qSets qNumbers
+  where qSets = map (S.fromDistinctAscList . map Kanji) $
+                      [tenthQ, ninthQ, eigthQ, seventhQ
+                      , sixthQ, fifthQ, fourthQ, thirdQ
+                      , preSecondQ, secondQ]
 allQs :: IO [Q]
 allQs = do
   allKanjiByQ <- readKanjiFiles

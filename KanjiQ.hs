@@ -16,7 +16,8 @@ instance Show Kanji where
 
 type QNum = Double
 
-data Q = Q {allKanjiInSetOf :: S.Set Kanji, qNumberOf :: QNum} deriving (Eq, Show)
+data Q = Q {allKanjiInSetOf :: S.Set Kanji, qNumberOf :: QNum}
+         deriving (Eq, Show)
 
 makeQ :: [Kanji] -> QNum -> Q
 makeQ ks n = Q (S.fromDistinctAscList ks) n

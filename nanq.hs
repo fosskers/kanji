@@ -6,11 +6,13 @@ import System.Console.GetOpt
 import Text.Printf (printf)
 import KanjiQ
 
-data Language = Jap | Eng deriving (Eq)
+data Language = Jap | Eng deriving (Show,Eq)
 
 data Flag = FileInput | PipeInput | Help      | Average    |
             Unknowns  | LevelDist | KDensity  | Elementary |
-            JapOutput deriving (Eq)
+            JapOutput |
+            AllFromQ QNum
+            deriving (Show,Eq)            
 
 options :: [OptDescr Flag]
 options = [ Option ['f'] ["file"]       (NoArg FileInput)  fDesc
@@ -22,6 +24,8 @@ options = [ Option ['f'] ["file"]       (NoArg FileInput)  fDesc
           , Option ['k'] ["density"]    (NoArg KDensity)   kDesc
           , Option ['e'] ["elementary"] (NoArg Elementary) eDesc
           , Option ['j'] ["japanese"]   (NoArg JapOutput)  jDesc 
+          , Option ['q'] ["fromq"]
+            (ReqArg (\s -> AllFromQ (read s :: QNum)) "QNum") qDesc
           ]
     where fDesc = "Takes input from a given file." ++
                   "\n入力は指定のファイルから"
@@ -42,13 +46,15 @@ options = [ Option ['f'] ["file"]       (NoArg FileInput)  fDesc
                   "\n入力は何パーセント小学校で習う漢字でできているか出力"
           jDesc = "Output is given in Japanese instead of English." ++
                   "\n出力の際は日本語"
+          qDesc = "Filters out all but Kanji in the given Level." ++
+                  "\n指定された級の漢字だけ出力"          
           
 usageMsg :: String
 usageMsg = "Usage : nanq [OPTION] (kanji / file)"
 
 japQNames :: [(QNum,String)]
 japQNames = zip qNumbers ["10級","9級","8級","7級","6級","5級","4級",
-                       "3級", "準2級","2級","準1級","1級"]
+                          "3級", "準2級","2級","準1級","1級"]
 
 engQNames :: [(QNum,String)]
 engQNames = zip qNumbers ["Tenth Level","Ninth Level","Eighth Level",
@@ -68,6 +74,7 @@ main = do
     ([LevelDist], lang,input) -> findPercentDistribution lang input
     ([KDensity],  lang,input) -> howMuchIsKanji lang input
     ([Elementary],lang,input) -> howMuchIsElementaryKanji lang input
+    ([AllFromQ qn],_,  input) -> getAllFromQ qn input
     (flagsInConflict,_,_)     -> argError "Conflicting flags given."
 
 processOpts :: [String] -> IO ([Flag],[String])
@@ -163,6 +170,13 @@ howMuchIsElementaryKanji lang ks = do
   printf (getMsg lang) percentSum
       where getMsg Eng = "Input Kanji is %.2f%% Elementary School Kanji.\n"
             getMsg Jap = "入力した漢字は「%.2f%%」小学校で習う漢字。\n"
+
+getAllFromQ :: QNum -> String -> IO ()
+getAllFromQ qn ks = do
+  qs <- allQs
+  mapM_ print $ case getQ qs qn of
+                  Just q  -> nub . filter (isKanjiInQ q) . allToKanji $ ks
+                  Nothing -> []
   
 allToKanji :: String -> [Kanji]
 allToKanji = map toKanji . filter isKanji

@@ -6,9 +6,9 @@
 module KanjiQ where
 
 import qualified Data.Set as S
+import KanjiData (allKanjiLists)
 import Data.List (sort, group)    
 import Data.Char (ord)
-import KanjiData
 
 data Kanji = Kanji Char deriving (Eq, Ord)
 
@@ -27,20 +27,17 @@ qNumbers :: [QNum]
 qNumbers = [10,9,8,7,6,5,4,3,2.5,2,1.5,1]
 
 allQs :: [Q]
-allQs = zipWith Q qSets qNumbers
-  where qSets = map (S.fromDistinctAscList . map Kanji) $
-                      [tenthQ, ninthQ, eighthQ, seventhQ
-                      , sixthQ, fifthQ, fourthQ, thirdQ
-                      , preSecondQ, secondQ]
+allQs = map (\(ks,n) -> makeQ (map toKanji ks) n) pairs
+    where pairs = zip allKanjiLists qNumbers
+
+toKanji :: Char -> Kanji
+toKanji k = if isKanji k then Kanji k else error $ k : " is not a Kanji!"
 
 isKanji :: Char -> Bool
 isKanji c = lowLimit <= c' && c' <= highLimit
     where c' = ord c
           lowLimit  = 19968  -- This is `一`
           highLimit = 40959  -- I don't have the right fonts to display this.
-
-toKanji :: Char -> Kanji
-toKanji k = if isKanji k then Kanji k else error $ k : " is not a Kanji!"
 
 -- Find out what Level a Kanji belongs to.
 whatQ :: [Q] -> Kanji -> Maybe QNum

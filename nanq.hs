@@ -66,13 +66,13 @@ main = do
   cleanedOpts <- cleanOpts opts
   case cleanedOpts of
     ([Help],_,_)              -> putStr $ usageInfo usageMsg options
-    ([Average],   lang,input) -> findAverageQ lang input
-    ([],          lang,input) -> findQs lang input
-    ([Unknowns],  lang,input) -> findUnknowns lang input
-    ([LevelDist], lang,input) -> findPercentDistribution lang input
-    ([KDensity],  lang,input) -> howMuchIsKanji lang input
-    ([Elementary],lang,input) -> howMuchIsElementaryKanji lang input
-    ([AllFromQ qn],_,  input) -> getAllFromQ qn input
+    ([Average],   lang,input) -> putStrLn $ findAverageQ lang input
+    ([],          lang,input) -> mapM_ putStrLn $ findQs lang input
+    ([Unknowns],  lang,input) -> mapM_ putStrLn $ findUnknowns lang input
+    ([LevelDist], lang,input) -> mapM_ putStrLn $ findDistribution lang input
+    ([KDensity],  lang,input) -> putStrLn $ howMuchIsKanji lang input
+    ([Elementary],lang,input) -> putStrLn $ howMuchIsElementaryKanji lang input
+    ([AllFromQ qn],_,  input) -> mapM_ print $ getAllFromQ qn input
     (flagsInConflict,_,_)     -> argError "Conflicting flags given."
 
 processOpts :: [String] -> IO ([Flag],[String])
@@ -98,60 +98,52 @@ cleanOpts (opts,nonopts) = clean opts nonopts Eng  -- English by default.
 argError :: String -> a
 argError msg = error $ usageInfo (msg ++ "\n" ++ usageMsg) options
 
-findAverageQ :: Language -> String -> IO ()
-findAverageQ lang ks = do
-  qs <- allQs
-  printf (getMsg lang ++ "%.2f\n") . averageQ qs . allToKanji $ ks
+findAverageQ :: Language -> String -> String
+findAverageQ lang ks = 
+  printf (getMsg lang ++ "%.2f") . averageQ allQs . allToKanji $ ks
       where getMsg Eng = "Average Level: "
             getMsg Jap = "平均の級："
 
-findQs :: Language -> String -> IO ()
-findQs lang ks = do
-  results <- mapM (nanQ (pass lang) (fail lang)) $ allToKanji ks
-  mapM_ putStrLn results
-    where
-      pass Eng = \k n -> (show k) ++ " is a " ++ (eQName n) ++ " Kanji."
-      pass Jap = \k n -> "「" ++ (show k) ++ "」は" ++ (jQName n) ++ "の漢字"
-      fail Eng = \k -> (show k) ++ " is not in any level."
-      fail Jap = \k -> "「" ++ (show k) ++ "」はどの級の漢字でもない"
+findQs :: Language -> String -> [String]
+findQs lang ks = map (nanQ lang) $ allToKanji ks
+
+nanQ :: Language -> Kanji -> String
+nanQ lang k = case whatQ allQs k of
+                Just qNum -> pass lang k qNum
+                Nothing   -> fail lang k
+    where 
+      pass Eng k n = (show k) ++ " is a " ++ (eQName n) ++ " Kanji."
+      pass Jap k n = "「" ++ (show k) ++ "」は" ++ (jQName n) ++ "の漢字"
+      fail Eng k   = (show k) ++ " is not in any level."
+      fail Jap k   = "「" ++ (show k) ++ "」はどの級の漢字でもない"
       eQName n = getQName n engQNames
       jQName n = getQName n japQNames
       getQName n names = fromJust $ n `lookup` names
 
-nanQ :: (Kanji -> Double -> String) -> (Kanji -> String) -> Kanji -> IO String
-nanQ pass fail k = do
-  qs <- allQs
-  case whatQ qs k of
-    Just qNum -> return $ pass k qNum
-    Nothing   -> return $ fail k
-
-findUnknowns :: Language -> String -> IO ()
-findUnknowns lang ks = do
-  qs <- allQs
-  let unknowns = nub . filter (isUnknown qs) . allToKanji $ ks
-  case unknowns of
-    [] -> putStrLn (fail lang)
-    _  -> putStrLn (pass lang) >> mapM_ print unknowns          
-    where fail Eng = "No Kanji of unknown Level found."
+findUnknowns :: Language -> String -> [String]
+findUnknowns lang ks = case unknowns of
+                         [] -> [fail lang]
+                         _  -> pass lang : map show unknowns          
+    where unknowns = nub . filter (isUnknown allQs) . allToKanji $ ks
+          fail Eng = "No Kanji of unknown Level found."
           fail Jap = "級を明確にできない漢字は見つからなかった"
           pass Eng = "The following Kanji of unknown Level were found:"
           pass Jap = "級を明確にできなかった漢字は："
 
-findPercentDistribution :: Language -> String -> IO ()
-findPercentDistribution lang ks = do
-  qs <- allQs
-  let distributions    = qDistribution qs $ allToKanji ks
-      namePercentPairs = map rawToPretty distributions
-  mapM_ (\(name,per) -> printf "%4s: %05.2f%%\n" name per) namePercentPairs
-      where rawToPretty (qn,p)   = (getQName lang qn, p * 100)
-            getQName Eng qn      = getName engQNames "Above Second Level" qn
-            getQName Jap qn      = getName japQNames "2級以上" qn
-            getName names msg qn = case qn `lookup` names of
-                                     Just name -> name
-                                     Nothing   -> msg
+findDistribution :: Language -> String -> [String]
+findDistribution lang ks =
+    map (\(name,per) -> printf "%4s: %05.2f%%" name per) namePercentPairs
+    where namePercentPairs     = map rawToPretty distributions
+          distributions        = qDistribution allQs $ allToKanji ks
+          rawToPretty (qn,p)   = (getQName lang qn, p * 100)
+          getQName Eng qn      = getName engQNames "Above Second Level" qn
+          getQName Jap qn      = getName japQNames "2級以上" qn
+          getName names msg qn = case qn `lookup` names of
+                                   Just name -> name
+                                   Nothing   -> msg
 
-howMuchIsKanji :: Language -> String -> IO ()
-howMuchIsKanji lang ks = printf "%s: %.2f%%\n" msg percent
+howMuchIsKanji :: Language -> String -> String
+howMuchIsKanji lang ks = printf "%s: %.2f%%" msg percent
     where percent = 100 * (length' asKanji / length' ks :: Float)
           length' = fromIntegral . length
           asKanji = allToKanji ks
@@ -159,22 +151,18 @@ howMuchIsKanji lang ks = printf "%s: %.2f%%\n" msg percent
           getMsg Eng = "Kanji Density"
           getMsg Jap = "漢字率"
 
-howMuchIsElementaryKanji :: Language -> String -> IO ()
-howMuchIsElementaryKanji lang ks = do
-  qs <- allQs
-  let distributions = qDistribution qs $ allToKanji ks
-      elementaryQs  = filter (\(qn,_) -> qn `elem` [5..10]) distributions
-      percentSum    = 100 * foldl (\acc (_,p) -> acc + p) 0 elementaryQs
-  printf (getMsg lang) percentSum
-      where getMsg Eng = "Input Kanji is %.2f%% Elementary School Kanji.\n"
-            getMsg Jap = "入力した漢字は「%.2f%%」小学校で習う漢字。\n"
+howMuchIsElementaryKanji :: Language -> String -> String
+howMuchIsElementaryKanji lang ks = printf (getMsg lang) percentSum
+    where percentSum    = 100 * foldl (\acc (_,p) -> acc + p) 0 elementaryQs
+          elementaryQs  = filter (\(qn,_) -> qn `elem` [5..10]) distributions
+          distributions = qDistribution allQs $ allToKanji ks
+          getMsg Eng = "Input Kanji is %.2f%% Elementary School Kanji."
+          getMsg Jap = "入力した漢字は「%.2f%%」小学校で習う漢字。"
 
-getAllFromQ :: QNum -> String -> IO ()
-getAllFromQ qn ks = do
-  qs <- allQs
-  mapM_ print $ case getQ qs qn of
-                  Just q  -> nub . filter (isKanjiInQ q) . allToKanji $ ks
-                  Nothing -> []
-  
+getAllFromQ :: QNum -> String -> [Kanji]
+getAllFromQ qn ks = case getQ allQs qn of
+                      Just q  -> nub . filter (isKanjiInQ q) . allToKanji $ ks
+                      Nothing -> []
+      
 allToKanji :: String -> [Kanji]
 allToKanji = map toKanji . filter isKanji

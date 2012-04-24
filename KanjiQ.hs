@@ -6,9 +6,9 @@
 module KanjiQ where
 
 import qualified Data.Set as S
+import KanjiData (allKanjiLists)
 import Data.List (sort, group)    
 import Data.Char (ord)
-import KanjiData
 
 data Kanji = Kanji Char deriving (Eq, Ord)
 
@@ -23,46 +23,21 @@ data Q = Q {allKanjiInSetOf :: S.Set Kanji, qNumberOf :: QNum}
 makeQ :: [Kanji] -> QNum -> Q
 makeQ ks n = Q (S.fromDistinctAscList ks) n
 
--- Base path to the Kanji data files.
-basePath :: String 
-basePath = "./data/"
-
-kanjiFiles :: [String]
-kanjiFiles = ["tenthQ.txt", "ninthQ.txt", "eigthQ.txt", "seventhQ.txt",
-              "sixthQ.txt", "fifthQ.txt", "fourthQ.txt", "thirdQ.txt",
-              "preSecondQ.txt", "secondQ.txt"]
-
-kanjiFilePaths :: [FilePath]
-kanjiFilePaths = map (basePath ++) kanjiFiles
-
 qNumbers :: [QNum]
 qNumbers = [10,9,8,7,6,5,4,3,2.5,2,1.5,1]
 
-allQsPure :: [Q]
-allQsPure = zipWith Q qSets qNumbers
-  where qSets = map (S.fromDistinctAscList . map Kanji) $
-                      [tenthQ, ninthQ, eigthQ, seventhQ
-                      , sixthQ, fifthQ, fourthQ, thirdQ
-                      , preSecondQ, secondQ]
-allQs :: IO [Q]
-allQs = do
-  allKanjiByQ <- readKanjiFiles
-  let kanjiLists = map toKanjiList allKanjiByQ
-      withQNums  = zip kanjiLists qNumbers
-  return . map (\(ks,n) -> makeQ ks n) $ withQNums
-      where toKanjiList = map (toKanji . head) . lines
+allQs :: [Q]
+allQs = map (\(ks,n) -> makeQ (map toKanji ks) n) pairs
+    where pairs = zip allKanjiLists qNumbers
 
-readKanjiFiles :: IO [String]
-readKanjiFiles = mapM readFile kanjiFilePaths
+toKanji :: Char -> Kanji
+toKanji k = if isKanji k then Kanji k else error $ k : " is not a Kanji!"
 
 isKanji :: Char -> Bool
 isKanji c = lowLimit <= c' && c' <= highLimit
     where c' = ord c
           lowLimit  = 19968  -- This is `一`
           highLimit = 40959  -- I don't have the right fonts to display this.
-
-toKanji :: Char -> Kanji
-toKanji k = if isKanji k then Kanji k else error $ k : " is not a Kanji!"
 
 -- Find out what Level a Kanji belongs to.
 whatQ :: [Q] -> Kanji -> Maybe QNum

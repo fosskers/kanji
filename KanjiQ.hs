@@ -23,37 +23,15 @@ data Q = Q {allKanjiInSetOf :: S.Set Kanji, qNumberOf :: QNum}
 makeQ :: [Kanji] -> QNum -> Q
 makeQ ks n = Q (S.fromDistinctAscList ks) n
 
--- Base path to the Kanji data files.
-basePath :: String 
-basePath = "./data/"
-
-kanjiFiles :: [String]
-kanjiFiles = ["tenthQ.txt", "ninthQ.txt", "eigthQ.txt", "seventhQ.txt",
-              "sixthQ.txt", "fifthQ.txt", "fourthQ.txt", "thirdQ.txt",
-              "preSecondQ.txt", "secondQ.txt"]
-
-kanjiFilePaths :: [FilePath]
-kanjiFilePaths = map (basePath ++) kanjiFiles
-
 qNumbers :: [QNum]
 qNumbers = [10,9,8,7,6,5,4,3,2.5,2,1.5,1]
 
-allQsPure :: [Q]
-allQsPure = zipWith Q qSets qNumbers
+allQs :: [Q]
+allQs = zipWith Q qSets qNumbers
   where qSets = map (S.fromDistinctAscList . map Kanji) $
-                      [tenthQ, ninthQ, eigthQ, seventhQ
+                      [tenthQ, ninthQ, eighthQ, seventhQ
                       , sixthQ, fifthQ, fourthQ, thirdQ
                       , preSecondQ, secondQ]
-allQs :: IO [Q]
-allQs = do
-  allKanjiByQ <- readKanjiFiles
-  let kanjiLists = map toKanjiList allKanjiByQ
-      withQNums  = zip kanjiLists qNumbers
-  return . map (\(ks,n) -> makeQ ks n) $ withQNums
-      where toKanjiList = map (toKanji . head) . lines
-
-readKanjiFiles :: IO [String]
-readKanjiFiles = mapM readFile kanjiFilePaths
 
 isKanji :: Char -> Bool
 isKanji c = lowLimit <= c' && c' <= highLimit

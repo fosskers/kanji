@@ -1,8 +1,8 @@
-module Kanji ( tenthQ, ninthQ, eigthQ, seventhQ, sixthQ, fifthQ, fourthQ, thirdQ, preSecondQ, secondQ) where
+module KanjiData where
 
 import Kanji.TenthQ
 import Kanji.NinthQ
-import Kanji.EigthQ
+import Kanji.EighthQ
 import Kanji.SeventhQ
 import Kanji.SixthQ
 import Kanji.FifthQ

@@ -8,7 +8,8 @@ module KanjiQ where
 import qualified Data.Set as S
 import Data.List (sort, group)    
 import Data.Char (ord)
-import Kanji
+import KanjiData
+
 data Kanji = Kanji Char deriving (Eq, Ord)
 
 instance Show Kanji where

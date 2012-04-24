@@ -10,9 +10,7 @@ data Language = Jap | Eng deriving (Show,Eq)
 
 data Flag = FileInput | PipeInput | Help      | Average    |
             Unknowns  | LevelDist | KDensity  | Elementary |
-            JapOutput |
-            AllFromQ QNum
-            deriving (Show,Eq)            
+            JapOutput | AllFromQ QNum deriving (Show,Eq)            
 
 options :: [OptDescr Flag]
 options = [ Option ['f'] ["file"]       (NoArg FileInput)  fDesc

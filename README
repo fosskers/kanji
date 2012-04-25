@@ -16,49 +16,40 @@ NanQ can be used to:
  - apply the above to whole files of Japanese.
  - display the results of all the above in Japanese or English.
 
-NanQ will in future be able to:
- - tell how much of a group of Kanji belongs to each Level,
-   as a percentage.
-
 INSTALLING NANQ
 ---------------
-First, get the source and data files from:
+First, get the source files from:
 
 https://github.com/fosskers/nanq
 
-Then, moving to the directory where you placed the source files,
-compile NanQ as follows:
+NanQ is written in Haskell, thus one needs to have Haskell installed
+as well. To install NanQ system-wide, move to the source directory and do:
 
-  ghc nanq.hs -O2
+runhaskell Setup.hs configure
+runhaskell Setup.hs build
+sudo runhaskell Setup.hs install
 
-Of course you need Haskell installed in order for this to work.
-
-As of April 02 2012, there is not yet any build script or the like,
-and the executable needs to be in the same folder as the `data`
-folder. This will change eventually.
+This will install NanQ into /usr/local/bin/.
 
 USING NANQ
 ----------
-As the executable needs to be in the same folder as the `data`
-folder, I use the current hack in my .bashrc to run NanQ.
-
-alias nanq='cd pathToExecutable/ && ./nanq'
-
-Again, this will be changed so NanQ can be run normally
-without any extra work after install.
-
 Assuming you've made it so that you can run the executable,
 the following command-line options are available:
 
- *no option*     Takes a line of Japanese straight from the
-     		   command line and gives the Level of each Kanji.
- -a, --average   Given Japanese input, finds the average Level of
-     		   all Kanji present.
- -u, --unknowns  Reports Kanji whose Level could not be determined.
- -h, --help      Prints a message explaining these options.
- -f, --file      Get input from a given file.
- -p, --pipe      Get input from stdin.
- -j, --japanese  Gives output in Japanese where available.
+ *no option*      Takes a line of Japanese straight from the
+     		    command line and gives the Level of each Kanji.
+ -a, --average    Given Japanese input, finds the average Level of
+     		    all Kanji present.
+ -u, --unknowns   Reports Kanji whose Level could not be determined.
+ -h, --help       Prints a message explaining these options.
+ -d, --leveldist  Find the % distribution of Levels in given Japanese.
+ -k, --density    Determines how much of the input is made up of Kanji.
+ -e, --elementary Determines how much of the input is made up of Kanji
+     		    leared in Japanese Elementary School.
+ -q, --fromq      Filters out all but Kanji from the requested Level.
+ -f, --file       Get input from a given file.
+ -p, --pipe       Get input from stdin.
+ -j, --japanese   Gives output in Japanese where available.
 
 -Notes on CLOs-
 Either `-f` or `-p` can be used on top of any other option.
@@ -90,13 +81,3 @@ nanq -fa file.txt
 
 *Reading from stdin (and getting output in Japanese)*
 cat file.txt | nanq -pj
-
-IF NOTHING ELSE
----------------
-If nothing else, there are lists of Kanji divided by Level in text
-files in the `data` folder. The Kanji are sorted in the order of
-their Unicode numbers. Feel free to use these lists as you wish,
-as after much searching I was able to find no similar compilation
-of lists that is _easily accessable_. The company that creates
-the Kanji Examination offers pretty PDFs, but no dead simple
-text files.

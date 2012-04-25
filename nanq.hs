@@ -44,7 +44,7 @@ options = [ Option ['f'] ["file"]       (NoArg FileInput)  fDesc
                   "\n入力は何パーセント小学校で習う漢字でできているか出力"
           jDesc = "Output is given in Japanese instead of English." ++
                   "\n出力の際は日本語"
-          qDesc = "Filters out all but Kanji in the given Level." ++
+          qDesc = "Filters out all but Kanji from the requested Level." ++
                   "\n指定された級の漢字だけ出力"          
           
 usageMsg :: String

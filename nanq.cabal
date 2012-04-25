@@ -1,0 +1,47 @@
+name:                nanq
+
+-- PVP summary:      +-+------- breaking API changes
+--                   | | +----- non-breaking API additions
+--                   | | | +--- code changes with no API change
+version:             0.1.0.0
+
+synopsis:            A Haskell program for analyzing Japanese Kanji.
+
+description:         `nanq` can inform the user of a number of statistics
+		     regarding Kanji and the Nation Kanji Examination, also
+		     known as 漢字検定 or 漢検. In the most simple case,
+		     it will reveal what inputed Kanji belong to what
+		     Level of the exam.
+
+homepage:            https://github.com/fosskers/nanq
+
+license:             GPL-3
+
+license-file:        LICENSE
+
+author:              Colin Woodbury
+
+maintainer:          colingw@gmail.com
+
+build-type:          Simple
+
+cabal-version:       >=1.8
+
+executable nanq
+  main-is:  	     nanq.hs
+  
+  other-modules:	KanjiQ,
+                        KanjiData,
+                        KanjiData.TenthQ,
+                        KanjiData.NinthQ,
+                        KanjiData.EighthQ,
+                        KanjiData.SeventhQ,
+                        KanjiData.SixthQ,
+                        KanjiData.FifthQ,
+                        KanjiData.FourthQ,
+                        KanjiData.ThirdQ,
+                        KanjiData.PreSecondQ,
+                        KanjiData.SecondQ 
+  
+  build-depends:       base ==4.5.*, containers ==0.4.*
+  

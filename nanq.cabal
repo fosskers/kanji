@@ -5,7 +5,7 @@ name:                nanq
 --                   | | | +--- code changes with no API change
 version:             0.1.0.0
 
-synopsis:            A Haskell program for analyzing Japanese Kanji.
+synopsis:            A Haskell program for determining what 級 (level) of the 漢字検定 (National Kanji Exam) a given Kanji belongs to.
 
 description:         `nanq` can inform the user of a number of statistics
 		     regarding Kanji and the Nation Kanji Examination, also
@@ -43,5 +43,5 @@ executable nanq
                         KanjiData.PreSecondQ,
                         KanjiData.SecondQ 
   
-  build-depends:       base ==4.5.*, containers ==0.4.*
+  build-depends:       base, containers >=0.4.*
   

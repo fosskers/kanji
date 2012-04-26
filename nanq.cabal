@@ -3,7 +3,7 @@ name:                nanq
 -- PVP summary:      +-+------- breaking API changes
 --                   | | +----- non-breaking API additions
 --                   | | | +--- code changes with no API change
-version:             0.1.0.0
+version:             0.1.0.1
 
 synopsis:            A Haskell program for determining what 級 (level) of the 漢字検定 (National Kanji Exam) a given Kanji belongs to.
 
@@ -43,5 +43,6 @@ executable nanq
                         KanjiData.PreSecondQ,
                         KanjiData.SecondQ 
   
-  build-depends:       base, containers >=0.4.*
+  build-depends:       base,
+                       containers>=0.4.0.0
   

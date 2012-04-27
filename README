@@ -60,24 +60,34 @@ printing a help message.
 -Examples-
 *Single Kanji*
 nanq 日
->>> 日 is a Level 10.0 Kanji
+>>> 日 is a Tenth Level Kanji.
 nanq -j 日
->>> 「日」は10.0級の漢字
+>>> 「日」は10級の漢字
 
 *A Japanese sentence*
 nanq これは日本語
->>> 日 is a Level 10.0 Kanji
-    本 is a Level 10.0 Kanji
-    語 is a Level 9.0 Kanji
+>>> 日 is a Tenth Level Kanji.
+    本 is a Tenth Level Kanji.
+    語 is a Ninth Level Kanji.
 
 *Averages*
 nanq -a この文は難しくない
->>> 7.5
-nanq -a 此の文は難儀だと思える
->>> 5.63
+>>> Average Level: 7.50
+nanq -ja 此の文は難儀だと思える
+>>> 平均の級：5.60
 
 *Reading from a file (and also finding the average)*
 nanq -fa file.txt
 
 *Reading from stdin (and getting output in Japanese)*
 cat file.txt | nanq -pj
+
+*Density Analysis*
+nanq -k あら、漢字があまりない
+>>> Kanji Density: 18.18%
+
+nanq -e 今日は良い天気
+>>> Input Kanji is 100.00% Elementary School Kanji.
+
+nanq -ej 蜘蛛が狸と争い、酷い目に遭った
+>>> 入力した漢字は「28.57%」小学校で習う漢字。

@@ -29,7 +29,7 @@ runhaskell Setup.hs configure
 runhaskell Setup.hs build
 sudo runhaskell Setup.hs install
 
-This will install NanQ into /usr/local/bin/.
+This will install NanQ into /usr/local/bin/ on (Li|U)nix systems.
 
 USING NANQ
 ----------
@@ -91,3 +91,9 @@ nanq -e 今日は良い天気
 
 nanq -ej 蜘蛛が狸と争い、酷い目に遭った
 >>> 入力した漢字は「28.57%」小学校で習う漢字。
+
+*Targeting Kanji of a Specific Level*
+nanq -q 9 あの絵は特に気に入ってる。買おうかな・・・ どう思う？
+>>> 絵
+    買
+    思

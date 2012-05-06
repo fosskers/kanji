@@ -43,8 +43,8 @@ options = [ Option ['f'] ["file"]       (NoArg FileInput)  fDesc
           eDesc = "Determines how much of the input is made of Kanji" ++
                   "\nlearnt in Elementary School in Japan." ++
                   "\n入力は何パーセント小学校で習う漢字でできているか出力"
-          tDesc = "Applies -k -e and -d all at once to analyse a text." ++
-                  "\n-k、-e、-dを連続に使ってファイルを分析"
+          tDesc = "Applies -k -e and -d all at once to analyse some text." ++
+                  "\n-k、-e、-dを連続に使って入力を分析"
           jDesc = "Output is given in Japanese instead of English." ++
                   "\n出力の際は日本語"
           qDesc = "Filters out all but Kanji from the requested Level." ++

@@ -10,7 +10,7 @@ data Language = Jap | Eng deriving (Show,Eq)
 
 data Flag = FileInput | PipeInput | Help      | Average    |
             Unknowns  | LevelDist | KDensity  | Elementary |
-            JapOutput | AllFromQ QNum deriving (Show,Eq)            
+            Text      | JapOutput | AllFromQ QNum deriving (Show,Eq)
 
 options :: [OptDescr Flag]
 options = [ Option ['f'] ["file"]       (NoArg FileInput)  fDesc
@@ -21,6 +21,7 @@ options = [ Option ['f'] ["file"]       (NoArg FileInput)  fDesc
           , Option ['d'] ["leveldist"]  (NoArg LevelDist)  lDesc
           , Option ['k'] ["density"]    (NoArg KDensity)   kDesc
           , Option ['e'] ["elementary"] (NoArg Elementary) eDesc
+          , Option ['t'] ["text"]       (NoArg Text)       tDesc
           , Option ['j'] ["japanese"]   (NoArg JapOutput)  jDesc 
           , Option ['q'] ["fromq"]
             (ReqArg (\s -> AllFromQ (read s :: QNum)) "QNum") qDesc
@@ -42,6 +43,8 @@ options = [ Option ['f'] ["file"]       (NoArg FileInput)  fDesc
           eDesc = "Determines how much of the input is made of Kanji" ++
                   "\nlearnt in Elementary School in Japan." ++
                   "\n入力は何パーセント小学校で習う漢字でできているか出力"
+          tDesc = "Applies -k -e and -d all at once to analyse a text." ++
+                  "\n-k、-e、-dを連続に使ってファイルを分析"
           jDesc = "Output is given in Japanese instead of English." ++
                   "\n出力の際は日本語"
           qDesc = "Filters out all but Kanji from the requested Level." ++
@@ -62,21 +65,12 @@ engQNames = zip qNumbers ["Tenth Level","Ninth Level","Eighth Level",
                           
 main = do
   args <- getArgs
-  opts <- processOpts args
+  opts <- parseOpts args
   cleanedOpts <- cleanOpts opts
-  case cleanedOpts of
-    ([Help],_,_)              -> putStr $ usageInfo usageMsg options
-    ([Average],   lang,input) -> putStrLn $ findAverageQ lang input
-    ([],          lang,input) -> mapM_ putStrLn $ findQs lang input
-    ([Unknowns],  lang,input) -> mapM_ putStrLn $ findUnknowns lang input
-    ([LevelDist], lang,input) -> mapM_ putStrLn $ findDistribution lang input
-    ([KDensity],  lang,input) -> putStrLn $ howMuchIsKanji lang input
-    ([Elementary],lang,input) -> putStrLn $ howMuchIsElementaryKanji lang input
-    ([AllFromQ qn],_,  input) -> mapM_ print $ getAllFromQ qn input
-    (flagsInConflict,_,_)     -> argError "Conflicting flags given."
+  executeOpts cleanedOpts
 
-processOpts :: [String] -> IO ([Flag],[String])
-processOpts args =
+parseOpts :: [String] -> IO ([Flag],[String])
+parseOpts args =
     case getOpt Permute options args of
       (opts,nonopts,[]) -> return (opts,nonopts)
       (_,_,errors)      -> argError "Bad flag used."
@@ -94,6 +88,21 @@ cleanOpts (opts,nonopts) = clean opts nonopts Eng  -- English by default.
                                          return (without FileInput,lang,input)
             | otherwise             = return (opts,lang,head nonopts)
             where without x = delete x opts
+
+executeOpts :: ([Flag],Language,String) -> IO ()
+executeOpts (flags,lang,input) =
+  case flags of
+    [Help]        -> putStr $ usageInfo usageMsg options
+    [Average]     -> putStrLn $ findAverageQ lang input
+    []            -> mapM_ putStrLn $ findQs lang input
+    [Unknowns]    -> mapM_ putStrLn $ findUnknowns lang input
+    [LevelDist]   -> mapM_ putStrLn $ findDistribution lang input
+    [KDensity]    -> putStrLn $ howMuchIsKanji lang input
+    [Elementary]  -> putStrLn $ howMuchIsElementaryKanji lang input
+    [Text]        -> mapM_ execAll [KDensity,Elementary,LevelDist]
+    [AllFromQ qn] -> mapM_ print $ getAllFromQ qn input
+    conflicts     -> argError "Conflicting flags given."
+    where execAll flag = executeOpts ([flag],lang,input) >> putStrLn ""
 
 argError :: String -> a
 argError msg = error $ usageInfo (msg ++ "\n" ++ usageMsg) options

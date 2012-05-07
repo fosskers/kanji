@@ -36,6 +36,7 @@ USING NANQ
 Assuming you've made it so that you can run the executable,
 the following command-line options are available:
 
+ ANALYSIS OPTIONS
  *no option*      Takes a line of Japanese straight from the
      		    command line and gives the Level of each Kanji.
  -a, --average    Given Japanese input, finds the average Level of
@@ -47,15 +48,27 @@ the following command-line options are available:
  -e, --elementary Determines how much of the input is made up of Kanji
      		    leared in Japanese Elementary School.
  -q, --fromq      Filters out all but Kanji from the requested Level.
+ -t, --text       Applies -k -e and -d all at once to analyse some text.
+
+ INPUT SOURCE OPTIONS
  -f, --file       Get input from a given file.
  -p, --pipe       Get input from stdin.
- -j, --japanese   Gives output in Japanese where available.
 
--Notes on CLOs-
-Either `-f` or `-p` can be used on top of any other option.
-`-j` will change output to Japanese and can be combined with any option.
-`-h` will over-ride any other options or arguments, discarding them and
-printing a help message.
+ OUTPUT LANGUAGE OPTIONS
+ -j, --japanese   Gives output in Japanese where applicable.
+
+NOTES ON CLOs
+ -> Either `-f` or `-p` can be used on top of any other option.
+ -> `-j` will change output to Japanese and can be combined with any option.
+ -> `-h` will over-ride any other options or arguments, discarding them and
+    printing a help message.
+ -> While the flags in something like:
+      nanq -jfk proofOfWhoKilledJFKInJapanese.txt
+    can be fused together and can come in any order, when using `-q` 
+    it's best to separate it and its argument from other flags like so:
+      nanq -q 3 -f someFile.txt
+ -> `-t` is probably the most convenient option for giving a quick
+    analysis of some Japanese.
 
 -Examples-
 *Single Kanji*

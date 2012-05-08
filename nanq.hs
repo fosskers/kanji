@@ -121,10 +121,12 @@ nanQ lang k = case whatQ allQs k of
                 Just qNum -> pass lang k qNum
                 Nothing   -> fail lang k
     where 
-      pass Eng k n = (show k) ++ " is a " ++ (eQName n) ++ " Kanji."
+      pass Eng k n = (show k) ++ " is " ++ (articledQName n) ++ " Kanji."
       pass Jap k n = "「" ++ (show k) ++ "」は" ++ (jQName n) ++ "の漢字"
       fail Eng k   = (show k) ++ " is not in any level."
       fail Jap k   = "「" ++ (show k) ++ "」はどの級の漢字でもない"
+      articledQName n = getArticle (eQName n) ++ " " ++ eQName n
+      getArticle name = if head name `elem` "AEIOU" then "an" else "a"
       eQName n = getQName n engQNames
       jQName n = getQName n japQNames
       getQName n names = fromJust $ n `lookup` names

@@ -70,10 +70,9 @@ main = do
   executeOpts cleanedOpts
 
 parseOpts :: [String] -> IO ([Flag],[String])
-parseOpts args =
-    case getOpt Permute options args of
-      (opts,nonopts,[]) -> return (opts,nonopts)
-      (_,_,errors)      -> argError "Bad flag used."
+parseOpts args = case getOpt Permute options args of
+                   (opts,nonopts,[]) -> return (opts,nonopts)
+                   (_,_,errors)      -> argError "Bad flag used."    
 
 -- Determine input source and output language.
 cleanOpts :: ([Flag],[String]) -> IO ([Flag],Language,String)

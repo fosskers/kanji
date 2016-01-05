@@ -32,33 +32,28 @@ Assuming you've made it so that you can run the executable, the following
 command-line options are available:
 
 #### ANALYSIS OPTIONS
- *no option*      Takes a line of Japanese straight from the
-                  command line and gives the Level of each Kanji.
-
- -a, --average    Given Japanese input, finds the average Level of
-                  all Kanji present.
- -u, --unknowns   Reports Kanji whose Level could not be determined.
-
- -h, --help       Prints a message explaining these options.
-
- -d, --leveldist  Find the % distribution of Levels in given Japanese.
-
- -k, --density    Determines how much of the input is made up of Kanji.
-
- -e, --elementary Determines how much of the input is made up of Kanji
-                  leared in Japanese Elementary School.
-
- -q, --fromq      Filters out all but Kanji from the requested Level.
-
- -t, --text       Applies -k -e and -d all at once to analyse some text.
+ Short  | Long   | Description
+ -----  | ------ | -----------
+ *none* | *none* | Takes a line of Japanese straight from the command line and gives the Level of each Kanji
+ -a | --average  | Given Japanese input, finds the average Level of all Kanji present
+ -u | --unknowns | Reports Kanji whose Level could not be determined
+ -h | --help     | Prints a message explaining these options
+ -d | --leveldist | Find the % distribution of Levels in given Japanese
+ -k | --density   | Determines how much of the input is made up of Kanji
+ -e | --elementary | Determines how much of the input is made up of Kanji learned in Japanese Elementary School
+ -q | --fromq    | Filters out all but Kanji from the requested Level
+ -t | --text     | Applies -k -e and -d all at once to analyse some text
 
 #### INPUT SOURCE OPTIONS
- -f, --file       Get input from a given file.
-
- -p, --pipe       Get input from stdin.
+ Short  | Long   | Description
+ -----  | ------ | -----------
+ -f     | --file | Get input from a given file
+ -p     | --pipe | Get input from stdin
 
 #### OUTPUT LANGUAGE OPTIONS
- -j, --japanese   Gives output in Japanese where applicable.
+ Short  | Long   | Description
+ -----  | ------ | -----------
+ -j     | --japanese | Gives output in Japanese where applicable
 
 #### NOTES ON CLOs
  * Either `-f` or `-p` can be used on top of any other option.

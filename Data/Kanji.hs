@@ -48,6 +48,9 @@ type Rank = Float
 -- While Level-2 (2136 Kanji) is considered "standard adult" ability,
 -- many adults could not pass the Level-2, or even the Level-Pre2 (1940 Kanji)
 -- exam without considerable study.
+--
+-- Level data for Kanji above Level-2 is currently not provided by
+-- this library.
 data Level = Level { _allKanji :: S.Set Kanji
                    , _rank :: Rank
                    } deriving (Eq, Show)

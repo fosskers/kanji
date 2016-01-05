@@ -1,9 +1,6 @@
 name:                nanq
 
--- PVP summary:      +-+------- breaking API changes
---                   | | +----- non-breaking API additions
---                   | | | +--- code changes with no API change
-version:             0.1.1.2
+version:             1.0.0
 
 synopsis:            Performs 漢字検定 (National Kanji Exam) level analysis on given Kanji.
 
@@ -28,9 +25,9 @@ build-type:          Simple
 cabal-version:       >=1.8
 
 executable nanq
-  main-is:  	     nanq.hs
+    main-is:  	     nanq.hs
   
-  other-modules:	Data.Kanji,
+    other-modules:	Data.Kanji,
                         Data.Kanji.TenthQ,
                         Data.Kanji.NinthQ,
                         Data.Kanji.EighthQ,
@@ -42,7 +39,23 @@ executable nanq
                         Data.Kanji.PreSecondQ,
                         Data.Kanji.SecondQ 
   
-  build-depends:       base,
-                       containers >= 0.4.0.0,
-                       microlens >= 0.3.5.0
+    build-depends:       base,
+                         containers >= 0.4.0.0,
+                         microlens >= 0.3.5.0
   
+library
+    build-depends: base,
+                   containers >= 0.4.0.0,
+                   microlens >= 0.3.5.0
+
+    exposed-modules: Data.Kanji,
+                     Data.Kanji.TenthQ,
+                     Data.Kanji.NinthQ,
+                     Data.Kanji.EighthQ,
+                     Data.Kanji.SeventhQ,
+                     Data.Kanji.SixthQ,
+                     Data.Kanji.FifthQ,
+                     Data.Kanji.FourthQ,
+                     Data.Kanji.ThirdQ,
+                     Data.Kanji.PreSecondQ,
+                     Data.Kanji.SecondQ

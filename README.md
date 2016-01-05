@@ -1,19 +1,17 @@
 NANQ
 ====
-Author:  Colin Woodbury
-Contact: colingw@gmail.com
+Author:  Colin Woodbury <colingw@gmail.com>
 
 NanQ is a Japanese Kanji analysation program written in Haskell. Its main
-function is to tell what Kanji belong to what Level of the 漢字検定, or in
-English, the Japanese National Kanji Examination.
+function is to tell what Kanji belong to what Level of the Japanese National
+Kanji Examination (漢字検定).
 
 NanQ can be used to:
- - determine what Level individual Kanji belong to, should a user
-   become curious.
+ - determine what Level individual Kanji belong to
  - determine the average Level (difficulty, in other words)
-   of a group of Kanji.
- - apply the above to whole files of Japanese.
- - display the results of all the above in Japanese or English.
+   of a group of Kanji
+ - apply the above to whole files of Japanese
+ - display the results of all the above in Japanese or English
 
 INSTALLING NANQ
 ---------------
@@ -22,39 +20,47 @@ First, get the source files from:
 https://github.com/fosskers/nanq
 
 NanQ is written in Haskell and uses the
-[stack](http://docs.haskellstack.org/en/stable/README.html) tool. Once it is
-installed, move to the source directory and do:
+[stack](http://docs.haskellstack.org/en/stable/README.html) tool. Once
+`stack` is installed, move to the source directory and perform:
 
     stack build
     stack install
 
-USING NANQ
-----------
+USAGE
+-----
 Assuming you've made it so that you can run the executable, the following
 command-line options are available:
 
- ANALYSIS OPTIONS
+#### ANALYSIS OPTIONS
  *no option*      Takes a line of Japanese straight from the
-     		    command line and gives the Level of each Kanji.
+                  command line and gives the Level of each Kanji.
+
  -a, --average    Given Japanese input, finds the average Level of
-     		    all Kanji present.
+                  all Kanji present.
  -u, --unknowns   Reports Kanji whose Level could not be determined.
+
  -h, --help       Prints a message explaining these options.
+
  -d, --leveldist  Find the % distribution of Levels in given Japanese.
+
  -k, --density    Determines how much of the input is made up of Kanji.
+
  -e, --elementary Determines how much of the input is made up of Kanji
-     		    leared in Japanese Elementary School.
+                  leared in Japanese Elementary School.
+
  -q, --fromq      Filters out all but Kanji from the requested Level.
+
  -t, --text       Applies -k -e and -d all at once to analyse some text.
 
- INPUT SOURCE OPTIONS
+#### INPUT SOURCE OPTIONS
  -f, --file       Get input from a given file.
+
  -p, --pipe       Get input from stdin.
 
- OUTPUT LANGUAGE OPTIONS
+#### OUTPUT LANGUAGE OPTIONS
  -j, --japanese   Gives output in Japanese where applicable.
 
-NOTES ON CLOs
+#### NOTES ON CLOs
  * Either `-f` or `-p` can be used on top of any other option.
  * `-j` will change output to Japanese and can be combined with any option.
  * `-h` will over-ride any other options or arguments, discarding them and

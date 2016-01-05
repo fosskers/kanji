@@ -30,6 +30,10 @@ import           Data.Kanji.SecondQ
 -- * 働 (to do physical labour)
 newtype Kanji = Kanji { _kanji :: Char } deriving (Eq, Ord, Show)
 
+-- | Traverse into a `Char` to find a `Kanji`.
+kanji :: Traversal' Char Kanji
+kanji f c = if isKanji c then _kanji <$> f (Kanji c) else pure c
+
 type Rank = Float
 
 -- | A Level or "Kyuu" (級) of Japanese Kanji ranking. There are 12 of these,
@@ -45,7 +49,7 @@ type Rank = Float
 -- many adults could not pass the Level-2, or even the Level-Pre2 (1940 Kanji)
 -- exam without considerable study.
 data Level = Level { _allKanji :: S.Set Kanji
-                   , _qNum :: Rank
+                   , _rank :: Rank
                    } deriving (Eq, Show)
 
 -- | All Kanji, grouped by their Level (級) in ascending order.
@@ -53,21 +57,20 @@ allKanji :: [String]
 allKanji = [tenthQ, ninthQ, eighthQ, seventhQ, sixthQ,
             fifthQ, fourthQ, thirdQ, preSecondQ, secondQ]
 
+-- | Convert as many `Char` as possible into legal `Kanji`.
+allToKanji :: [Char] -> [Kanji]
+allToKanji ks = ks ^.. traverse . kanji
+
 makeLevel :: [Kanji] -> Rank -> Level
 makeLevel ks n = Level (S.fromDistinctAscList ks) n
 
 rankNums :: [Rank]
 rankNums = [10,9,8,7,6,5,4,3,2.5,2,1.5,1]
 
-allLevels :: [Level]
-allLevels = map f pairs
-  where f (ks,n) = makeLevel (map toKanji ks ^.. traverse . _Just) n
-        pairs = zip allKanji rankNums
-
--- | Wrapped in `Maybe`, as a `Char` could be given that is outside
--- the UTF8 range for valid Kanji.
-toKanji :: Char -> Maybe Kanji
-toKanji k = if isKanji k then Just $ Kanji k else Nothing
+-- | All `Level`s, with all their `Kanji`, ordered from Level-10 to Level-2.
+levels :: [Level]
+levels = map f $ zip allKanji rankNums
+  where f (ks,n) = makeLevel (allToKanji ks) n
 
 -- | Legal Kanji appear between UTF8 characters 19968 and 40959.
 isKanji :: Char -> Bool
@@ -77,24 +80,24 @@ isKanji c = lowLimit <= c' && c' <= highLimit
           highLimit = 40959  -- I don't have the right fonts to display this.
 
 -- | What `Level` does a Kanji belong to?
-level :: [Level] -> Kanji -> Maybe Rank
+level :: [Level] -> Kanji -> Maybe Level
 level [] k     = Nothing
-level (q:qs) k | isKanjiInLevel q k = Just $ _qNum q
-               | otherwise          = level qs k
+level (q:qs) k | kanjiInLevel q k = Just q
+               | otherwise = level qs k
 
-isKanjiInLevel :: Level -> Kanji -> Bool
-isKanjiInLevel q k = S.member k $ _allKanji q
+kanjiInLevel :: Level -> Kanji -> Bool
+kanjiInLevel q k = S.member k $ _allKanji q
 
 -- | Some Kanji may be outside the Level system. This means they are
 -- particularly difficult, and are given a rank of 0 here.
 -- This is used internally for averaging calculations.
 rank :: [Level] -> Kanji -> Rank
-rank qs k = maybe 0 id $ level qs k
+rank qs k = maybe 0 _rank $ level qs k
 
 -- | Is there a `Level` that corresponds with a given `Rank` value?
 levelFromRank :: [Level] -> Rank -> Maybe Level
 levelFromRank [] _      = Nothing
-levelFromRank (q:qs) qn | _qNum q == qn = Just q
+levelFromRank (q:qs) qn | _rank q == qn = Just q
                         | otherwise     = levelFromRank qs qn
 
 -- | Find the average `Level` of a given set of `Kanji`.
@@ -113,9 +116,9 @@ levelDist qs ks = map toNumPercentPair $ group sortedRanks
         toNumPercentPair qns = (head qns, length' qns / length' sortedRanks)
         length' n = fromIntegral $ length n
 
--- | Is the Level of a given Kanji known?
-isKnown :: [Level] -> Kanji -> Bool
-isKnown qs k = has _Just $ level qs k
+-- | Is the `Level` of a given `Kanji` known?
+hasLevel :: [Level] -> Kanji -> Bool
+hasLevel qs k = has _Just $ level qs k
 
 -- Inefficient.
 areSameLevel :: [Level] -> Kanji -> Kanji -> Bool

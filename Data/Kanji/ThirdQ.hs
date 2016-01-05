@@ -1,4 +1,4 @@
-module KanjiData.ThirdQ where 
+module Data.Kanji.ThirdQ where 
 
 thirdQ :: String
 thirdQ = "乏乙了企伏伐伴伸佳侍促倣倹偶催債克免冗冠" ++

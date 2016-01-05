@@ -1,4 +1,4 @@
-module KanjiData.SixthQ where 
+module Data.Kanji.SixthQ where 
 
 sixthQ :: String
 sixthQ = "久仏仮件任似余価保修俵個備像再刊判制券則" ++

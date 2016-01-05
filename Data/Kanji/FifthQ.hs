@@ -1,4 +1,4 @@
-module KanjiData.FifthQ where 
+module Data.Kanji.FifthQ where 
 
 fifthQ :: String
 fifthQ = "並乱乳亡仁供俳値傷優党冊処刻割創劇勤危卵" ++

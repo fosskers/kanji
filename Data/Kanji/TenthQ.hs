@@ -1,4 +1,4 @@
-module KanjiData.TenthQ where 
+module Data.Kanji.TenthQ where 
 
 tenthQ :: String
 tenthQ = "一七三上下中九二五人休先入八六円出力十千" ++

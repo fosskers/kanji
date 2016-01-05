@@ -1,4 +1,4 @@
-module KanjiData.SecondQ where 
+module Data.Kanji.SecondQ where 
 
 secondQ :: String
 secondQ = "串丼乞亀伎侶俺傲僅冥冶凄刹剥勃勾匂叱呂呪" ++

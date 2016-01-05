@@ -5,10 +5,12 @@
 
 module KanjiQ where
 
+import           Data.Char (ord)
+import           Data.Kanji
+import           Data.List (sort, group)
 import qualified Data.Set as S
-import KanjiData (allKanjiLists)
-import Data.List (sort, group)    
-import Data.Char (ord)
+
+---
 
 data Kanji = Kanji Char deriving (Eq, Ord)
 
@@ -28,7 +30,7 @@ qNumbers = [10,9,8,7,6,5,4,3,2.5,2,1.5,1]
 
 allQs :: [Q]
 allQs = map (\(ks,n) -> makeQ (map toKanji ks) n) pairs
-    where pairs = zip allKanjiLists qNumbers
+    where pairs = zip allKanji qNumbers
 
 toKanji :: Char -> Kanji
 toKanji k = if isKanji k then Kanji k else error $ k : " is not a Kanji!"

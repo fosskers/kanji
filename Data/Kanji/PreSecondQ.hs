@@ -1,4 +1,4 @@
-module KanjiData.PreSecondQ where 
+module Data.Kanji.PreSecondQ where 
 
 preSecondQ :: String
 preSecondQ = "且丙亜享亭仙伯但佐併侮侯俊俸倫偏偵偽傑傘" ++

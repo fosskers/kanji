@@ -1,4 +1,4 @@
-module KanjiData.NinthQ where 
+module Data.Kanji.NinthQ where 
 
 ninthQ :: String
 ninthQ = "万丸交京今会体何作元兄光公内冬刀分切前北" ++

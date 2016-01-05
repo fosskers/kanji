@@ -1,4 +1,4 @@
-module KanjiData.SeventhQ where 
+module Data.Kanji.SeventhQ where 
 
 seventhQ :: String
 seventhQ = "不争付令以仲伝位低例便信倉候借停健側働億" ++

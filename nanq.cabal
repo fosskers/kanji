@@ -31,17 +31,17 @@ executable nanq
   main-is:  	     nanq.hs
   
   other-modules:	KanjiQ,
-                        KanjiData,
-                        KanjiData.TenthQ,
-                        KanjiData.NinthQ,
-                        KanjiData.EighthQ,
-                        KanjiData.SeventhQ,
-                        KanjiData.SixthQ,
-                        KanjiData.FifthQ,
-                        KanjiData.FourthQ,
-                        KanjiData.ThirdQ,
-                        KanjiData.PreSecondQ,
-                        KanjiData.SecondQ 
+                        Data.Kanji,
+                        Data.Kanji.TenthQ,
+                        Data.Kanji.NinthQ,
+                        Data.Kanji.EighthQ,
+                        Data.Kanji.SeventhQ,
+                        Data.Kanji.SixthQ,
+                        Data.Kanji.FifthQ,
+                        Data.Kanji.FourthQ,
+                        Data.Kanji.ThirdQ,
+                        Data.Kanji.PreSecondQ,
+                        Data.Kanji.SecondQ 
   
   build-depends:       base,
                        containers>=0.4.0.0

@@ -1,4 +1,4 @@
-module KanjiData.EighthQ where 
+module Data.Kanji.EighthQ where 
 
 eighthQ :: String
 eighthQ = "丁世両主乗予事仕他代住使係倍全具写列助勉" ++

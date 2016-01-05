@@ -1,10 +1,12 @@
-import System.IO (hGetContents, stdin)
-import System.Environment (getArgs)
 import Data.List (delete, nub)
 import Data.Maybe (fromJust)
-import System.Console.GetOpt
-import Text.Printf (printf)
 import KanjiQ
+import System.Console.GetOpt
+import System.Environment (getArgs)
+import System.IO (hGetContents, stdin)
+import Text.Printf (printf)
+
+---
 
 data Language = Jap | Eng deriving (Show,Eq)
 
@@ -63,48 +65,6 @@ engQNames = zip qNumbers ["Tenth Level","Ninth Level","Eighth Level",
                           "Forth Level","Third Level", "Pre-Second Level",
                           "Second Level","Pre-First Level","First Level"]
                           
-main = do
-  args <- getArgs
-  opts <- parseOpts args
-  cleanedOpts <- cleanOpts opts
-  executeOpts cleanedOpts
-
-parseOpts :: [String] -> IO ([Flag],[String])
-parseOpts args = case getOpt Permute options args of
-                   (opts,nonopts,[]) -> return (opts,nonopts)
-                   (_,_,errors)      -> argError "Bad flag used."    
-
--- Determine input source and output language.
-cleanOpts :: ([Flag],[String]) -> IO ([Flag],Language,String)
-cleanOpts (opts,nonopts) = clean opts nonopts Eng  -- English by default.
-    where clean opts nonopts lang 
-            | JapOutput `elem` opts = clean (without JapOutput) nonopts Jap
-            | Help `elem` opts      = return ([Help],lang,"")
-            | PipeInput `elem` opts = do input <- hGetContents stdin
-                                         return (without PipeInput,lang,input)
-            | null nonopts          = argError "No Kanji / file given!"
-            | FileInput `elem` opts = do input <- readFile $ head nonopts
-                                         return (without FileInput,lang,input)
-            | otherwise             = return (opts,lang,head nonopts)
-            where without x = delete x opts
-
-executeOpts :: ([Flag],Language,String) -> IO ()
-executeOpts (flags,lang,input) =
-  case flags of
-    [Help]        -> putStr $ usageInfo usageMsg options
-    [Average]     -> putStrLn $ findAverageQ lang input
-    []            -> mapM_ putStrLn $ findQs lang input
-    [Unknowns]    -> mapM_ putStrLn $ findUnknowns lang input
-    [LevelDist]   -> mapM_ putStrLn $ findDistribution lang input
-    [KDensity]    -> putStrLn $ howMuchIsKanji lang input
-    [Elementary]  -> putStrLn $ howMuchIsElementaryKanji lang input
-    [Text]        -> mapM_ execAll [KDensity,Elementary,LevelDist]
-    [AllFromQ qn] -> mapM_ print $ getAllFromQ qn input
-    conflicts     -> argError "Conflicting flags given."
-    where execAll flag = executeOpts ([flag],lang,input) >> putStrLn ""
-
-argError :: String -> a
-argError msg = error $ usageInfo (msg ++ "\n" ++ usageMsg) options
 
 findAverageQ :: Language -> String -> String
 findAverageQ lang ks = 
@@ -176,3 +136,47 @@ getAllFromQ qn ks = case getQ allQs qn of
       
 allToKanji :: String -> [Kanji]
 allToKanji = map toKanji . filter isKanji
+
+parseOpts :: [String] -> IO ([Flag],[String])
+parseOpts args = case getOpt Permute options args of
+                   (opts,nonopts,[]) -> return (opts,nonopts)
+                   (_,_,errors)      -> argError "Bad flag used."    
+
+-- Determine input source and output language.
+cleanOpts :: ([Flag],[String]) -> IO ([Flag],Language,String)
+cleanOpts (opts,nonopts) = clean opts nonopts Eng  -- English by default.
+    where clean opts nonopts lang 
+            | JapOutput `elem` opts = clean (without JapOutput) nonopts Jap
+            | Help `elem` opts      = return ([Help],lang,"")
+            | PipeInput `elem` opts = do input <- hGetContents stdin
+                                         return (without PipeInput,lang,input)
+            | null nonopts          = argError "No Kanji / file given!"
+            | FileInput `elem` opts = do input <- readFile $ head nonopts
+                                         return (without FileInput,lang,input)
+            | otherwise             = return (opts,lang,head nonopts)
+            where without x = delete x opts
+
+executeOpts :: ([Flag],Language,String) -> IO ()
+executeOpts (flags,lang,input) =
+  case flags of
+    [Help]        -> putStr $ usageInfo usageMsg options
+    [Average]     -> putStrLn $ findAverageQ lang input
+    []            -> mapM_ putStrLn $ findQs lang input
+    [Unknowns]    -> mapM_ putStrLn $ findUnknowns lang input
+    [LevelDist]   -> mapM_ putStrLn $ findDistribution lang input
+    [KDensity]    -> putStrLn $ howMuchIsKanji lang input
+    [Elementary]  -> putStrLn $ howMuchIsElementaryKanji lang input
+    [Text]        -> mapM_ execAll [KDensity,Elementary,LevelDist]
+    [AllFromQ qn] -> mapM_ print $ getAllFromQ qn input
+    _             -> argError "Conflicting flags given."
+    where execAll flag = executeOpts ([flag],lang,input) >> putStrLn ""
+
+argError :: String -> a
+argError msg = error $ usageInfo (msg ++ "\n" ++ usageMsg) options
+
+main :: IO ()
+main = do
+  args <- getArgs
+  opts <- parseOpts args
+  cleanedOpts <- cleanOpts opts
+  executeOpts cleanedOpts

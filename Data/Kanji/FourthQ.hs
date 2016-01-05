@@ -1,4 +1,4 @@
-module KanjiData.FourthQ where 
+module Data.Kanji.FourthQ where 
 
 fourthQ :: String
 fourthQ = "丈与丘丹乾互井介仰伺依侵俗倒偉傍傾僧儀兼" ++

@@ -1,6 +1,6 @@
+import Data.Kanji
 import Data.List (delete, nub)
 import Data.Maybe (fromJust)
-import KanjiQ
 import System.Console.GetOpt
 import System.Environment (getArgs)
 import System.IO (hGetContents, stdin)

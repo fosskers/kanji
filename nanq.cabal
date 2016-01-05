@@ -30,8 +30,7 @@ cabal-version:       >=1.8
 executable nanq
   main-is:  	     nanq.hs
   
-  other-modules:	KanjiQ,
-                        Data.Kanji,
+  other-modules:	Data.Kanji,
                         Data.Kanji.TenthQ,
                         Data.Kanji.NinthQ,
                         Data.Kanji.EighthQ,

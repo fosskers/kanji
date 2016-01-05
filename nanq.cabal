@@ -43,5 +43,6 @@ executable nanq
                         Data.Kanji.SecondQ 
   
   build-depends:       base,
-                       containers>=0.4.0.0
+                       containers >= 0.4.0.0,
+                       microlens >= 0.3.5.0
   

@@ -1,6 +1,7 @@
 import Data.Kanji
 import Data.List (delete, nub)
 import Data.Maybe (fromJust)
+import Lens.Micro
 import System.Console.GetOpt
 import System.Environment (getArgs)
 import System.IO (hGetContents, stdin)
@@ -12,7 +13,7 @@ data Language = Jap | Eng deriving (Show,Eq)
 
 data Flag = FileInput | PipeInput | Help      | Average    |
             Unknowns  | LevelDist | KDensity  | Elementary |
-            Text      | JapOutput | AllFromQ QNum deriving (Show,Eq)
+            Text      | JapOutput | AllFromQ Rank deriving (Show,Eq)
 
 options :: [OptDescr Flag]
 options = [ Option ['f'] ["file"]       (NoArg FileInput)  fDesc
@@ -26,7 +27,7 @@ options = [ Option ['f'] ["file"]       (NoArg FileInput)  fDesc
           , Option ['t'] ["text"]       (NoArg Text)       tDesc
           , Option ['j'] ["japanese"]   (NoArg JapOutput)  jDesc 
           , Option ['q'] ["fromq"]
-            (ReqArg (\s -> AllFromQ (read s :: QNum)) "QNum") qDesc
+            (ReqArg (\s -> AllFromQ (read s :: Rank)) "Rank") qDesc
           ]
     where fDesc = "Takes input from a given file." ++
                   "\n入力は指定のファイルから"
@@ -55,12 +56,12 @@ options = [ Option ['f'] ["file"]       (NoArg FileInput)  fDesc
 usageMsg :: String
 usageMsg = "Usage : nanq [OPTION] (kanji / file)"
 
-japQNames :: [(QNum,String)]
-japQNames = zip qNumbers ["10級","9級","8級","7級","6級","5級","4級",
+japQNames :: [(Rank,String)]
+japQNames = zip rankNums ["10級","9級","8級","7級","6級","5級","4級",
                           "3級", "準2級","2級","準1級","1級"]
 
-engQNames :: [(QNum,String)]
-engQNames = zip qNumbers ["Tenth Level","Ninth Level","Eighth Level",
+engQNames :: [(Rank,String)]
+engQNames = zip rankNums ["Tenth Level","Ninth Level","Eighth Level",
                           "Seventh Level","Sixth Level","Fifth Level",
                           "Forth Level","Third Level", "Pre-Second Level",
                           "Second Level","Pre-First Level","First Level"]
@@ -68,7 +69,7 @@ engQNames = zip qNumbers ["Tenth Level","Ninth Level","Eighth Level",
 
 findAverageQ :: Language -> String -> String
 findAverageQ lang ks = 
-  printf (getMsg lang ++ "%.2f") . averageQ allQs . allToKanji $ ks
+  printf (getMsg lang ++ "%.2f") . averageLevel allLevels . allToKanji $ ks
       where getMsg Eng = "Average Level: "
             getMsg Jap = "平均の級："
 
@@ -76,7 +77,7 @@ findQs :: Language -> String -> [String]
 findQs lang ks = map (nanQ lang) $ allToKanji ks
 
 nanQ :: Language -> Kanji -> String
-nanQ lang k = case whatQ allQs k of
+nanQ lang k = case level allLevels k of
                 Just qNum -> pass lang k qNum
                 Nothing   -> fail lang k
     where 
@@ -94,7 +95,7 @@ findUnknowns :: Language -> String -> [String]
 findUnknowns lang ks = case unknowns of
                          [] -> [fail lang]
                          _  -> pass lang : map show unknowns          
-    where unknowns = nub . filter (isUnknown allQs) . allToKanji $ ks
+    where unknowns = nub . filter (not . isKnown allLevels) . allToKanji $ ks
           fail Eng = "No Kanji of unknown Level found."
           fail Jap = "級を明確にできない漢字は見つからなかった"
           pass Eng = "The following Kanji of unknown Level were found:"
@@ -104,7 +105,7 @@ findDistribution :: Language -> String -> [String]
 findDistribution lang ks =
     map (\(name,per) -> printf "%4s: %05.2f%%" name per) namePercentPairs
     where namePercentPairs     = map rawToPretty distributions
-          distributions        = qDistribution allQs $ allToKanji ks
+          distributions        = levelDist allLevels $ allToKanji ks
           rawToPretty (qn,p)   = (getQName lang qn, p * 100)
           getQName Eng qn      = getName engQNames "Above Second Level" qn
           getQName Jap qn      = getName japQNames "2級以上" qn
@@ -125,17 +126,17 @@ howMuchIsElementaryKanji :: Language -> String -> String
 howMuchIsElementaryKanji lang ks = printf (getMsg lang) percentSum
     where percentSum    = 100 * foldl (\acc (_,p) -> acc + p) 0 elementaryQs
           elementaryQs  = filter (\(qn,_) -> qn `elem` [5..10]) distributions
-          distributions = qDistribution allQs $ allToKanji ks
+          distributions = levelDist allLevels $ allToKanji ks
           getMsg Eng = "Input Kanji is %.2f%% Elementary School Kanji."
           getMsg Jap = "入力した漢字は「%.2f%%」小学校で習う漢字。"
 
-getAllFromQ :: QNum -> String -> [Kanji]
-getAllFromQ qn ks = case getQ allQs qn of
-                      Just q  -> nub . filter (isKanjiInQ q) . allToKanji $ ks
+getAllFromQ :: Rank -> String -> [Kanji]
+getAllFromQ qn ks = case levelFromRank allLevels qn of
+                      Just q  -> nub . filter (isKanjiInLevel q) . allToKanji $ ks
                       Nothing -> []
       
 allToKanji :: String -> [Kanji]
-allToKanji = map toKanji . filter isKanji
+allToKanji s = map toKanji s ^.. traverse . _Just
 
 parseOpts :: [String] -> IO ([Flag],[String])
 parseOpts args = case getOpt Permute options args of

@@ -1,3 +1,13 @@
+-- |
+-- Module    : Data.Kanji
+-- Copyright : (c) Colin Woodbury, 2015
+-- License   : GPL3
+-- Maintainer: Colin Woodbury <colingw@gmail.com>
+--
+-- A library for analysing the density of Kanji in given texts,
+-- according to their "Level" classification, as defined by the
+-- Japan Kanji Aptitude Testing Foundation (日本漢字能力検定協会).
+
 module Data.Kanji
        (
          -- * Kanji

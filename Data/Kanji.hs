@@ -1,5 +1,4 @@
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE ViewPatterns #-}
 
 -- |
 -- Module    : Data.Kanji
@@ -40,10 +39,10 @@ import qualified Data.ByteString.Lazy.Char8 as LB
 import           Data.Char (ord)
 import           Data.List (sort, group)
 import qualified Data.Set as S
-import           Data.String (IsString)
 import qualified Data.Text as ST
 import qualified Data.Text.Lazy as LT
 import           Lens.Micro
+import           Lens.Micro.Platform ()
 
 import           Data.Kanji.TenthQ
 import           Data.Kanji.NinthQ
@@ -58,28 +57,56 @@ import           Data.Kanji.SecondQ
 
 ---
 
--- | All String types can be transformed into a list of Kanji.
-class IsString a => AsKanji a where
+-- | Anything that can be transformed in a list of Kanji.
+class AsKanji a where
+
+  -- | Traverse into this type to find 0 or more Kanji.
+  --
+  -- Despite what the Haddock documentation says, this is part of the
+  -- minimal complete definition.
+  _Kanji :: Traversal' a Kanji
+
+  -- | How long is this input source?
+  len :: Num b => a -> b
+
   -- | Transform this string type into a list of Kanji. The source string
   -- and the resulting list might not have the same length, if there
   -- were `Char` in the source that did not fall within the legal
   -- UTF8 range for Kanji.
   asKanji :: a -> [Kanji]
+  asKanji a = a ^.. _Kanji
+
+instance AsKanji Char where
+  _Kanji f c = if isKanji c then _kanji <$> f (Kanji c) else pure c
+
+  len = const 1
 
 instance AsKanji [Char] where
-  asKanji cs = cs ^.. traverse . kanji
+  _Kanji = traverse . _Kanji
+
+  len = fromIntegral . length
 
 instance AsKanji ST.Text where
-  asKanji = asKanji . ST.unpack
+  _Kanji = each . _Kanji
+
+  len = fromIntegral . ST.length
 
 instance AsKanji LT.Text where
-  asKanji = asKanji . LT.unpack
+  _Kanji = each . _Kanji
+
+  len = fromIntegral . LT.length
 
 instance AsKanji SB.ByteString where
-  asKanji = asKanji . SB.unpack
+  _Kanji = packed . _Kanji
+    where packed f b = SB.pack <$> f (SB.unpack b)
+
+  len = fromIntegral . SB.length
 
 instance AsKanji LB.ByteString where
-  asKanji = asKanji . LB.unpack
+  _Kanji = packed . _Kanji
+    where packed f b = LB.pack <$> f (LB.unpack b)
+
+  len = fromIntegral . LB.length          
 
 -- | A single symbol of Kanji. Japanese Kanji were borrowed from China
 -- over several waves during the past millenium. Japan names 2136 of
@@ -93,9 +120,9 @@ instance AsKanji LB.ByteString where
 -- * 働 (to do physical labour)
 newtype Kanji = Kanji { _kanji :: Char } deriving (Eq, Ord, Show)
 
--- | Traverse into a `Char` to find a `Kanji`.
+{-# DEPRECATED kanji "Use _Kanji instead" #-}
 kanji :: Traversal' Char Kanji
-kanji f c = if isKanji c then _kanji <$> f (Kanji c) else pure c
+kanji = _Kanji
 
 -- | A Level or "Kyuu" (級) of Japanese Kanji ranking. There are 12 of these,
 -- from 10 to 1, including intermediate levels between 3 and 2, and 2 and 1.
@@ -142,15 +169,15 @@ isKanji c = lowLimit <= c' && c' <= highLimit
 hasLevel :: [Level] -> Kanji -> Bool
 hasLevel qs k = has _Just $ level qs k
 
--- | What is the density @d@ of Kanji characters in a given String,
--- where @0 <= d <= 1@?
-kanjiDensity :: [Char] -> Float
-kanjiDensity ks = length' (asKanji ks) / length' ks
+-- | What is the density @d@ of Kanji characters in a given String-like
+-- type, where @0 <= d <= 1@?
+kanjiDensity :: AsKanji a => a -> Float
+kanjiDensity ks = length' (asKanji ks) / len ks
   where length' = fromIntegral . length
 
 -- | As above, but only Kanji of the first 1006 are counted (those learned
 -- in elementary school in Japan).
-elementaryKanjiDensity :: [Char] -> Float
+elementaryKanjiDensity :: AsKanji a => a -> Float
 elementaryKanjiDensity ks = foldl (\acc (_,p) -> acc + p) 0 elementaryQs
   where elementaryQs  = filter (\(qn,_) -> qn `elem` [5..10]) distributions
         distributions = levelDist levels $ asKanji ks

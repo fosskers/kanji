@@ -1,5 +1,7 @@
 name:                nanq
 
+category:            Natural Language Processing
+
 version:             1.0.0
 
 synopsis:            Performs 漢字検定 (National Kanji Exam) level analysis on given Kanji.
@@ -39,14 +41,18 @@ executable nanq
                         Data.Kanji.PreSecondQ,
                         Data.Kanji.SecondQ
   
-    build-depends:       base,
-                         containers >= 0.4.0.0,
-                         microlens >= 0.3.5.0
+    build-depends:       base < 5
+                       , bytestring >= 0.10.6.0
+                       , containers >= 0.4.0.0
+                       , microlens >= 0.3.5.0
+                       , text
   
 library
-    build-depends: base,
-                   containers >= 0.4.0.0,
-                   microlens >= 0.3.5.0
+    build-depends: base < 5
+                 , bytestring >= 0.10.6.0
+                 , containers >= 0.4.0.0
+                 , microlens >= 0.3.5.0
+                 , text
 
     exposed-modules: Data.Kanji,
                      Data.Kanji.TenthQ,

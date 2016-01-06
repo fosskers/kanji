@@ -67,12 +67,12 @@ engQNames = zip rankNums ["Tenth Level","Ninth Level","Eighth Level",
                           
 findAverageQ :: Language -> [Char] -> String
 findAverageQ lang ks = 
-  printf (getMsg lang ++ "%.2f") . averageLevel levels . allToKanji $ ks
+  printf (getMsg lang ++ "%.2f") . averageLevel levels . asKanji $ ks
       where getMsg Eng = "Average Level: "
             getMsg Jap = "平均の級："
 
 findQs :: Language -> [Char] -> [String]
-findQs lang ks = map (nanQ lang) $ allToKanji ks
+findQs lang ks = map (nanQ lang) $ asKanji ks
 
 nanQ :: Language -> Kanji -> String
 nanQ lang k = maybe (bad lang) (good lang . _rank) $ level levels k
@@ -91,7 +91,7 @@ findUnknowns :: Language -> String -> [String]
 findUnknowns lang ks = case unknowns of
                          [] -> [bad lang]
                          _  -> good lang : map show unknowns
-  where unknowns = nub . filter (not . hasLevel levels) . allToKanji $ ks
+  where unknowns = nub . filter (not . hasLevel levels) . asKanji $ ks
         bad Eng  = "No Kanji of unknown Level found."
         bad Jap  = "級を明確にできない漢字は見つからなかった"
         good Eng = "The following Kanji of unknown Level were found:"
@@ -101,7 +101,7 @@ findDistribution :: Language -> String -> [String]
 findDistribution lang ks =
   map (\(name,per) -> printf "%4s: %05.2f%%" name per) namePercentPairs
   where namePercentPairs     = map rawToPretty distributions
-        distributions        = levelDist levels $ allToKanji ks
+        distributions        = levelDist levels $ asKanji ks
         rawToPretty (qn,p)   = (getQName lang qn, p * 100)
         getQName Eng qn      = getName engQNames "Above Second Level" qn
         getQName Jap qn      = getName japQNames "2級以上" qn
@@ -121,7 +121,7 @@ howMuchIsElementaryKanji lang ks = printf (getMsg lang) percent
 
 getAllFromLevel :: Rank -> [Char] -> [Kanji]
 getAllFromLevel qn ks = maybe [] f $ levelFromRank levels qn
-  where f q = nub . filter (isKanjiInLevel q) . allToKanji $ ks
+  where f q = nub . filter (isKanjiInLevel q) . asKanji $ ks
 
 parseOpts :: [String] -> IO ([Flag],[String])
 parseOpts args = case getOpt Permute options args of

@@ -1,3 +1,6 @@
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE ViewPatterns #-}
+
 -- |
 -- Module    : Data.Kanji
 -- Copyright : (c) Colin Woodbury, 2015
@@ -11,10 +14,10 @@
 module Data.Kanji
        (
          -- * Kanji
-         Kanji(..)
+         AsKanji(..)
+       , Kanji(..)
        , kanji
        , allKanji
-       , allToKanji
        , isKanji
        , hasLevel
        , kanjiDensity
@@ -32,9 +35,14 @@ module Data.Kanji
        , averageLevel
        ) where
 
+import qualified Data.ByteString.Char8 as SB
+import qualified Data.ByteString.Lazy.Char8 as LB
 import           Data.Char (ord)
 import           Data.List (sort, group)
 import qualified Data.Set as S
+import           Data.String (IsString)
+import qualified Data.Text as ST
+import qualified Data.Text.Lazy as LT
 import           Lens.Micro
 
 import           Data.Kanji.TenthQ
@@ -49,6 +57,29 @@ import           Data.Kanji.PreSecondQ
 import           Data.Kanji.SecondQ
 
 ---
+
+-- | All String types can be transformed into a list of Kanji.
+class IsString a => AsKanji a where
+  -- | Transform this string type into a list of Kanji. The source string
+  -- and the resulting list might not have the same length, if there
+  -- were `Char` in the source that did not fall within the legal
+  -- UTF8 range for Kanji.
+  asKanji :: a -> [Kanji]
+
+instance AsKanji [Char] where
+  asKanji cs = cs ^.. traverse . kanji
+
+instance AsKanji ST.Text where
+  asKanji = asKanji . ST.unpack
+
+instance AsKanji LT.Text where
+  asKanji = asKanji . LT.unpack
+
+instance AsKanji SB.ByteString where
+  asKanji = asKanji . SB.unpack
+
+instance AsKanji LB.ByteString where
+  asKanji = asKanji . LB.unpack
 
 -- | A single symbol of Kanji. Japanese Kanji were borrowed from China
 -- over several waves during the past millenium. Japan names 2136 of
@@ -96,13 +127,9 @@ rankNums = [10,9,8,7,6,5,4,3,2.5,2,1.5,1]
 -- Here, ascending order means from the lowest to the highest level,
 -- meaning from 10 to 1.
 allKanji :: [[Kanji]]
-allKanji =  map allToKanji ks
+allKanji =  map asKanji ks
   where ks = [tenthQ, ninthQ, eighthQ, seventhQ, sixthQ,
               fifthQ, fourthQ, thirdQ, preSecondQ, secondQ]
-
--- | Convert as many `Char` as possible into legal `Kanji`.
-allToKanji :: [Char] -> [Kanji]
-allToKanji ks = ks ^.. traverse . kanji
 
 -- | Legal Kanji appear between UTF8 characters 19968 and 40959.
 isKanji :: Char -> Bool
@@ -118,7 +145,7 @@ hasLevel qs k = has _Just $ level qs k
 -- | What is the density @d@ of Kanji characters in a given String,
 -- where @0 <= d <= 1@?
 kanjiDensity :: [Char] -> Float
-kanjiDensity ks = length' (allToKanji ks) / length' ks
+kanjiDensity ks = length' (asKanji ks) / length' ks
   where length' = fromIntegral . length
 
 -- | As above, but only Kanji of the first 1006 are counted (those learned
@@ -126,7 +153,7 @@ kanjiDensity ks = length' (allToKanji ks) / length' ks
 elementaryKanjiDensity :: [Char] -> Float
 elementaryKanjiDensity ks = foldl (\acc (_,p) -> acc + p) 0 elementaryQs
   where elementaryQs  = filter (\(qn,_) -> qn `elem` [5..10]) distributions
-        distributions = levelDist levels $ allToKanji ks
+        distributions = levelDist levels $ asKanji ks
 
 makeLevel :: [Kanji] -> Rank -> Level
 makeLevel ks n = Level (S.fromDistinctAscList ks) n

@@ -42,7 +42,6 @@ import qualified Data.Set as S
 import qualified Data.Text as ST
 import qualified Data.Text.Lazy as LT
 import           Lens.Micro
-import           Lens.Micro.Platform ()
 
 import           Data.Kanji.TenthQ
 import           Data.Kanji.NinthQ
@@ -87,12 +86,14 @@ instance AsKanji [Char] where
   len = fromIntegral . length
 
 instance AsKanji ST.Text where
-  _Kanji = each . _Kanji
+  _Kanji = packed . _Kanji
+    where packed f b = ST.pack <$> f (ST.unpack b)
 
   len = fromIntegral . ST.length
 
 instance AsKanji LT.Text where
-  _Kanji = each . _Kanji
+  _Kanji = packed . _Kanji
+    where packed f b = LT.pack <$> f (LT.unpack b)
 
   len = fromIntegral . LT.length
 

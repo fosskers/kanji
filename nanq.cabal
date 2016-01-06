@@ -2,7 +2,7 @@ name:                nanq
 
 category:            Natural Language Processing
 
-version:             1.1.0
+version:             1.1.1
 
 synopsis:            Performs 漢字検定 (National Kanji Exam) level analysis on given Kanji.
 
@@ -45,7 +45,6 @@ executable nanq
                        , bytestring >= 0.10.6.0
                        , containers >= 0.4.0.0
                        , microlens >= 0.3.5.0
-                       , microlens-platform >= 0.1.7.0
                        , text
   
 library
@@ -53,7 +52,6 @@ library
                  , bytestring >= 0.10.6.0
                  , containers >= 0.4.0.0
                  , microlens >= 0.3.5.0
-                 , microlens-platform >= 0.1.7.0
                  , text
 
     exposed-modules: Data.Kanji,

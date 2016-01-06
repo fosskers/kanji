@@ -1,7 +1,6 @@
 import Data.Kanji
 import Data.List (delete, nub)
 import Data.Maybe (fromJust)
-import Lens.Micro
 import System.Console.GetOpt
 import System.Environment (getArgs)
 import System.IO (hGetContents, stdin)
@@ -66,23 +65,22 @@ engQNames = zip rankNums ["Tenth Level","Ninth Level","Eighth Level",
                           "Forth Level","Third Level", "Pre-Second Level",
                           "Second Level","Pre-First Level","First Level"]
                           
-
-findAverageQ :: Language -> String -> String
+findAverageQ :: Language -> [Char] -> String
 findAverageQ lang ks = 
   printf (getMsg lang ++ "%.2f") . averageLevel levels . allToKanji $ ks
       where getMsg Eng = "Average Level: "
             getMsg Jap = "平均の級："
 
-findQs :: Language -> String -> [String]
+findQs :: Language -> [Char] -> [String]
 findQs lang ks = map (nanQ lang) $ allToKanji ks
 
 nanQ :: Language -> Kanji -> String
-nanQ lang k = maybe (fail lang k) (pass lang k . _rank) $ level levels k
+nanQ lang k = maybe (bad lang) (good lang . _rank) $ level levels k
   where 
-    pass Eng k n = (show k) ++ " is " ++ (articledQName n) ++ " Kanji."
-    pass Jap k n = "「" ++ (show k) ++ "」は" ++ (jQName n) ++ "の漢字"
-    fail Eng k   = (show k) ++ " is not in any level."
-    fail Jap k   = "「" ++ (show k) ++ "」はどの級の漢字でもない"
+    good Eng n = (show k) ++ " is " ++ (articledQName n) ++ " Kanji."
+    good Jap n = "「" ++ (show k) ++ "」は" ++ (jQName n) ++ "の漢字"
+    bad Eng    = (show k) ++ " is not in any level."
+    bad Jap    = "「" ++ (show k) ++ "」はどの級の漢字でもない"
     articledQName n = getArticle (eQName n) ++ " " ++ eQName n
     getArticle name = if head name `elem` "AEIOU" then "an" else "a"
     eQName n = getQName n engQNames
@@ -91,13 +89,13 @@ nanQ lang k = maybe (fail lang k) (pass lang k . _rank) $ level levels k
 
 findUnknowns :: Language -> String -> [String]
 findUnknowns lang ks = case unknowns of
-                         [] -> [fail lang]
-                         _  -> pass lang : map show unknowns          
+                         [] -> [bad lang]
+                         _  -> good lang : map show unknowns
   where unknowns = nub . filter (not . hasLevel levels) . allToKanji $ ks
-        fail Eng = "No Kanji of unknown Level found."
-        fail Jap = "級を明確にできない漢字は見つからなかった"
-        pass Eng = "The following Kanji of unknown Level were found:"
-        pass Jap = "級を明確にできなかった漢字は："
+        bad Eng  = "No Kanji of unknown Level found."
+        bad Jap  = "級を明確にできない漢字は見つからなかった"
+        good Eng = "The following Kanji of unknown Level were found:"
+        good Jap = "級を明確にできなかった漢字は："
 
 findDistribution :: Language -> String -> [String]
 findDistribution lang ks =
@@ -110,30 +108,25 @@ findDistribution lang ks =
         getName names msg qn = maybe msg id $ qn `lookup` names
 
 howMuchIsKanji :: Language -> String -> String
-howMuchIsKanji lang ks = printf "%s: %.2f%%" msg percent
-  where percent = 100 * (length' asKanji / length' ks :: Float)
-        length' = fromIntegral . length
-        asKanji = allToKanji ks
-        msg     = getMsg lang
+howMuchIsKanji lang ks = printf "%s: %.2f%%" (getMsg lang) percent
+  where percent = 100 * kanjiDensity ks
         getMsg Eng = "Kanji Density"
         getMsg Jap = "漢字率"
 
 howMuchIsElementaryKanji :: Language -> String -> String
-howMuchIsElementaryKanji lang ks = printf (getMsg lang) percentSum
-  where percentSum    = 100 * foldl (\acc (_,p) -> acc + p) 0 elementaryQs
-        elementaryQs  = filter (\(qn,_) -> qn `elem` [5..10]) distributions
-        distributions = levelDist levels $ allToKanji ks
+howMuchIsElementaryKanji lang ks = printf (getMsg lang) percent
+  where percent    = 100 * elementaryKanjiDensity ks
         getMsg Eng = "Input Kanji is %.2f%% Elementary School Kanji."
         getMsg Jap = "入力した漢字は「%.2f%%」小学校で習う漢字。"
 
-getAllFromQ :: Rank -> String -> [Kanji]
-getAllFromQ qn ks = maybe [] f $ levelFromRank levels qn
-  where f q = nub . filter (kanjiInLevel q) . allToKanji $ ks
+getAllFromLevel :: Rank -> [Char] -> [Kanji]
+getAllFromLevel qn ks = maybe [] f $ levelFromRank levels qn
+  where f q = nub . filter (isKanjiInLevel q) . allToKanji $ ks
 
 parseOpts :: [String] -> IO ([Flag],[String])
 parseOpts args = case getOpt Permute options args of
                    (opts,nonopts,[]) -> return (opts,nonopts)
-                   (_,_,errors)      -> argError "Bad flag used."    
+                   (_,_,_)           -> argError "Bad flag used."
 
 -- Determine input source and output language.
 cleanOpts :: ([Flag],[String]) -> IO ([Flag],Language,String)
@@ -160,7 +153,7 @@ executeOpts (flags,lang,input) =
     [KDensity]    -> putStrLn $ howMuchIsKanji lang input
     [Elementary]  -> putStrLn $ howMuchIsElementaryKanji lang input
     [Text]        -> mapM_ execAll [KDensity,Elementary,LevelDist]
-    [AllFromQ qn] -> mapM_ print $ getAllFromQ qn input
+    [AllFromQ qn] -> mapM_ print $ getAllFromLevel qn input
     _             -> argError "Conflicting flags given."
     where execAll flag = executeOpts ([flag],lang,input) >> putStrLn ""
 

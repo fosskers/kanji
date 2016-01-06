@@ -1,6 +1,7 @@
 module Data.Kanji.SecondQ where 
 
-secondQ :: String
+-- | The Kanji unique to Level-2, considered "standard adult" level.
+secondQ :: [Char]
 secondQ = "串丼乞亀伎侶俺傲僅冥冶凄刹剥勃勾匂叱呂呪" ++
           "咽哺唄唾喉喩嗅嘲埼堆塞填奈妖妬媛嫉宛尻岡" ++
           "崖嵐巾弄弥彙怨恣惧慄憧憬戚戴拉拭拳拶挨挫" ++

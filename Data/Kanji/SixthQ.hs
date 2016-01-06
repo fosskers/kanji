@@ -1,6 +1,8 @@
 module Data.Kanji.SixthQ where 
 
-sixthQ :: String
+-- | The Kanji unique to Level-6, studied by the end of 5th grade in
+-- Japanese elementary schools.
+sixthQ :: [Char]
 sixthQ = "久仏仮件任似余価保修俵個備像再刊判制券則" ++
          "効務勢厚句可営因団圧在均基報境墓増夢妻婦" ++
          "容寄富導居属布師常幹序弁張往復徳志応快性" ++

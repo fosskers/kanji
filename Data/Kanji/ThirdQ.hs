@@ -1,6 +1,8 @@
 module Data.Kanji.ThirdQ where 
 
-thirdQ :: String
+-- | The Kanji unique to Level-3, studied by the end of middle school
+-- in Japan.
+thirdQ :: [Char]
 thirdQ = "乏乙了企伏伐伴伸佳侍促倣倹偶催債克免冗冠" ++
          "凍凝刑削励勘募匠匿卑卓卸厘又双吉吏哀哲啓" ++
          "喚喫嘱坑埋塊塗墜墨墳墾壇奉契奪如妨姫娯婆" ++

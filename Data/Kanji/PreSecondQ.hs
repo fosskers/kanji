@@ -1,6 +1,7 @@
 module Data.Kanji.PreSecondQ where 
 
-preSecondQ :: String
+-- | The Kanji unique to Level-Pre2, considerend "mid high school" level.
+preSecondQ :: [Char]
 preSecondQ = "且丙亜享亭仙伯但佐併侮侯俊俸倫偏偵偽傑傘" ++
              "僕僚儒償充准凸凹刃剖剛剰劾勅勲升厄叔叙吟" ++
              "呈呉唆唇唯喝喪嗣嚇囚坪垣培堀堕堪塀塁塑塚" ++

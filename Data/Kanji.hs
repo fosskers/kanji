@@ -1,4 +1,26 @@
-module Data.Kanji where
+module Data.Kanji
+       (
+         -- * Kanji
+         Kanji(..)
+       , kanji
+       , allKanji
+       , allToKanji
+       , isKanji
+       , hasLevel
+       , kanjiDensity
+       , elementaryKanjiDensity
+       , percentSpread
+         -- * Levels
+       , Level(..)
+       , Rank
+       , rankNums
+       , level
+       , levels
+       , isKanjiInLevel
+       , levelDist
+       , levelFromRank
+       , averageLevel
+       ) where
 
 import           Data.Char (ord)
 import           Data.List (sort, group)
@@ -34,8 +56,6 @@ newtype Kanji = Kanji { _kanji :: Char } deriving (Eq, Ord, Show)
 kanji :: Traversal' Char Kanji
 kanji f c = if isKanji c then _kanji <$> f (Kanji c) else pure c
 
-type Rank = Float
-
 -- | A Level or "Kyuu" (級) of Japanese Kanji ranking. There are 12 of these,
 -- from 10 to 1, including intermediate levels between 3 and 2, and 2 and 1.
 --
@@ -55,25 +75,24 @@ data Level = Level { _allKanji :: S.Set Kanji
                    , _rank :: Rank
                    } deriving (Eq, Show)
 
+-- | A numeric representation of a `Level`.
+type Rank = Float
+
+-- | Numerical representations of the 12 ranks.
+rankNums :: [Rank]
+rankNums = [10,9,8,7,6,5,4,3,2.5,2,1.5,1]
+
 -- | All Kanji, grouped by their Level (級) in ascending order.
-allKanji :: [String]
-allKanji = [tenthQ, ninthQ, eighthQ, seventhQ, sixthQ,
-            fifthQ, fourthQ, thirdQ, preSecondQ, secondQ]
+-- Here, ascending order means from the lowest to the highest level,
+-- meaning from 10 to 1.
+allKanji :: [[Kanji]]
+allKanji =  map allToKanji ks
+  where ks = [tenthQ, ninthQ, eighthQ, seventhQ, sixthQ,
+              fifthQ, fourthQ, thirdQ, preSecondQ, secondQ]
 
 -- | Convert as many `Char` as possible into legal `Kanji`.
 allToKanji :: [Char] -> [Kanji]
 allToKanji ks = ks ^.. traverse . kanji
-
-makeLevel :: [Kanji] -> Rank -> Level
-makeLevel ks n = Level (S.fromDistinctAscList ks) n
-
-rankNums :: [Rank]
-rankNums = [10,9,8,7,6,5,4,3,2.5,2,1.5,1]
-
--- | All `Level`s, with all their `Kanji`, ordered from Level-10 to Level-2.
-levels :: [Level]
-levels = map f $ zip allKanji rankNums
-  where f (ks,n) = makeLevel (allToKanji ks) n
 
 -- | Legal Kanji appear between UTF8 characters 19968 and 40959.
 isKanji :: Char -> Bool
@@ -82,14 +101,40 @@ isKanji c = lowLimit <= c' && c' <= highLimit
           lowLimit  = 19968  -- This is `一`
           highLimit = 40959  -- I don't have the right fonts to display this.
 
+-- | Is the `Level` of a given `Kanji` known?
+hasLevel :: [Level] -> Kanji -> Bool
+hasLevel qs k = has _Just $ level qs k
+
+-- | What is the density @d@ of Kanji characters in a given String,
+-- where @0 <= d <= 1@?
+kanjiDensity :: [Char] -> Float
+kanjiDensity ks = length' (allToKanji ks) / length' ks
+  where length' = fromIntegral . length
+
+-- | As above, but only Kanji of the first 1006 are counted (those learned
+-- in elementary school in Japan).
+elementaryKanjiDensity :: [Char] -> Float
+elementaryKanjiDensity ks = foldl (\acc (_,p) -> acc + p) 0 elementaryQs
+  where elementaryQs  = filter (\(qn,_) -> qn `elem` [5..10]) distributions
+        distributions = levelDist levels $ allToKanji ks
+
+makeLevel :: [Kanji] -> Rank -> Level
+makeLevel ks n = Level (S.fromDistinctAscList ks) n
+
+-- | All `Level`s, with all their `Kanji`, ordered from Level-10 to Level-2.
+levels :: [Level]
+levels = map f $ zip allKanji rankNums
+  where f (ks,n) = makeLevel ks n
+
 -- | What `Level` does a Kanji belong to?
 level :: [Level] -> Kanji -> Maybe Level
-level [] k     = Nothing
-level (q:qs) k | kanjiInLevel q k = Just q
+level [] _     = Nothing
+level (q:qs) k | isKanjiInLevel q k = Just q
                | otherwise = level qs k
 
-kanjiInLevel :: Level -> Kanji -> Bool
-kanjiInLevel q k = S.member k $ _allKanji q
+-- | Does a given `Kanji` belong to the given `Level`?
+isKanjiInLevel :: Level -> Kanji -> Bool
+isKanjiInLevel q k = S.member k $ _allKanji q
 
 -- | Some Kanji may be outside the Level system. This means they are
 -- particularly difficult, and are given a rank of 0 here.
@@ -108,10 +153,6 @@ averageLevel :: [Level] -> [Kanji] -> Float
 averageLevel qs ks = average $ map (rank qs) ks
   where average ns = (sum ns) / (fromIntegral $ length ns) 
 
--- | Determines how many times each `Kanji` appears in given set of them.
-kanjiQuantities :: [Kanji] -> [(Kanji,Int)]
-kanjiQuantities = map (\ks -> (head ks, length ks)) . group . sort
-
 -- | How much of each `Level` is represented by a group of Kanji?
 levelDist :: [Level] -> [Kanji] -> [(Rank,Float)]
 levelDist qs ks = map toNumPercentPair $ group sortedRanks
@@ -119,17 +160,14 @@ levelDist qs ks = map toNumPercentPair $ group sortedRanks
         toNumPercentPair qns = (head qns, length' qns / length' sortedRanks)
         length' n = fromIntegral $ length n
 
--- | Is the `Level` of a given `Kanji` known?
-hasLevel :: [Level] -> Kanji -> Bool
-hasLevel qs k = has _Just $ level qs k
-
--- Inefficient.
-areSameLevel :: [Level] -> Kanji -> Kanji -> Bool
-areSameLevel qs k1 k2 = level qs k1 == level qs k2
-
--- | Gives the percent distribution of each `Kanji` in a set of them.
+-- | The distribution of each `Kanji` in a set of them.
+-- The distribution values must sum to 1.
 percentSpread :: [Kanji] -> [(Kanji,Float)]
 percentSpread ks = map getPercent kQuants
-    where getPercent (k,q) = (k, 100 * (fromIntegral q) / totalKanji)
+    where getPercent (k,q) = (k, fromIntegral q / totalKanji)
           kQuants    = kanjiQuantities ks
           totalKanji = fromIntegral $ foldl (\acc (_,q) -> q + acc) 0 kQuants
+
+-- | Determines how many times each `Kanji` appears in given set of them.
+kanjiQuantities :: [Kanji] -> [(Kanji,Int)]
+kanjiQuantities = map (\ks -> (head ks, length ks)) . group . sort

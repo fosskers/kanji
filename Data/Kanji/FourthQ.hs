@@ -1,6 +1,7 @@
 module Data.Kanji.FourthQ where 
 
-fourthQ :: String
+-- | The Kanji unique to Level-4, studied during middle school in Japan.
+fourthQ :: [Char]
 fourthQ = "丈与丘丹乾互井介仰伺依侵俗倒偉傍傾僧儀兼" ++
           "冒凡凶刈到刺剣剤劣勧匹占即却及叫召吐含吹" ++
           "咲唐嘆噴圏坊執堅堤塔壁壊壱奇奥奴妙姓威娘" ++

@@ -37,7 +37,7 @@ executable nanq
                         Data.Kanji.FourthQ,
                         Data.Kanji.ThirdQ,
                         Data.Kanji.PreSecondQ,
-                        Data.Kanji.SecondQ 
+                        Data.Kanji.SecondQ
   
     build-depends:       base,
                          containers >= 0.4.0.0,

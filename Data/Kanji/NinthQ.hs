@@ -1,6 +1,8 @@
 module Data.Kanji.NinthQ where 
 
-ninthQ :: String
+-- | The Kanji unique to Level-9, studied by the end of 2nd grade in
+-- Japanese elementary schools.
+ninthQ :: [Char]
 ninthQ = "万丸交京今会体何作元兄光公内冬刀分切前北" ++
          "午半南原友古台合同回図国園地場声売夏外多" ++
          "夜太妹姉室家寺少岩工市帰広店弓引弟弱強当" ++

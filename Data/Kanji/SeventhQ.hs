@@ -1,6 +1,8 @@
 module Data.Kanji.SeventhQ where 
 
-seventhQ :: String
+-- | The Kanji unique to Level-7, studied by the end of 4th grade in
+-- Japanese elementary schools.
+seventhQ :: [Char]
 seventhQ = "不争付令以仲伝位低例便信倉候借停健側働億" ++
            "兆児共兵典冷初別利刷副功加努労勇包卒協単" ++
            "博印参史司各告周唱喜器囲固型堂塩士変夫失" ++

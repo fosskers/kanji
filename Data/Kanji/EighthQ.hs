@@ -1,6 +1,8 @@
 module Data.Kanji.EighthQ where 
 
-eighthQ :: String
+-- | The Kanji unique to Level-8, studied by the end of 3rd grade in
+-- Japanese elementary schools.
+eighthQ :: [Char]
 eighthQ = "丁世両主乗予事仕他代住使係倍全具写列助勉" ++
           "動勝化区医去反取受号向君味命和品員商問坂" ++
           "央始委守安定実客宮宿寒対局屋岸島州帳平幸" ++

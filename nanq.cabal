@@ -41,18 +41,23 @@ executable nanq
                         Data.Kanji.PreSecondQ,
                         Data.Kanji.SecondQ
   
-    build-depends:       base < 5
+    build-depends:       aeson >= 0.10.0.0
+                       , aeson-pretty >= 0.7.2
+                       , base < 5
                        , bytestring >= 0.10.6.0
                        , containers >= 0.4.0.0
+                       , extensible-effects >= 1.11.0.0
                        , microlens >= 0.3.5.0
-                       , text
+                       , microlens-aeson >= 2.1.0
+                       , optparse-applicative >= 0.12.0.0
+                       , text >= 1.2.2.0
   
 library
     build-depends: base < 5
                  , bytestring >= 0.10.6.0
                  , containers >= 0.4.0.0
                  , microlens >= 0.3.5.0
-                 , text
+                 , text >= 1.2.2.0
 
     exposed-modules: Data.Kanji,
                      Data.Kanji.TenthQ,

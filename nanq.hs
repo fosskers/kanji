@@ -1,59 +1,58 @@
-import Data.Kanji
-import Data.List (delete, nub)
-import Data.Maybe (fromJust)
-import System.Console.GetOpt
-import System.Environment (getArgs)
-import System.IO (hGetContents, stdin)
-import Text.Printf (printf)
+{-# LANGUAGE FlexibleContexts #-}
+
+import           Control.Eff
+import           Control.Eff.Reader.Lazy
+import           Data.Aeson
+import           Data.Aeson.Encode.Pretty
+import           Data.Kanji
+import           Data.List (nub)
+import           Data.Maybe (fromJust)
+import qualified Data.Text as T
+import qualified Data.Text.IO as TIO
+import           Data.Text.Lazy (toStrict)
+import           Data.Text.Lazy.Builder (toLazyText)
+import           Lens.Micro
+import           Lens.Micro.Aeson
+import           Options.Applicative
+import           Text.Printf (printf)
 
 ---
 
+data Flags = Flags [Operation] Language (Either FilePath T.Text)
+  deriving (Eq)
+
+data Operation = Unknowns | FromLevel | Density | Elementary | Distribution
+  deriving (Eq)
+
 data Language = Jap | Eng deriving (Show,Eq)
 
-data Flag = FileInput | PipeInput | Help      | Average    |
-            Unknowns  | LevelDist | KDensity  | Elementary |
-            Text      | JapOutput | AllFromQ Rank deriving (Show,Eq)
+data Env = Env { _lang :: Language
+               , _allKanji :: [Kanji]
+               , _original :: T.Text } deriving Eq
 
-options :: [OptDescr Flag]
-options = [ Option ['f'] ["file"]       (NoArg FileInput)  fDesc
-          , Option ['p'] ["pipe"]       (NoArg PipeInput)  pDesc
-          , Option ['h'] ["help"]       (NoArg Help)       hDesc
-          , Option ['a'] ["average"]    (NoArg Average)    aDesc
-          , Option ['u'] ["unknowns"]   (NoArg Unknowns)   uDesc
-          , Option ['d'] ["leveldist"]  (NoArg LevelDist)  lDesc
-          , Option ['k'] ["density"]    (NoArg KDensity)   kDesc
-          , Option ['e'] ["elementary"] (NoArg Elementary) eDesc
-          , Option ['t'] ["text"]       (NoArg Text)       tDesc
-          , Option ['j'] ["japanese"]   (NoArg JapOutput)  jDesc 
-          , Option ['q'] ["fromq"]
-            (ReqArg (\s -> AllFromQ (read s :: Rank)) "Rank") qDesc
-          ]
-    where fDesc = "Takes input from a given file." ++
-                  "\n入力は指定のファイルから"
-          pDesc = "Takes input from a pipe (stdin)." ++
-                  "\n入力はpipe (つまりstdin)から"
-          hDesc = "Shows this help message." ++
-                  "\nこのメッセージから出力"
-          aDesc = "Find the average level of some given line of Japanese." ++
-                  "\n日本語の文の平均的な級を求める"
-          uDesc = "Report Kanji whose Level could not be determined." ++
-                  "\n級を明確にできなかった漢字を報告"
-          lDesc = "Find the % distribution of levels in given Japanese." ++
-                  "\nどの級の漢字がどれ程出ているか、パーセントで出力"
-          kDesc = "Determines how much of the input is made of Kanji." ++
-                  "\n入力は何パーセント漢字でできているか出力"
-          eDesc = "Determines how much of the input is made of Kanji" ++
-                  "\nlearnt in Elementary School in Japan." ++
-                  "\n入力は何パーセント小学校で習う漢字でできているか出力"
-          tDesc = "Applies -k -e and -d all at once to analyse some text." ++
-                  "\n-k、-e、-dを連続に使って入力を分析"
-          jDesc = "Output is given in Japanese instead of English." ++
-                  "\n出力の際は日本語"
-          qDesc = "Filters out all but Kanji from the requested Level." ++
-                  "\n指定された級の漢字だけ出力"          
-          
-usageMsg :: String
-usageMsg = "Usage : nanq [OPTION] (kanji / file)"
+-- | Long, Short, Help
+lsh l s h = long l <> short s <> help h
+
+flags :: Parser Flags
+flags = Flags <$> operations <*> lang <*> (file <|> japanese)
+  where lang = flag Jap Eng (lsh "japanese" 'j' "Output language is Japanese")
+        file = Left <$> strOption (lsh "file" 'f' "Take input from a file")
+        japanese = (Right . T.pack) <$> argument str (metavar "JAPANESE")
+
+-- TODO: Better way to handle Maybes
+operations :: Parser [Operation]
+operations = (^.. each . _Just) <$> pairs
+  where pairs = (,,,,) <$>
+          flag (Just Unknowns) Nothing
+          (lsh "unknowns" 'u' "Find Kanji whose Level couldn't be determined")
+          <*> flag (Just FromLevel) Nothing
+          (lsh "level" 'q' "Find Kanji from the requested Level")
+          <*> flag (Just Density) Nothing
+          (lsh "density" 'd' "Find how much of the input is made of Kanji")
+          <*> flag (Just Elementary) Nothing
+          (lsh "elementary" 'e' "Find how much of the Kanji is learnt in elementary school")
+          <*> flag (Just Distribution) Nothing
+          (lsh "leveldist" 'l' "Find the distribution of Kanji levels")
 
 japQNames :: [(Rank,String)]
 japQNames = zip rankNums ["10級","9級","8級","7級","6級","5級","4級",
@@ -125,25 +124,7 @@ getAllFromLevel :: Rank -> [Char] -> [Kanji]
 getAllFromLevel qn ks = maybe [] f $ levelFromRank levels qn
   where f q = nub . filter (isKanjiInLevel q) . asKanji $ ks
 
-parseOpts :: [String] -> IO ([Flag],[String])
-parseOpts args = case getOpt Permute options args of
-                   (opts,nonopts,[]) -> return (opts,nonopts)
-                   (_,_,_)           -> argError "Bad flag used."
-
--- Determine input source and output language.
-cleanOpts :: ([Flag],[String]) -> IO ([Flag],Language,String)
-cleanOpts (opts,nonopts) = clean opts nonopts Eng  -- English by default.
-    where clean opts nonopts lang 
-            | JapOutput `elem` opts = clean (without JapOutput) nonopts Jap
-            | Help `elem` opts      = return ([Help],lang,"")
-            | PipeInput `elem` opts = do input <- hGetContents stdin
-                                         return (without PipeInput,lang,input)
-            | null nonopts          = argError "No Kanji / file given!"
-            | FileInput `elem` opts = do input <- readFile $ head nonopts
-                                         return (without FileInput,lang,input)
-            | otherwise             = return (opts,lang,head nonopts)
-            where without x = delete x opts
-
+{-}
 executeOpts :: ([Flag],Language,String) -> IO ()
 executeOpts (flags,lang,input) =
   case flags of
@@ -158,13 +139,31 @@ executeOpts (flags,lang,input) =
     [AllFromQ qn] -> putStrLn . map _kanji $ getAllFromLevel qn input
     _             -> argError "Conflicting flags given."
     where execAll flag = executeOpts ([flag],lang,input) >> putStrLn ""
+-}
 
-argError :: String -> a
-argError msg = error $ usageInfo (msg ++ "\n" ++ usageMsg) options
+-- | All operations return JSON, to be aggregated into a master Object.
+execOp :: Member (Reader Env) r => Operation -> Eff r Value
+execOp Unknowns = undefined
+execOp FromLevel = undefined
+execOp Density = undefined
+execOp Elementary = undefined
+execOp Distribution = undefined
+
+output :: Value -> IO ()
+output = TIO.putStrLn . toStrict . toLazyText . encodePrettyToTextBuilder
+
+-- | Dispatch on each `Operation` given. Aggregates the resulting JSON.
+work :: (Env, [Operation]) -> Value
+work (e,os) = Object $ vals ^. each . _Object
+  where vals = run $ runReader (mapM execOp os) e
+
+env :: Flags -> IO (Env, [Operation])
+env (Flags os l (Right t)) = pure (Env l (asKanji t) t, os)
+env (Flags os l (Left f)) = do
+  t <- TIO.readFile f
+  pure (Env l (asKanji t) t, os)
 
 main :: IO ()
-main = do
-  args <- getArgs
-  opts <- parseOpts args
-  cleanedOpts <- cleanOpts opts
-  executeOpts cleanedOpts
+main = execParser opts >>= env >>= output . work
+  where opts = info (helper <*> flags)
+          (fullDesc <> header "nanq - Kanji analysis of Japanese text")

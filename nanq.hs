@@ -110,13 +110,13 @@ findDistribution lang ks =
 
 howMuchIsKanji :: Language -> String -> String
 howMuchIsKanji lang ks = printf "%s: %.2f%%" (getMsg lang) percent
-  where percent = 100 * kanjiDensity ks
+  where percent = 100 * kanjiDensity ks (asKanji ks)
         getMsg Eng = "Kanji Density"
         getMsg Jap = "漢字率"
 
 howMuchIsElementaryKanji :: Language -> String -> String
 howMuchIsElementaryKanji lang ks = printf (getMsg lang) percent
-  where percent    = 100 * elementaryKanjiDensity ks
+  where percent    = 100 * elementaryKanjiDensity (asKanji ks)
         getMsg Eng = "Input Kanji is %.2f%% Elementary School Kanji."
         getMsg Jap = "入力した漢字は「%.2f%%」小学校で習う漢字。"
 

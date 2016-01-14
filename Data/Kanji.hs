@@ -67,16 +67,16 @@ hasLevel qs k = has _Just $ level qs k
 
 -- | What is the density @d@ of Kanji characters in a given String-like
 -- type, where @0 <= d <= 1@?
-kanjiDensity :: AsKanji a => a -> Float
-kanjiDensity ks = length' (asKanji ks) / len ks
+kanjiDensity :: AsKanji a => a -> [Kanji] -> Float
+kanjiDensity orig ks = length' ks / len orig
   where length' = fromIntegral . length
 
 -- | As above, but only Kanji of the first 1006 are counted (those learned
 -- in elementary school in Japan).
-elementaryKanjiDensity :: AsKanji a => a -> Float
+elementaryKanjiDensity :: [Kanji] -> Float
 elementaryKanjiDensity ks = foldl (\acc (_,p) -> acc + p) 0 elementaryQs
   where elementaryQs  = filter (\(qn,_) -> qn `elem` [5..10]) distributions
-        distributions = levelDist levels $ asKanji ks
+        distributions = levelDist levels ks
 
 makeLevel :: [Kanji] -> Rank -> Level
 makeLevel ks n = Level (S.fromDistinctAscList ks) n

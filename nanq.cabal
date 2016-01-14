@@ -60,6 +60,7 @@ library
                  , text >= 1.2.2.0
 
     exposed-modules: Data.Kanji,
+                     Data.Kanji.Types,
                      Data.Kanji.Level.TenthQ,
                      Data.Kanji.Level.NinthQ,
                      Data.Kanji.Level.EighthQ,

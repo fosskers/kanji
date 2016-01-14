@@ -155,7 +155,7 @@ executeOpts (flags,lang,input) =
     [KDensity]    -> putStrLn $ howMuchIsKanji lang input
     [Elementary]  -> putStrLn $ howMuchIsElementaryKanji lang input
     [Text]        -> mapM_ execAll [KDensity,Elementary,LevelDist]
-    [AllFromQ qn] -> mapM_ print $ getAllFromLevel qn input
+    [AllFromQ qn] -> putStrLn . map _kanji $ getAllFromLevel qn input
     _             -> argError "Conflicting flags given."
     where execAll flag = executeOpts ([flag],lang,input) >> putStrLn ""
 

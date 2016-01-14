@@ -1,4 +1,4 @@
-module Data.Kanji.SeventhQ where 
+module Data.Kanji.Level.SeventhQ where 
 
 -- | The Kanji unique to Level-7, studied by the end of 4th grade in
 -- Japanese elementary schools.

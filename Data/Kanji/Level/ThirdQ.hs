@@ -1,4 +1,4 @@
-module Data.Kanji.ThirdQ where 
+module Data.Kanji.Level.ThirdQ where 
 
 -- | The Kanji unique to Level-3, studied by the end of middle school
 -- in Japan.

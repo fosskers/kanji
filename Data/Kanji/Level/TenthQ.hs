@@ -1,4 +1,4 @@
-module Data.Kanji.TenthQ where 
+module Data.Kanji.Level.TenthQ where 
 
 -- | The Kanji unique to Level-10, studied by the end of 1st grade in
 -- Japanese elementary schools.

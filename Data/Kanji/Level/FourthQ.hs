@@ -1,4 +1,4 @@
-module Data.Kanji.FourthQ where 
+module Data.Kanji.Level.FourthQ where 
 
 -- | The Kanji unique to Level-4, studied during middle school in Japan.
 fourthQ :: [Char]

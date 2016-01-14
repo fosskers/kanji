@@ -43,16 +43,16 @@ import qualified Data.Text as ST
 import qualified Data.Text.Lazy as LT
 import           Lens.Micro
 
-import           Data.Kanji.TenthQ
-import           Data.Kanji.NinthQ
-import           Data.Kanji.EighthQ
-import           Data.Kanji.SeventhQ
-import           Data.Kanji.SixthQ
-import           Data.Kanji.FifthQ
-import           Data.Kanji.FourthQ
-import           Data.Kanji.ThirdQ
-import           Data.Kanji.PreSecondQ
-import           Data.Kanji.SecondQ
+import           Data.Kanji.Level.TenthQ
+import           Data.Kanji.Level.NinthQ
+import           Data.Kanji.Level.EighthQ
+import           Data.Kanji.Level.SeventhQ
+import           Data.Kanji.Level.SixthQ
+import           Data.Kanji.Level.FifthQ
+import           Data.Kanji.Level.FourthQ
+import           Data.Kanji.Level.ThirdQ
+import           Data.Kanji.Level.PreSecondQ
+import           Data.Kanji.Level.SecondQ
 
 ---
 

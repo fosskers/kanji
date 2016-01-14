@@ -1,4 +1,4 @@
-module Data.Kanji.SixthQ where 
+module Data.Kanji.Level.SixthQ where 
 
 -- | The Kanji unique to Level-6, studied by the end of 5th grade in
 -- Japanese elementary schools.

@@ -1,4 +1,4 @@
-module Data.Kanji.NinthQ where 
+module Data.Kanji.Level.NinthQ where 
 
 -- | The Kanji unique to Level-9, studied by the end of 2nd grade in
 -- Japanese elementary schools.

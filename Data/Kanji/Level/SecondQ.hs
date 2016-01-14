@@ -1,4 +1,4 @@
-module Data.Kanji.SecondQ where 
+module Data.Kanji.Level.SecondQ where 
 
 -- | The Kanji unique to Level-2, considered "standard adult" level.
 secondQ :: [Char]

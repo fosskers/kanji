@@ -1,4 +1,4 @@
-module Data.Kanji.PreSecondQ where 
+module Data.Kanji.Level.PreSecondQ where 
 
 -- | The Kanji unique to Level-Pre2, considerend "mid high school" level.
 preSecondQ :: [Char]

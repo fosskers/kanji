@@ -1,3 +1,6 @@
+-- TODO: Move `Env` into a `Types` module, so that Data.Kanji can use it
+-- via a `Reader` effect.
+
 {-# LANGUAGE FlexibleContexts #-}
 
 import           Control.Eff

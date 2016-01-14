@@ -1,4 +1,4 @@
-module Data.Kanji.EighthQ where 
+module Data.Kanji.Level.EighthQ where 
 
 -- | The Kanji unique to Level-8, studied by the end of 3rd grade in
 -- Japanese elementary schools.

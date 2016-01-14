@@ -87,10 +87,12 @@ nanQ lang k = maybe (bad lang) (good lang . _rank) $ level levels k
     jQName n = getQName n japQNames
     getQName n names = fromJust $ n `lookup` names
 
+-- TODO: This should be two functions. One for finding the unknowns,
+-- another for formatting output.
 findUnknowns :: Language -> String -> [String]
 findUnknowns lang ks = case unknowns of
                          [] -> [bad lang]
-                         _  -> good lang : map show unknowns
+                         _  -> [good lang, map _kanji unknowns]
   where unknowns = nub . filter (not . hasLevel levels) . asKanji $ ks
         bad Eng  = "No Kanji of unknown Level found."
         bad Jap  = "級を明確にできない漢字は見つからなかった"

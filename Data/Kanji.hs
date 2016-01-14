@@ -56,7 +56,7 @@ import           Data.Kanji.SecondQ
 
 ---
 
--- | Anything that can be transformed in a list of Kanji.
+-- | Anything that can be transformed into a list of Kanji.
 class AsKanji a where
 
   -- | Traverse into this type to find 0 or more Kanji.

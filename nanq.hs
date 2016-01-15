@@ -7,9 +7,8 @@ import           Data.Aeson.Encode.Pretty
 import           Data.Kanji
 import           Data.List (nub)
 import           Data.Maybe (fromJust)
-import qualified Data.Text as T
-import qualified Data.Text.IO as TIO
-import           Data.Text.Lazy (toStrict)
+import qualified Data.Text.Lazy as T
+import qualified Data.Text.Lazy.IO as TIO
 import           Data.Text.Lazy.Builder (toLazyText)
 import           Lens.Micro
 import           Lens.Micro.Aeson
@@ -150,7 +149,7 @@ execOp Elementary = undefined
 execOp Distribution = undefined
 
 output :: Value -> IO ()
-output = TIO.putStrLn . toStrict . toLazyText . encodePrettyToTextBuilder
+output = TIO.putStrLn . toLazyText . encodePrettyToTextBuilder
 
 -- | Dispatch on each `Operation` given. Aggregates the resulting JSON.
 work :: (Env, [Operation]) -> Value

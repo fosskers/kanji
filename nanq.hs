@@ -1,15 +1,20 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 import           Control.Eff
 import           Control.Eff.Reader.Lazy
 import           Data.Aeson
 import           Data.Aeson.Encode.Pretty
+import qualified Data.HashMap.Strict as HMS
 import           Data.Kanji
 import           Data.List (nub)
 import           Data.Maybe (fromJust)
+import qualified Data.Text as TS
 import qualified Data.Text.Lazy as T
-import qualified Data.Text.Lazy.IO as TIO
 import           Data.Text.Lazy.Builder (toLazyText)
+import qualified Data.Text.Lazy.IO as TIO
+import qualified Data.Vector as V
 import           Lens.Micro
 import           Lens.Micro.Aeson
 import           Options.Applicative
@@ -20,13 +25,13 @@ import           Text.Printf (printf)
 data Flags = Flags [Operation] Language (Either FilePath T.Text)
   deriving (Eq)
 
-data Operation = Unknowns | FromLevel | Density | Elementary | Distribution
+data Operation = Unknowns | FromLevel Rank | Density | Elementary | Distribution
   deriving (Eq)
 
 data Language = Jap | Eng deriving (Show,Eq)
 
 data Env = Env { _lang :: Language
-               , _allKanji :: [Kanji]
+               , _allKs :: [Kanji]
                , _original :: T.Text } deriving Eq
 
 -- | Long, Short, Help
@@ -42,15 +47,15 @@ flags = Flags <$> operations <*> lang <*> (file <|> japanese)
 operations :: Parser [Operation]
 operations = (^.. each . _Just) <$> pairs
   where pairs = (,,,,) <$>
-          flag (Just Unknowns) Nothing
+          flag Nothing (Just Unknowns)
           (lsh "unknowns" 'u' "Find Kanji whose Level couldn't be determined")
-          <*> flag (Just FromLevel) Nothing
-          (lsh "level" 'q' "Find Kanji from the requested Level")
-          <*> flag (Just Density) Nothing
+          <*> (Just . FromLevel <$> option auto
+          (lsh "level" 'q' "Find Kanji from the requested Level"))
+          <*> flag Nothing (Just Density)
           (lsh "density" 'd' "Find how much of the input is made of Kanji")
-          <*> flag (Just Elementary) Nothing
+          <*> flag Nothing (Just Elementary)
           (lsh "elementary" 'e' "Find how much of the Kanji is learnt in elementary school")
-          <*> flag (Just Distribution) Nothing
+          <*> flag Nothing (Just Distribution)
           (lsh "leveldist" 'l' "Find the distribution of Kanji levels")
 
 japQNames :: [(Rank,String)]
@@ -69,9 +74,12 @@ findAverageQ lang ks =
       where getMsg Eng = "Average Level: "
             getMsg Jap = "平均の級："
 
+{-
 findQs :: Language -> [Char] -> [String]
 findQs lang ks = map (nanQ lang) $ asKanji ks
+-}
 
+{-
 nanQ :: Language -> Kanji -> String
 nanQ lang k = maybe (bad lang) (good lang . _rank) $ level levels k
   where 
@@ -84,6 +92,7 @@ nanQ lang k = maybe (bad lang) (good lang . _rank) $ level levels k
     eQName n = getQName n engQNames
     jQName n = getQName n japQNames
     getQName n names = fromJust $ n `lookup` names
+-}
 
 -- TODO: This should be two functions. One for finding the unknowns,
 -- another for formatting output.
@@ -107,11 +116,13 @@ findDistribution lang ks =
         getQName Jap qn      = getName japQNames "2級以上" qn
         getName names msg qn = maybe msg id $ qn `lookup` names
 
+{-
 howMuchIsKanji :: Language -> String -> String
 howMuchIsKanji lang ks = printf "%s: %.2f%%" (getMsg lang) percent
   where percent = 100 * kanjiDensity ks (asKanji ks)
         getMsg Eng = "Kanji Density"
         getMsg Jap = "漢字率"
+-}
 
 howMuchIsElementaryKanji :: Language -> String -> String
 howMuchIsElementaryKanji lang ks = printf (getMsg lang) percent
@@ -119,9 +130,13 @@ howMuchIsElementaryKanji lang ks = printf (getMsg lang) percent
         getMsg Eng = "Input Kanji is %.2f%% Elementary School Kanji."
         getMsg Jap = "入力した漢字は「%.2f%%」小学校で習う漢字。"
 
-getAllFromLevel :: Rank -> [Char] -> [Kanji]
-getAllFromLevel qn ks = maybe [] f $ levelFromRank levels qn
-  where f q = nub . filter (isKanjiInLevel q) . asKanji $ ks
+getAllFromLevel :: Member (Reader Env) r => Rank -> Eff r Value
+getAllFromLevel l = (v . g) <$> reader _allKs
+  where g ks = maybe [] (f ks) $ levelFromRank levels l
+        f ks q = nub $ filter (isKanjiInLevel q) ks
+        v ks = Object . HMS.singleton "fromLevel" . Object $ HMS.fromList obj
+          where obj = [ ("level", String . TS.pack $ show l)
+                      , ("kanji", String . TS.pack $ map _kanji ks) ]
 
 {-}
 executeOpts :: ([Flag],Language,String) -> IO ()
@@ -143,7 +158,7 @@ executeOpts (flags,lang,input) =
 -- | All operations return JSON, to be aggregated into a master Object.
 execOp :: Member (Reader Env) r => Operation -> Eff r Value
 execOp Unknowns = undefined
-execOp FromLevel = undefined
+execOp (FromLevel l) = getAllFromLevel l
 execOp Density = undefined
 execOp Elementary = undefined
 execOp Distribution = undefined

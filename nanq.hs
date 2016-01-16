@@ -43,20 +43,19 @@ flags = Flags <$> operations <*> lang <*> (file <|> japanese)
         file = Left <$> strOption (lsh "file" 'f' "Take input from a file")
         japanese = (Right . T.pack) <$> argument str (metavar "JAPANESE")
 
--- TODO: Better way to handle Maybes
 operations :: Parser [Operation]
-operations = (^.. each . _Just) <$> pairs
-  where pairs = (,,,,) <$>
-          flag Nothing (Just Unknowns)
-          (lsh "unknowns" 'u' "Find Kanji whose Level couldn't be determined")
-          <*> (Just . FromLevel <$> option auto
-          (lsh "level" 'q' "Find Kanji from the requested Level"))
-          <*> flag Nothing (Just Density)
-          (lsh "density" 'd' "Find how much of the input is made of Kanji")
-          <*> flag Nothing (Just Elementary)
-          (lsh "elementary" 'e' "Find how much of the Kanji is learnt in elementary school")
-          <*> flag Nothing (Just Distribution)
-          (lsh "leveldist" 'l' "Find the distribution of Kanji levels")
+operations = (^.. each . _Just) <$> ops
+  where ops = sequenceA $ map optional
+          [ flag' Unknowns $
+            lsh "unknowns" 'u' "Find Kanji whose Level couldn't be determined"
+          , FromLevel <$> option auto
+            (lsh "level" 'q' "Find Kanji from the requested Level")
+          , flag' Density $
+            lsh "density" 'd' "Find how much of the input is made of Kanji"
+          , flag' Elementary $
+            lsh "elementary" 'e' "Find density of Kanji learnt in elementary school"
+          , flag' Distribution $
+            lsh "leveldist" 'l' "Find the distribution of Kanji levels" ]
 
 japQNames :: [(Rank,String)]
 japQNames = zip rankNums ["10級","9級","8級","7級","6級","5級","4級",

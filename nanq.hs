@@ -25,8 +25,8 @@ import           Text.Printf (printf)
 data Flags = Flags [Operation] Language (Either FilePath T.Text)
   deriving (Eq)
 
-data Operation = Unknowns | FromLevel Rank | Density | Elementary | Distribution
-  deriving (Eq)
+data Operation = Unknowns | FromLevel Rank | Density | Elementary
+  | Distribution | Average deriving (Eq)
 
 data Language = Jap | Eng deriving (Show,Eq)
 
@@ -55,7 +55,9 @@ operations = (^.. each . _Just) <$> ops
           , flag' Elementary $
             lsh "elementary" 'e' "Find density of Kanji learnt in elementary school"
           , flag' Distribution $
-            lsh "leveldist" 'l' "Find the distribution of Kanji levels" ]
+            lsh "leveldist" 'l' "Find the distribution of Kanji levels"
+          , flag' Average $
+            lsh "average" 'a' "Find the average Level of all Kanji present" ]
 
 japQNames :: [(Rank,String)]
 japQNames = zip rankNums ["10級","9級","8級","7級","6級","5級","4級",
@@ -67,11 +69,10 @@ engQNames = zip rankNums ["Tenth Level","Ninth Level","Eighth Level",
                           "Forth Level","Third Level", "Pre-Second Level",
                           "Second Level","Pre-First Level","First Level"]
                           
-findAverageQ :: Language -> [Char] -> String
-findAverageQ lang ks = 
-  printf (getMsg lang ++ "%.2f") . averageLevel levels . asKanji $ ks
-      where getMsg Eng = "Average Level: "
-            getMsg Jap = "平均の級："
+findAverageQ :: Member (Reader Env) r => Eff r Value
+findAverageQ = do
+  average <- averageLevel levels <$> reader _allKs
+  pure $ object [ "average" .= average ]
 
 {-
 findQs :: Language -> [Char] -> [String]
@@ -115,20 +116,12 @@ findDistribution lang ks =
         getQName Jap qn      = getName japQNames "2級以上" qn
         getName names msg qn = maybe msg id $ qn `lookup` names
 
-{-
-howMuchIsKanji :: Language -> String -> String
-howMuchIsKanji lang ks = printf "%s: %.2f%%" (getMsg lang) percent
-  where percent = 100 * kanjiDensity ks (asKanji ks)
-        getMsg Eng = "Kanji Density"
-        getMsg Jap = "漢字率"
--}
+howMuchIsKanji :: Member (Reader Env) r => Eff r Value
+howMuchIsKanji = do
+  density <- kanjiDensity <$> reader _original <*> reader _allKs
+  pure $ object [ "density" .= density ]
 
-howMuchIsElementaryKanji :: Language -> String -> String
-howMuchIsElementaryKanji lang ks = printf (getMsg lang) percent
-  where percent    = 100 * elementaryKanjiDensity (asKanji ks)
-        getMsg Eng = "Input Kanji is %.2f%% Elementary School Kanji."
-        getMsg Jap = "入力した漢字は「%.2f%%」小学校で習う漢字。"
-
+-- TODO: Use `object` here
 getAllFromLevel :: Member (Reader Env) r => Rank -> Eff r Value
 getAllFromLevel l = (v . g) <$> reader _allKs
   where g ks = maybe [] (f ks) $ levelFromRank levels l
@@ -136,6 +129,15 @@ getAllFromLevel l = (v . g) <$> reader _allKs
         v ks = Object . HMS.singleton "fromLevel" . Object $ HMS.fromList obj
           where obj = [ ("level", String . TS.pack $ show l)
                       , ("kanji", String . TS.pack $ map _kanji ks) ]
+
+howMuchIsElementaryKanji :: Member (Reader Env) r => Eff r Value
+howMuchIsElementaryKanji = do
+  density <- elementaryKanjiDensity <$> reader _allKs
+  pure $ object [ "elementary" .= density ]
+
+{-
+
+-}
 
 {-}
 executeOpts :: ([Flag],Language,String) -> IO ()
@@ -158,9 +160,10 @@ executeOpts (flags,lang,input) =
 execOp :: Member (Reader Env) r => Operation -> Eff r Value
 execOp Unknowns = undefined
 execOp (FromLevel l) = getAllFromLevel l
-execOp Density = undefined
-execOp Elementary = undefined
+execOp Density = howMuchIsKanji
+execOp Elementary = howMuchIsElementaryKanji
 execOp Distribution = undefined
+execOp Average = findAverageQ
 
 output :: Value -> IO ()
 output = TIO.putStrLn . toLazyText . encodePrettyToTextBuilder

@@ -121,14 +121,12 @@ howMuchIsKanji = do
   density <- kanjiDensity <$> reader _original <*> reader _allKs
   pure $ object [ "density" .= density ]
 
--- TODO: Use `object` here
 getAllFromLevel :: Member (Reader Env) r => Rank -> Eff r Value
 getAllFromLevel l = (v . g) <$> reader _allKs
   where g ks = maybe [] (f ks) $ levelFromRank levels l
         f ks q = nub $ filter (isKanjiInLevel q) ks
         v ks = object [ "fromLevel" .= object obj ]
-          where obj = [ "level" .= (String . TS.pack $ show l)
-                      , "kanji" .= (String . TS.pack $ map _kanji ks) ]
+          where obj = [TS.pack (show l) .= (String . TS.pack $ map _kanji ks)]
 
 howMuchIsElementaryKanji :: Member (Reader Env) r => Eff r Value
 howMuchIsElementaryKanji = do

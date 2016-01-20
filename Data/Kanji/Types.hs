@@ -13,6 +13,7 @@ module Data.Kanji.Types where
 import qualified Data.ByteString.Char8 as SB
 import qualified Data.ByteString.Lazy.Char8 as LB
 import           Data.Char (ord)
+import           Data.Maybe (fromJust)
 import qualified Data.Set as S
 import qualified Data.Text as ST
 import qualified Data.Text.Lazy as LT
@@ -104,8 +105,23 @@ data Level = Level { _allKanji :: S.Set Kanji
                    , _rank :: Rank
                    } deriving (Eq, Show)
 
+_Rank :: Lens' Level Rank
+_Rank f l = (\r -> l { _rank = r }) <$> f (_rank l)
+
 -- | A numeric representation of a `Level`.
-type Rank = Float
+data Rank = Ten | Nine | Eight | Seven | Six | Five | Four | Three | PreTwo
+  | Two | PreOne | One deriving (Eq, Ord, Enum, Read, Show)
+
+_RankFl :: Lens' Rank Float
+_RankFl f r = const r <$> f (fromRank r)
+
+-- | Discover a Rank's numeric representation, as a `Float`.
+fromRank :: Rank -> Float
+fromRank = fromJust . flip lookup rankMap
+
+-- | A mapping of Ranks to their numeric representation.
+rankMap :: [(Rank,Float)]
+rankMap = zip [Ten ..] [10,9,8,7,6,5,4,3,2.5,2,1.5,1]
 
 -- | Legal Kanji appear between UTF8 characters 19968 and 40959.
 isKanji :: Char -> Bool

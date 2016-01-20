@@ -60,11 +60,11 @@ operations = (^.. each . _Just) <$> ops
             lsh "average" 'a' "Find the average Level of all Kanji present" ]
 
 japQNames :: [(Rank,String)]
-japQNames = zip rankNums ["10級","9級","8級","7級","6級","5級","4級",
+japQNames = zip [Ten ..] ["10級","9級","8級","7級","6級","5級","4級",
                           "3級", "準2級","2級","準1級","1級"]
 
 engQNames :: [(Rank,String)]
-engQNames = zip rankNums ["Tenth Level","Ninth Level","Eighth Level",
+engQNames = zip [Ten ..] ["Tenth Level","Ninth Level","Eighth Level",
                           "Seventh Level","Sixth Level","Fifth Level",
                           "Forth Level","Third Level", "Pre-Second Level",
                           "Second Level","Pre-First Level","First Level"]
@@ -126,9 +126,9 @@ getAllFromLevel :: Member (Reader Env) r => Rank -> Eff r Value
 getAllFromLevel l = (v . g) <$> reader _allKs
   where g ks = maybe [] (f ks) $ levelFromRank levels l
         f ks q = nub $ filter (isKanjiInLevel q) ks
-        v ks = Object . HMS.singleton "fromLevel" . Object $ HMS.fromList obj
-          where obj = [ ("level", String . TS.pack $ show l)
-                      , ("kanji", String . TS.pack $ map _kanji ks) ]
+        v ks = object [ "fromLevel" .= object obj ]
+          where obj = [ "level" .= (String . TS.pack $ show l)
+                      , "kanji" .= (String . TS.pack $ map _kanji ks) ]
 
 howMuchIsElementaryKanji :: Member (Reader Env) r => Eff r Value
 howMuchIsElementaryKanji = do

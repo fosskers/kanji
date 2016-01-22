@@ -100,13 +100,13 @@ levelFromRank (q:qs) qn | _rank q == qn = Just q
 -- | Find the average `Level` of a given set of `Kanji`.
 averageLevel :: [Level] -> [Kanji] -> Float
 averageLevel ls ks = average ranks
-  where ranks = map (level ls) ks ^.. each . _Just . _Rank . _RankFl
+  where ranks = ks ^.. each . to (level ls) . _Just . to _rank . to fromRank
         average ns = (sum ns) / (fromIntegral $ length ns) 
 
 -- | How much of each `Level` is represented by a group of Kanji?
 levelDist :: [Level] -> [Kanji] -> [(Rank,Float)]
 levelDist qs ks = map toNumPercentPair $ group sortedRanks
-  where sortedRanks = sort $ map (level qs) ks ^.. each . _Just . _Rank
+  where sortedRanks = sort $ ks ^.. each . to (level qs) . _Just . to _rank
         toNumPercentPair qns = (head qns, length' qns / length' sortedRanks)
         length' n = fromIntegral $ length n
 

@@ -94,17 +94,10 @@ nanQ lang k = maybe (bad lang) (good lang . _rank) $ level levels k
     getQName n names = fromJust $ n `lookup` names
 -}
 
--- TODO: This should be two functions. One for finding the unknowns,
--- another for formatting output.
-findUnknowns :: Language -> String -> [String]
-findUnknowns lang ks = case unknowns of
-                         [] -> [bad lang]
-                         _  -> [good lang, map _kanji unknowns]
-  where unknowns = nub . filter (not . hasLevel levels) . asKanji $ ks
-        bad Eng  = "No Kanji of unknown Level found."
-        bad Jap  = "級を明確にできない漢字は見つからなかった"
-        good Eng = "The following Kanji of unknown Level were found:"
-        good Jap = "級を明確にできなかった漢字は："
+unknowns :: Member (Reader Env) r => Eff r Value
+unknowns = do
+  ks <- nub . filter (not . hasLevel levels) <$> reader _allKs
+  pure $ object [ "unknowns" .= map _kanji ks ]
 
 findDistribution :: Language -> String -> [String]
 findDistribution lang ks =
@@ -126,37 +119,16 @@ getAllFromLevel l = (v . g) <$> reader _allKs
   where g ks = maybe [] (f ks) $ levelFromRank levels l
         f ks q = nub $ filter (isKanjiInLevel q) ks
         v ks = object [ "fromLevel" .= object obj ]
-          where obj = [TS.pack (show l) .= (String . TS.pack $ map _kanji ks)]
+          where obj = [TS.pack (show l) .= map _kanji ks]
 
 howMuchIsElementaryKanji :: Member (Reader Env) r => Eff r Value
 howMuchIsElementaryKanji = do
   density <- elementaryKanjiDensity <$> reader _allKs
   pure $ object [ "elementary" .= density ]
 
-{-
-
--}
-
-{-}
-executeOpts :: ([Flag],Language,String) -> IO ()
-executeOpts (flags,lang,input) =
-  case flags of
-    [Help]        -> putStr $ usageInfo usageMsg options
-    [Average]     -> putStrLn $ findAverageQ lang input
-    []            -> mapM_ putStrLn $ findQs lang input
-    [Unknowns]    -> mapM_ putStrLn $ findUnknowns lang input
-    [LevelDist]   -> mapM_ putStrLn $ findDistribution lang input
-    [KDensity]    -> putStrLn $ howMuchIsKanji lang input
-    [Elementary]  -> putStrLn $ howMuchIsElementaryKanji lang input
-    [Text]        -> mapM_ execAll [KDensity,Elementary,LevelDist]
-    [AllFromQ qn] -> putStrLn . map _kanji $ getAllFromLevel qn input
-    _             -> argError "Conflicting flags given."
-    where execAll flag = executeOpts ([flag],lang,input) >> putStrLn ""
--}
-
 -- | All operations return JSON, to be aggregated into a master Object.
 execOp :: Member (Reader Env) r => Operation -> Eff r Value
-execOp Unknowns = undefined
+execOp Unknowns = unknowns
 execOp (FromLevel l) = getAllFromLevel l
 execOp Density = howMuchIsKanji
 execOp Elementary = howMuchIsElementaryKanji

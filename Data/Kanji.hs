@@ -108,7 +108,7 @@ averageLevel ks = average ranks
 levelDist :: [Kanji] -> [(Rank,Float)]
 levelDist ks = map toNumPercentPair $ group sortedRanks
   where sortedRanks = sort $ ks ^.. each . to level . _Just . to _rank
-        toNumPercentPair qns = (head qns, length' qns / length' sortedRanks)
+        toNumPercentPair qns = (head qns, length' qns / length' ks)
         length' n = fromIntegral $ length n
 
 -- | The distribution of each `Kanji` in a set of them.

@@ -87,6 +87,12 @@ unknowns = do
   ks <- S.filter (not . hasLevel) . S.fromList <$> reader _allKs
   pure $ object [ "unknowns" .= map _kanji (S.toList ks) ]
 
+distribution :: Member (Reader Env) r => Eff r Value
+distribution = do
+  ds <- map f . levelDist <$> reader _allKs
+  pure $ object [ "distributions" .= object ds ]
+    where f (r,v) = TS.pack (show r) .= v
+
 {-}
 distribution :: Language -> String -> [String]
 distribution lang ks =
@@ -114,7 +120,7 @@ execOp :: Member (Reader Env) r => Operation -> Eff r Value
 execOp Unknowns = unknowns
 execOp Density = density
 execOp Elementary = elementaryDensity
-execOp Distribution = undefined
+execOp Distribution = distribution
 execOp Average = averageLev
 execOp Splits = splits
 

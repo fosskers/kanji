@@ -57,8 +57,8 @@ allKanji =  map asKanji ks
               fifthQ, fourthQ, thirdQ, preSecondQ, secondQ]
 
 -- | Is the `Level` of a given `Kanji` known?
-hasLevel :: [Level] -> Kanji -> Bool
-hasLevel qs k = has _Just $ level qs k
+hasLevel :: Kanji -> Bool
+hasLevel k = has _Just $ level k
 
 -- | What is the density @d@ of Kanji characters in a given String-like
 -- type, where @0 <= d <= 1@?
@@ -70,7 +70,7 @@ kanjiDensity orig ks = fromIntegral (length ks) / len orig
 elementaryKanjiDensity :: [Kanji] -> Float
 elementaryKanjiDensity ks = foldl (\acc (_,p) -> acc + p) 0 elementaryQs
   where elementaryQs  = filter (\(qn,_) -> qn `elem` [Five, Six ..]) dists
-        dists = levelDist levels ks
+        dists = levelDist ks
 
 makeLevel :: [Kanji] -> Rank -> Level
 makeLevel ks n = Level (S.fromDistinctAscList ks) n
@@ -81,31 +81,33 @@ levels = map f $ zip allKanji [Ten ..]
   where f (ks,n) = makeLevel ks n
 
 -- | What `Level` does a Kanji belong to?
-level :: [Level] -> Kanji -> Maybe Level
-level [] _     = Nothing
-level (q:qs) k | isKanjiInLevel q k = Just q
-               | otherwise = level qs k
+level :: Kanji -> Maybe Level
+level = level' levels
+  where level' [] _     = Nothing
+        level' (q:qs) k | isKanjiInLevel q k = Just q
+                        | otherwise = level' qs k
 
 -- | Does a given `Kanji` belong to the given `Level`?
 isKanjiInLevel :: Level -> Kanji -> Bool
 isKanjiInLevel q k = S.member k $ _allKanji q
 
 -- | Is there a `Level` that corresponds with a given `Rank` value?
-levelFromRank :: [Level] -> Rank -> Maybe Level
-levelFromRank [] _      = Nothing
-levelFromRank (q:qs) qn | _rank q == qn = Just q
-                        | otherwise     = levelFromRank qs qn
+levelFromRank :: Rank -> Maybe Level
+levelFromRank = levelFromRank' levels
+  where levelFromRank' [] _      = Nothing
+        levelFromRank' (q:qs) qn | _rank q == qn = Just q
+                                 | otherwise     = levelFromRank' qs qn
 
 -- | Find the average `Level` of a given set of `Kanji`.
-averageLevel :: [Level] -> [Kanji] -> Float
-averageLevel ls ks = average ranks
-  where ranks = ks ^.. each . to (level ls) . _Just . to _rank . to fromRank
+averageLevel :: [Kanji] -> Float
+averageLevel ks = average ranks
+  where ranks = ks ^.. each . to level . _Just . to _rank . to fromRank
         average ns = (sum ns) / (fromIntegral $ length ns) 
 
 -- | How much of each `Level` is represented by a group of Kanji?
-levelDist :: [Level] -> [Kanji] -> [(Rank,Float)]
-levelDist qs ks = map toNumPercentPair $ group sortedRanks
-  where sortedRanks = sort $ ks ^.. each . to (level qs) . _Just . to _rank
+levelDist :: [Kanji] -> [(Rank,Float)]
+levelDist ks = map toNumPercentPair $ group sortedRanks
+  where sortedRanks = sort $ ks ^.. each . to level . _Just . to _rank
         toNumPercentPair qns = (head qns, length' qns / length' sortedRanks)
         length' n = fromIntegral $ length n
 

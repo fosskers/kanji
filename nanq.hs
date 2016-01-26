@@ -72,24 +72,22 @@ engQNames = zip [Ten ..] ["Tenth Level","Ninth Level","Eighth Level",
                           
 averageLev :: Member (Reader Env) r => Eff r Value
 averageLev = do
-  average <- averageLevel levels <$> reader _allKs
+  average <- averageLevel <$> reader _allKs
   pure $ object [ "average" .= average ]
 
 splits :: Member (Reader Env) r => Eff r Value
 splits = do
-  ks <- M.toList . S.foldl f m . S.fromList <$> reader _allKs
-  pure $ object [ "levelSplit" .= object (map g $ filter h ks) ]
-    where m = M.fromList $ map (,[]) [Ten .. Two]
-          f a k = maybe a (\l -> M.adjust (k :) (_rank l) a) $ level levels k
-          h (_,[]) = False  -- Exclude Levels for which none were found.
-          h _ = True
+  ks <- map g . M.toList . S.foldl f M.empty . S.fromList <$> reader _allKs
+  pure $ object [ "levelSplit" .= object ks ]
+    where f a k = maybe a (\l -> M.insertWith (++) (_rank l) [k] a) $ level k
           g (r,ks) = TS.pack (show r) .= map _kanji ks
 
 unknowns :: Member (Reader Env) r => Eff r Value
 unknowns = do
-  ks <- S.filter (not . hasLevel levels) . S.fromList <$> reader _allKs
+  ks <- S.filter (not . hasLevel) . S.fromList <$> reader _allKs
   pure $ object [ "unknowns" .= map _kanji (S.toList ks) ]
 
+{-}
 distribution :: Language -> String -> [String]
 distribution lang ks =
   map (\(name,per) -> printf "%4s: %05.2f%%" name per) namePercentPairs
@@ -99,6 +97,7 @@ distribution lang ks =
         getQName Eng qn      = getName engQNames "Above Second Level" qn
         getQName Jap qn      = getName japQNames "2級以上" qn
         getName names msg qn = maybe msg id $ qn `lookup` names
+-}
 
 density :: Member (Reader Env) r => Eff r Value
 density = do

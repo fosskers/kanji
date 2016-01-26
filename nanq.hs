@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 import           Control.Eff
@@ -8,6 +8,7 @@ import           Data.Aeson
 import           Data.Aeson.Encode.Pretty
 import qualified Data.HashMap.Strict as HMS
 import           Data.Kanji
+import qualified Data.Map.Lazy as M
 import           Data.Maybe (fromJust)
 import qualified Data.Set as S
 import qualified Data.Text as TS
@@ -25,8 +26,8 @@ import           Text.Printf (printf)
 data Flags = Flags [Operation] Language (Either FilePath T.Text)
   deriving (Eq)
 
-data Operation = Unknowns | FromLevel Rank | Density | Elementary
-  | Distribution | Average deriving (Eq)
+data Operation = Unknowns | Density | Elementary
+  | Distribution | Average | Splits deriving (Eq)
 
 data Language = Jap | Eng deriving (Show,Eq)
 
@@ -48,8 +49,6 @@ operations = (^.. each . _Just) <$> ops
   where ops = sequenceA $ map optional
           [ flag' Unknowns $
             lsh "unknowns" 'u' "Find Kanji whose Level couldn't be determined"
-          , FromLevel <$> option auto
-            (lsh "level" 'q' "Find Kanji from the requested Level")
           , flag' Density $
             lsh "density" 'd' "Find how much of the input is made of Kanji"
           , flag' Elementary $
@@ -57,7 +56,9 @@ operations = (^.. each . _Just) <$> ops
           , flag' Distribution $
             lsh "leveldist" 'l' "Find the distribution of Kanji levels"
           , flag' Average $
-            lsh "average" 'a' "Find the average Level of all Kanji present" ]
+            lsh "average" 'a' "Find the average Level of all Kanji present"
+          , flag' Splits $
+            lsh "splits" 's' "Show which Level each Kanji belongs to" ]
 
 japQNames :: [(Rank,String)]
 japQNames = zip [Ten ..] ["10級","9級","8級","7級","6級","5級","4級",
@@ -69,30 +70,20 @@ engQNames = zip [Ten ..] ["Tenth Level","Ninth Level","Eighth Level",
                           "Forth Level","Third Level", "Pre-Second Level",
                           "Second Level","Pre-First Level","First Level"]
                           
-findAverageQ :: Member (Reader Env) r => Eff r Value
-findAverageQ = do
+averageLev :: Member (Reader Env) r => Eff r Value
+averageLev = do
   average <- averageLevel levels <$> reader _allKs
   pure $ object [ "average" .= average ]
 
-{-
-findQs :: Language -> [Char] -> [String]
-findQs lang ks = map (nanQ lang) $ asKanji ks
--}
-
-{-
-nanQ :: Language -> Kanji -> String
-nanQ lang k = maybe (bad lang) (good lang . _rank) $ level levels k
-  where 
-    good Eng n = (show k) ++ " is " ++ (articledQName n) ++ " Kanji."
-    good Jap n = "「" ++ (show k) ++ "」は" ++ (jQName n) ++ "の漢字"
-    bad Eng    = (show k) ++ " is not in any level."
-    bad Jap    = "「" ++ (show k) ++ "」はどの級の漢字でもない"
-    articledQName n = getArticle (eQName n) ++ " " ++ eQName n
-    getArticle name = if head name `elem` "AEIOU" then "an" else "a"
-    eQName n = getQName n engQNames
-    jQName n = getQName n japQNames
-    getQName n names = fromJust $ n `lookup` names
--}
+splits :: Member (Reader Env) r => Eff r Value
+splits = do
+  ks <- M.toList . S.foldl f m . S.fromList <$> reader _allKs
+  pure $ object [ "levelSplit" .= object (map g $ filter h ks) ]
+    where m = M.fromList $ map (,[]) [Ten .. Two]
+          f a k = maybe a (\l -> M.adjust (k :) (_rank l) a) $ level levels k
+          h (_,[]) = False  -- Exclude Levels for which none were found.
+          h _ = True
+          g (r,ks) = TS.pack (show r) .= map _kanji ks
 
 unknowns :: Member (Reader Env) r => Eff r Value
 unknowns = do
@@ -111,29 +102,22 @@ distribution lang ks =
 
 density :: Member (Reader Env) r => Eff r Value
 density = do
-  density <- kanjiDensity <$> reader _original <*> reader _allKs
-  pure $ object [ "density" .= density ]
-
-allFromLevel :: Member (Reader Env) r => Rank -> Eff r Value
-allFromLevel l = (v . g) <$> reader _allKs
-  where g ks = maybe S.empty (f ks) $ levelFromRank levels l
-        f ks q = S.filter (isKanjiInLevel q) $ S.fromList ks
-        v ks = object [ "levelSplit" .= object obj ]
-          where obj = [TS.pack (show l) .= map _kanji (S.toList ks)]
+  d <- kanjiDensity <$> reader _original <*> reader _allKs
+  pure $ object [ "density" .= d ]
 
 elementaryDensity :: Member (Reader Env) r => Eff r Value
 elementaryDensity = do
-  density <- elementaryKanjiDensity <$> reader _allKs
-  pure $ object [ "elementary" .= density ]
+  d <- elementaryKanjiDensity <$> reader _allKs
+  pure $ object [ "elementary" .= d ]
 
 -- | All operations return JSON, to be aggregated into a master Object.
 execOp :: Member (Reader Env) r => Operation -> Eff r Value
 execOp Unknowns = unknowns
-execOp (FromLevel l) = allFromLevel l
 execOp Density = density
 execOp Elementary = elementaryDensity
 execOp Distribution = undefined
-execOp Average = findAverageQ
+execOp Average = averageLev
+execOp Splits = splits
 
 output :: Value -> IO ()
 output = TIO.putStrLn . toLazyText . encodePrettyToTextBuilder

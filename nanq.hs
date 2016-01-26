@@ -6,20 +6,16 @@ import           Control.Eff
 import           Control.Eff.Reader.Lazy
 import           Data.Aeson
 import           Data.Aeson.Encode.Pretty
-import qualified Data.HashMap.Strict as HMS
 import           Data.Kanji
 import qualified Data.Map.Lazy as M
-import           Data.Maybe (fromJust)
 import qualified Data.Set as S
 import qualified Data.Text as TS
 import qualified Data.Text.Lazy as T
 import           Data.Text.Lazy.Builder (toLazyText)
 import qualified Data.Text.Lazy.IO as TIO
-import qualified Data.Vector as V
 import           Lens.Micro
 import           Lens.Micro.Aeson
 import           Options.Applicative
-import           Text.Printf (printf)
 
 ---
 
@@ -60,20 +56,18 @@ operations = (^.. each . _Just) <$> ops
           , flag' Splits $
             lsh "splits" 's' "Show which Level each Kanji belongs to" ]
 
-japQNames :: [(Rank,String)]
+{-}
+japQNames :: [(Rank,TS.Text)]
 japQNames = zip [Ten ..] ["10級","9級","8級","7級","6級","5級","4級",
                           "3級", "準2級","2級","準1級","1級"]
+-}
 
-engQNames :: [(Rank,String)]
-engQNames = zip [Ten ..] ["Tenth Level","Ninth Level","Eighth Level",
-                          "Seventh Level","Sixth Level","Fifth Level",
-                          "Forth Level","Third Level", "Pre-Second Level",
-                          "Second Level","Pre-First Level","First Level"]
-                          
+-- | Shortcut for singleton objects
+ob :: ToJSON v => TS.Text -> v -> Value
+ob k v = object [ k .= v ]
+
 averageLev :: Member (Reader Env) r => Eff r Value
-averageLev = do
-  average <- averageLevel <$> reader _allKs
-  pure $ object [ "average" .= average ]
+averageLev = ob "average" . averageLevel <$> reader _allKs
 
 splits :: Member (Reader Env) r => Eff r Value
 splits = do
@@ -88,22 +82,8 @@ unknowns = do
   pure $ object [ "unknowns" .= map _kanji (S.toList ks) ]
 
 distribution :: Member (Reader Env) r => Eff r Value
-distribution = do
-  ds <- map f . levelDist <$> reader _allKs
-  pure $ object [ "distributions" .= object ds ]
+distribution = ob "distributions" . object . map f . levelDist <$> reader _allKs
     where f (r,v) = TS.pack (show r) .= v
-
-{-}
-distribution :: Language -> String -> [String]
-distribution lang ks =
-  map (\(name,per) -> printf "%4s: %05.2f%%" name per) namePercentPairs
-  where namePercentPairs     = map rawToPretty distributions
-        distributions        = levelDist levels $ asKanji ks
-        rawToPretty (qn,p)   = (getQName lang qn, p * 100)
-        getQName Eng qn      = getName engQNames "Above Second Level" qn
-        getQName Jap qn      = getName japQNames "2級以上" qn
-        getName names msg qn = maybe msg id $ qn `lookup` names
--}
 
 density :: Member (Reader Env) r => Eff r Value
 density = do
@@ -111,9 +91,7 @@ density = do
   pure $ object [ "density" .= d ]
 
 elementaryDensity :: Member (Reader Env) r => Eff r Value
-elementaryDensity = do
-  d <- elementaryKanjiDensity <$> reader _allKs
-  pure $ object [ "elementary" .= d ]
+elementaryDensity = ob "elementary" . elementaryKanjiDensity <$> reader _allKs
 
 -- | All operations return JSON, to be aggregated into a master Object.
 execOp :: Member (Reader Env) r => Operation -> Eff r Value

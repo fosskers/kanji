@@ -77,7 +77,7 @@ $> nanq -s これは日本語
 
 *All options*
 ```
-$> nanq -udeasl これは日本語
+$> nanq -leadus これは日本語
 {
     "levelSplit": {
       "Nine": "語",

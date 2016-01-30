@@ -2,7 +2,7 @@ name:                nanq
 
 category:            Natural Language Processing
 
-version:             1.1.1
+version:             2.0.0
 
 synopsis:            Performs 漢字検定 (National Kanji Exam) level analysis on given Kanji.
 

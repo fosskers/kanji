@@ -1,0 +1,40 @@
+name:                kanji
+version:             1.0.0
+synopsis:            Perform 漢字検定 (National Kanji Exam) level analysis on Japanese Kanji.
+description:         Perform 漢字検定 (National Kanji Exam) level analysis on Japanese Kanji.        
+license:             GPL-3
+license-file:        LICENSE
+author:              Colin Woodbury
+maintainer:          colingw@gmail.com
+
+homepage:            https://github.com/fosskers/nanq
+-- copyright:           
+category:            Data
+build-type:          Simple
+-- extra-source-files:  
+cabal-version:       >=1.10
+
+library
+  exposed-modules:     Data.Kanji
+                     , Data.Kanji.Types
+                     , Data.Kanji.Level.NinthQ
+                     , Data.Kanji.Level.EighthQ
+                     , Data.Kanji.Level.SecondQ
+                     , Data.Kanji.Level.TenthQ
+                     , Data.Kanji.Level.FifthQ
+                     , Data.Kanji.Level.SixthQ
+                     , Data.Kanji.Level.SeventhQ
+                     , Data.Kanji.Level.ThirdQ
+                     , Data.Kanji.Level.FourthQ
+                     , Data.Kanji.Level.PreSecondQ
+  -- other-modules:       
+  other-extensions:    FlexibleInstances
+
+  build-depends:       base >= 4.8 && < 4.9
+                     , containers >= 0.5 && < 0.6
+                     , bytestring >= 0.10 && < 0.11
+                     , microlens >= 0.4.1 && < 0.5
+                     , text >= 1.2 && < 1.3
+
+  -- hs-source-dirs:      
+  default-language:    Haskell2010

@@ -2,7 +2,7 @@ name:                nanq
 
 category:            Natural Language Processing
 
-version:             2.0.0
+version:             3.0.0
 
 synopsis:            Performs 漢字検定 (National Kanji Exam) level analysis on given Kanji.
 
@@ -32,45 +32,14 @@ extra-source-files: README.md
 executable nanq
     main-is:  	     nanq.hs
   
-    other-modules:	Data.Kanji,
-                        Data.Kanji.Level.TenthQ,
-                        Data.Kanji.Level.NinthQ,
-                        Data.Kanji.Level.EighthQ,
-                        Data.Kanji.Level.SeventhQ,
-                        Data.Kanji.Level.SixthQ,
-                        Data.Kanji.Level.FifthQ,
-                        Data.Kanji.Level.FourthQ,
-                        Data.Kanji.Level.ThirdQ,
-                        Data.Kanji.Level.PreSecondQ,
-                        Data.Kanji.Level.SecondQ
-  
     build-depends:       aeson >= 0.9.0.1
                        , aeson-pretty >= 0.7.2
                        , base < 5
                        , bytestring >= 0.10.6.0
                        , containers >= 0.4.0.0
                        , extensible-effects >= 1.11.0.0
+                       , kanji < 2
                        , microlens >= 0.3.5.0
                        , microlens-aeson >= 2.1.0
                        , optparse-applicative >= 0.12.0.0
                        , text >= 1.2.2.0
-
-library
-    build-depends: base < 5
-                 , bytestring >= 0.10.6.0
-                 , containers >= 0.4.0.0
-                 , microlens >= 0.3.5.0
-                 , text >= 1.2.2.0
-
-    exposed-modules: Data.Kanji,
-                     Data.Kanji.Types,
-                     Data.Kanji.Level.TenthQ,
-                     Data.Kanji.Level.NinthQ,
-                     Data.Kanji.Level.EighthQ,
-                     Data.Kanji.Level.SeventhQ,
-                     Data.Kanji.Level.SixthQ,
-                     Data.Kanji.Level.FifthQ,
-                     Data.Kanji.Level.FourthQ,
-                     Data.Kanji.Level.ThirdQ,
-                     Data.Kanji.Level.PreSecondQ,
-                     Data.Kanji.Level.SecondQ

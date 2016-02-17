@@ -1,2 +1,3 @@
 # Files to ignore for `nanq`
 data/*RAW.txt
+kanji/.stack-work/*

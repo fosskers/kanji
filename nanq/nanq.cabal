@@ -4,7 +4,7 @@ category:            Natural Language Processing
 
 version:             3.0.0
 
-synopsis:            Performs 漢字検定 (National Kanji Exam) level analysis on given Kanji.
+synopsis:            Performs 漢字検定 (Japan Kanji Aptitude Test) level analysis on given Kanji.
 
 description:         `nanq` can inform the user of a number of statistics
 		     regarding Kanji and the Nation Kanji Examination, also

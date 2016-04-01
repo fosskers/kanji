@@ -1,7 +1,7 @@
 name:                kanji
 version:             1.0.0
-synopsis:            Perform 漢字検定 (National Kanji Exam) level analysis on Japanese Kanji.
-description:         Perform 漢字検定 (National Kanji Exam) level analysis on Japanese Kanji.        
+synopsis:            Perform 漢字検定 (Japan Kanji Aptitude Test) level analysis on Japanese Kanji.
+description:         Perform 漢字検定 (Japan Kanji Aptitude Test) level analysis on Japanese Kanji.        
 license:             GPL-3
 license-file:        LICENSE
 author:              Colin Woodbury

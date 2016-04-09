@@ -11,7 +11,9 @@ maintainer:          colingw@gmail.com
 -- copyright:           
 -- category:            
 build-type:          Simple
--- extra-source-files:  
+
+extra-source-files:  bootstrap/css/bootstrap.css.min
+
 cabal-version:       >=1.10
 
 executable nanq-site

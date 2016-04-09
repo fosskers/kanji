@@ -17,12 +17,16 @@ import Network.Wai
 import Network.Wai.Handler.Warp
 import Servant
 import Servant.HTML.Lucid
+import Pages.Pages
 
 ---
 
 type PersonAPI = "persons" :> Get '[JSON, HTML] [Person]
+                 :<|> Get '[HTML] (Html ())
+                 :<|> "bootstrap" :> Raw
 
-data Person = Person { firstName :: String, lastName :: String } deriving Generic
+data Person = Person { firstName :: String
+                     , lastName :: String } deriving Generic
 
 instance ToJSON Person
 
@@ -48,7 +52,7 @@ personAPI :: Proxy PersonAPI
 personAPI = Proxy
 
 server :: Server PersonAPI
-server = pure persons
+server = pure persons :<|> pure (base $ p_ "hi") :<|> serveDirectory "bootstrap"
 
 app :: Application
 app = serve personAPI server

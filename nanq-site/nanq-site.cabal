@@ -12,13 +12,14 @@ maintainer:          colingw@gmail.com
 -- category:            
 build-type:          Simple
 
-extra-source-files:  bootstrap/css/bootstrap.css.min
+extra-source-files:  assets/bootstrap.css.min
 
 cabal-version:       >=1.10
 
 executable nanq-site
   main-is:             nanq-site.hs
-  -- other-modules:       
+
+  other-modules:       Pages.Pages
   -- other-extensions:    
 
   build-depends:       base >=4.8 && <4.9

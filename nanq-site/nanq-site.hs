@@ -23,7 +23,7 @@ import Pages.Pages
 
 type PersonAPI = "persons" :> Get '[JSON, HTML] [Person]
                  :<|> Get '[HTML] (Html ())
-                 :<|> "bootstrap" :> Raw
+                 :<|> "assets" :> Raw
 
 data Person = Person { firstName :: String
                      , lastName :: String } deriving Generic
@@ -52,7 +52,7 @@ personAPI :: Proxy PersonAPI
 personAPI = Proxy
 
 server :: Server PersonAPI
-server = pure persons :<|> pure (base $ p_ "hi") :<|> serveDirectory "bootstrap"
+server = pure persons :<|> pure (base home) :<|> serveDirectory "assets"
 
 app :: Application
 app = serve personAPI server

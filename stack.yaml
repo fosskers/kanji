@@ -16,7 +16,10 @@ packages:
   - nanq-site/
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
-extra-deps: []
+extra-deps:
+  - servant-0.6.1
+  - servant-server-0.6.1
+  - servant-lucid-0.6.1
 
 # Override default flag values for local packages and extra-deps
 flags: {}

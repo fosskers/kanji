@@ -10,6 +10,8 @@ module Pages.Bootstrap
        , col6_
        , col8_
        , col12_
+         -- * Misc.
+       , center_
        ) where
 
 import Lucid
@@ -43,3 +45,8 @@ col8_ = termWith "div" [class_ " col-md-8 "]
 -- | col-md-12
 col12_ :: Term arg result => arg -> result
 col12_ = termWith "div" [class_ " col-md-12 "]
+
+-- | The @<center>@ tag isn't supported in HTML5.
+center_ :: Term arg result => arg -> result
+center_ = termWith "div"
+  [style_ "display:flex;justify-content:center;align-items:center;"]

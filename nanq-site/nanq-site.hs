@@ -1,10 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE ViewPatterns  #-}
 
 module Main where
 
@@ -18,13 +17,20 @@ import Network.Wai.Handler.Warp
 import Servant
 import Servant.HTML.Lucid
 import Pages.Pages
+import qualified Data.Text as T
 
 ---
 
-type PersonAPI = "persons" :> Get '[JSON, HTML] [Person]
-                 :<|> Get '[HTML] (Html ())
-                 :<|> "assets" :> Raw
+--"persons" :> Get '[JSON, HTML] [Person]
+type API = "analyse" :> ReqBody '[FormUrlEncoded] [(T.Text,T.Text)] :> Post '[HTML] (Html ())
+           :<|> Get '[HTML] (Html ())
+           :<|> "assets" :> Raw
 
+--data Jap = Jap { japText :: TL.Text } deriving Generic
+
+--instance FromJSON Jap
+
+{-}
 data Person = Person { firstName :: String
                      , lastName :: String } deriving Generic
 
@@ -47,15 +53,21 @@ instance ToHtml [Person] where
 persons :: [Person]
 persons = [ Person "Colin" "Woodbury"
           , Person "Jack" "Catworthy" ]
+-}
 
-personAPI :: Proxy PersonAPI
-personAPI = Proxy
+api :: Proxy API
+api = Proxy
 
-server :: Server PersonAPI
-server = pure persons :<|> pure (base home) :<|> serveDirectory "assets"
+server :: Server API
+server = (pure . foo) :<|> pure (base home) :<|> serveDirectory "assets"
 
 app :: Application
-app = serve personAPI server
+app = serve api server
 
 main :: IO ()
 main = run 8081 app
+
+foo :: [(T.Text,T.Text)] -> Html ()
+foo [] = base $ p_ "You didn't give any input!"
+foo ((_,""):_) = base $ p_ "You didn't give any input!"
+foo ((_,t):_) = base $ p_ (toHtml t)

@@ -24,6 +24,14 @@ base body = do
 -- | The Home Page, accessible through the `/` endpoint.
 home :: Html ()
 home = containerFluid_ $ do
-  row_ $ do
-    col6_ [class_ "col-md-offset-3"] $ h1_ "NanQ - Analyse Japanese Text"
-
+  row_ $
+    col6_ [class_ "col-md-offset-3"] $
+      center_ $ h1_ "NanQ - Analyse Japanese Text"
+  row_ $
+    col6_ [class_ "col-md-offset-3"] $
+      form_ [action_ "/analyse", method_ "POST"] $ do
+        div_ [class_ "input"] $ do
+          label_ [for_ "japText"] "Japanese Text"
+          textarea_ [id_ "japText", class_ "form-control", name_ "japText"] ""
+        button_ [class_ "btn btn-primary btn-lg", type_ "submit"] "Analyse"
+      

@@ -20,6 +20,7 @@ executable nanq-site
   main-is:             nanq-site.hs
 
   other-modules:       Pages.Pages
+                     , Pages.Bootstrap
   -- other-extensions:    
 
   build-depends:       base >=4.8 && <4.9
@@ -28,6 +29,7 @@ executable nanq-site
                      , lucid >= 2.9.4
                      , servant-server >= 0.6 && < 0.7
                      , servant-lucid >= 0.6 && < 0.7
+                     , text >= 1.2 && < 2
                      , wai >= 3.2.0
                      , warp >= 3.2.2
 

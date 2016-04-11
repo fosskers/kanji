@@ -15,6 +15,7 @@ build-type:          Simple
 extra-source-files:  assets/bootstrap.css.min
                    , assets/highcharts.js
                    , assets/jquery.js
+                   , assets/logo.png
 
 cabal-version:       >=1.10
 

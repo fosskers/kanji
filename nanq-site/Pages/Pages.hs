@@ -40,6 +40,7 @@ base content = do
               a_ [href_ "https://github.com/fosskers/nanq"] "Github"
               "・"
               a_ [href_ "mailto:colingw@gmail.com"] "Contact"
+            center_ $ img_ [src_ "/assets/logo.png"]
 
 -- | The Home Page, accessible through the `/` endpoint.
 home :: Html ()
@@ -58,7 +59,7 @@ form = form_ [action_ "/analyse", method_ "POST"] $ do
               , placeholder_ "Paste your text here."
               ] ""
     center_ [style_ "padding-top:15px;"] $
-      button_ [ class_ "btn btn-primary btn-lg", type_ "submit" ] "Analyse"
+      button_ [ class_ "btn btn-primary btn-lg", type_ "submit" ] "Analyse・分析"
 
 explanation :: Html ()
 explanation = div_ [class_ "jumbotron"] $ do
@@ -117,7 +118,7 @@ $(function () {
       plotShadow: false,
       type: 'pie'
     },
-    title: { text: 'Kanji Densities' },
+    title: { text: 'Level Densities' },
     tooltip: {
       pointFormat: '{series.name}: <b>{point.percentage:.1f}%%</b>'
     },

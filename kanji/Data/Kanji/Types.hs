@@ -12,6 +12,7 @@
 module Data.Kanji.Types where
 
 import           Data.Char (ord)
+import           Data.Kanji.Types.Internal ()
 import           Data.Maybe (fromJust)
 import qualified Data.Set as S
 import qualified Data.Text as ST
@@ -45,13 +46,11 @@ instance AsKanji [Char] where
   {-# INLINE _Kanji #-}
 
 instance AsKanji ST.Text where
-  _Kanji = packed . _Kanji
-    where packed f b = ST.pack <$> f (ST.unpack b)
+  _Kanji = each . _Kanji
   {-# INLINE _Kanji #-}
 
 instance AsKanji LT.Text where
-  _Kanji = packed . _Kanji
-    where packed f b = LT.pack <$> f (LT.unpack b)
+  _Kanji = each . _Kanji
   {-# INLINE _Kanji #-}
 
 -- | A single symbol of Kanji. Japanese Kanji were borrowed from China

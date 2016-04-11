@@ -9,6 +9,7 @@ module Pages.Bootstrap
        , col4_
        , col6_
        , col8_
+       , col10_
        , col12_
          -- * Misc.
        , center_
@@ -41,6 +42,10 @@ col6_ = termWith "div" [class_ " col-md-6 "]
 -- | col-md-8
 col8_ :: Term arg result => arg -> result
 col8_ = termWith "div" [class_ " col-md-8 "]
+
+-- | col-md-10
+col10_ :: Term arg result => arg -> result
+col10_ = termWith "div" [class_ " col-md-10 "]
 
 -- | col-md-12
 col12_ :: Term arg result => arg -> result

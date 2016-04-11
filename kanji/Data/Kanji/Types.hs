@@ -6,12 +6,11 @@
 -- License   : GPL3
 -- Maintainer: Colin Woodbury <colingw@gmail.com>
 --
--- Types for this library.
+-- Types for this library. Note that typeclass instances for `ByteString`s
+-- are not provided, as `SB.pack` garbles characters above 0xFF.
 
 module Data.Kanji.Types where
 
-import qualified Data.ByteString.Char8 as SB
-import qualified Data.ByteString.Lazy.Char8 as LB
 import           Data.Char (ord)
 import           Data.Maybe (fromJust)
 import qualified Data.Set as S
@@ -42,37 +41,29 @@ class AsKanji a where
 
 instance AsKanji Char where
   _Kanji f c = if isKanji c then _kanji <$> f (Kanji c) else pure c
+  {-# INLINE _Kanji #-}
 
   len = const 1
 
 instance AsKanji [Char] where
   _Kanji = traverse . _Kanji
+  {-# INLINE _Kanji #-}
 
   len = fromIntegral . length
 
 instance AsKanji ST.Text where
   _Kanji = packed . _Kanji
     where packed f b = ST.pack <$> f (ST.unpack b)
+  {-# INLINE _Kanji #-}
 
   len = fromIntegral . ST.length
 
 instance AsKanji LT.Text where
   _Kanji = packed . _Kanji
     where packed f b = LT.pack <$> f (LT.unpack b)
+  {-# INLINE _Kanji #-}
 
   len = fromIntegral . LT.length
-
-instance AsKanji SB.ByteString where
-  _Kanji = packed . _Kanji
-    where packed f b = SB.pack <$> f (SB.unpack b)
-
-  len = fromIntegral . SB.length
-
-instance AsKanji LB.ByteString where
-  _Kanji = packed . _Kanji
-    where packed f b = LB.pack <$> f (LB.unpack b)
-
-  len = fromIntegral . LB.length          
 
 -- | A single symbol of Kanji. Japanese Kanji were borrowed from China
 -- over several waves during the past millenium. Japan names 2136 of

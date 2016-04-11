@@ -15,7 +15,7 @@ import           Text.Printf.TH
 
 -- | The basic template for all pages.
 base :: Html () -> Html ()
-base body = do
+base content = do
   doctype_
   html_ $ do
     head_ $ do
@@ -32,7 +32,7 @@ base body = do
             div_ [class_ "header clearfix"] $ do
               h3_ [class_ "text-muted"] "NanQ - Analyse Japanese Text"
               hr_ []
-        body
+        content
         row_ $
           col6_ [class_ "col-md-offset-3"] $ do
             hr_ []
@@ -74,23 +74,84 @@ analysis [] = analyse ""
 analysis ((_,""):_) = analyse ""
 analysis ((_,t):_) = analyse t
 
--- <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 analyse :: T.Text -> Html ()
 analyse "" = center_ "You didn't give any input."
 analyse t = do
-  script_ [src_ "assets/d3.min.js", charset_ "utf-8"] T.empty
+  script_ [src_ "/assets/jquery.js", charset_ "utf-8"] T.empty
+  script_ [src_ "/assets/highcharts.js", charset_ "utf-8"] T.empty
   row_ $
     col10_ [class_ "col-md-offset-1"] $ do
       p_ . toHtml $ [lt|Elementary Kanji: %.2f%%|] (100 * e)
       p_ . toHtml $ [lt|Kanji Density: %.2f%%|] (100 * d)
       p_ . toHtml $ [lt|Average Level: %.2f|] a
       h3_ "Level Densities"
-      p_ . dist $ levelDist ks
+      p_ $ dist ld
+      div_ [id_ "nanqchart"] ""
+      pie ld
       h3_ "Kanji per Level"
       p_ $ splits ks
       h3_ "Unknown Kanji"
-      center_ . h2_ . toHtml . intersperse ' ' $ unknowns ks
+      center_ . h2_ . toHtml . f . intersperse ' ' $ unknowns ks
     where ks = asKanji t
+          ld = levelDist ks
           e = elementaryKanjiDensity ks
           d = kanjiDensity (T.length t) ks
           a = averageLevel ks
+          f "" = "None"
+          f x = x
+
+pie :: [(Rank,Float)] -> Html ()
+pie rf = script_ $ [st|
+
+$(function () {
+  $('#nanqchart').highcharts({
+    chart: {
+      plotBackgroundColor: null,
+      plotBorderWidth: null,
+      plotShadow: false,
+      type: 'pie'
+    },
+    title: { text: 'Kanji Densities' },
+    tooltip: {
+      pointFormat: '{series.name}: <b>{point.percentage:.1f}%%</b>'
+    },
+    plotOptions: {
+      pie: {
+        allowPointSelect: true,
+        cursor: 'pointer',
+        dataLabels: {
+          enabled: true,
+          format: '<b>{point.name}</b>: {point.percentage:.1f} %%',
+          style: {
+            color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+          }
+        }
+      }
+    },
+    series: [{
+      name: 'Levels',
+      colorByPoint: true,
+      data: [%s]
+    }]
+  });
+});
+
+|] datums
+
+  where datums = mconcat . intersperse "," $ map f rf
+        f (r,n) = [st|{name: '%s', y: %f}|] (show r) n
+
+-- | Javascript to make a bar chart.
+chart :: Html ()
+chart = script_ $ mconcat
+  [ [st|var data = [5,5,5,5,5,5,5,5,5,5];|]
+  , [st|$(function () { $('#nanqchart').highcharts({|]
+  , [st|chart: { type: 'column' },
+       title: { text: 'Level Densities' },|]
+--  , [st|subtitle: { text: 'Source: WorldClimate.com'},|]
+  , [st|xAxis: { categories: [ 'Ten', 'Nine', 'Eight', 'Seven', 'Six',|]
+  , [st|'Five','Four','Three','Pre-Two','Two'], crosshair: true},|]
+  , [st|yAxis: { min: 0, title: { text: 'Density (%%)' }},|]
+  , [st|plotOptions: { column: { pointPadding: 0.2, borderWidth: 0 }},|]
+  , [st|series: [{ name: 'Levels', data}]});});|]
+  ]

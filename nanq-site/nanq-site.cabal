@@ -13,7 +13,8 @@ maintainer:          colingw@gmail.com
 build-type:          Simple
 
 extra-source-files:  assets/bootstrap.css.min
-                   , assets/d3.min.js
+                   , assets/highcharts.js
+                   , assets/jquery.js
 
 cabal-version:       >=1.10
 

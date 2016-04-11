@@ -16,17 +16,18 @@ module Data.Kanji
        , allKanji
        , isKanji
        , hasLevel
-       , kanjiDensity
-       , elementaryKanjiDensity
-       , percentSpread
          -- * Levels
        , Level(..)
        , Rank(..)
        , level
        , levels
        , isKanjiInLevel
-       , levelDist
        , levelFromRank
+         -- * Analysis
+       , kanjiDensity
+       , elementaryKanjiDensity
+       , percentSpread
+       , levelDist
        , averageLevel
        ) where
 

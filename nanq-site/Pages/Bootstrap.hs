@@ -46,7 +46,8 @@ col8_ = termWith "div" [class_ " col-md-8 "]
 col12_ :: Term arg result => arg -> result
 col12_ = termWith "div" [class_ " col-md-12 "]
 
--- | The @<center>@ tag isn't supported in HTML5.
+-- | The @<center>@ tag isn't supported in HTML5. This centers both
+-- divs and plain text.
 center_ :: Term arg result => arg -> result
 center_ = termWith "div"
   [style_ "display:flex;justify-content:center;align-items:center;"]

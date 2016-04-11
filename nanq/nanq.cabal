@@ -2,7 +2,7 @@ name:                nanq
 
 category:            Natural Language Processing
 
-version:             3.0.0
+version:             3.0.1
 
 synopsis:            Performs 漢字検定 (Japan Kanji Aptitude Test) level analysis on given Kanji.
 
@@ -38,7 +38,7 @@ executable nanq
                        , bytestring >= 0.10.6.0
                        , containers >= 0.4.0.0
                        , extensible-effects >= 1.11.0.0
-                       , kanji < 2
+                       , kanji >= 2 && < 3
                        , microlens >= 0.3.5.0
                        , microlens-aeson >= 2.1.0
                        , optparse-applicative >= 0.12.0.0

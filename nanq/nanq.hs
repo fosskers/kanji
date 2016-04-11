@@ -76,7 +76,7 @@ distribution = ob "distributions" . object . map f . levelDist <$> reader _allKs
 
 density :: Member (Reader Env) r => Eff r Value
 density = do
-  d <- kanjiDensity <$> reader _original <*> reader _allKs
+  d <- kanjiDensity <$> reader (fromIntegral . TL.length . _original) <*> reader _allKs
   pure $ object [ "density" .= d ]
 
 elementaryDensity :: Member (Reader Env) r => Eff r Value

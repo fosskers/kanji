@@ -55,8 +55,8 @@ hasLevel k = has _Just $ level k
 
 -- | What is the density @d@ of Kanji characters in a given String-like
 -- type, where @0 <= d <= 1@?
-kanjiDensity :: AsKanji a => a -> [Kanji] -> Float
-kanjiDensity orig ks = fromIntegral (length ks) / len orig
+kanjiDensity :: Int -> [Kanji] -> Float
+kanjiDensity len ks = fromIntegral (length ks) / fromIntegral len
 
 -- | As above, but only Kanji of the first 1006 are counted (those learned
 -- in elementary school in Japan).

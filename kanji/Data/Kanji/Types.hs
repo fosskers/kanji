@@ -29,9 +29,6 @@ class AsKanji a where
   -- minimal complete definition.
   _Kanji :: Traversal' a Kanji
 
-  -- | How long is this input source?
-  len :: Num b => a -> b
-
   -- | Transform this string type into a list of Kanji. The source string
   -- and the resulting list might not have the same length, if there
   -- were `Char` in the source that did not fall within the legal
@@ -43,27 +40,19 @@ instance AsKanji Char where
   _Kanji f c = if isKanji c then _kanji <$> f (Kanji c) else pure c
   {-# INLINE _Kanji #-}
 
-  len = const 1
-
 instance AsKanji [Char] where
   _Kanji = traverse . _Kanji
   {-# INLINE _Kanji #-}
-
-  len = fromIntegral . length
 
 instance AsKanji ST.Text where
   _Kanji = packed . _Kanji
     where packed f b = ST.pack <$> f (ST.unpack b)
   {-# INLINE _Kanji #-}
 
-  len = fromIntegral . ST.length
-
 instance AsKanji LT.Text where
   _Kanji = packed . _Kanji
     where packed f b = LT.pack <$> f (LT.unpack b)
   {-# INLINE _Kanji #-}
-
-  len = fromIntegral . LT.length
 
 -- | A single symbol of Kanji. Japanese Kanji were borrowed from China
 -- over several waves during the past millenium. Japan names 2136 of

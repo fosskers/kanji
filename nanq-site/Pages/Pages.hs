@@ -81,9 +81,15 @@ analyse t = do
   script_ [src_ "/assets/highcharts.js", charset_ "utf-8"] T.empty
   row_ $
     col10_ [class_ "col-md-offset-1"] $ do
-      p_ . toHtml $ [lt|Elementary Kanji: %.2f%%|] (100 * e)
-      p_ . toHtml $ [lt|Kanji Density: %.2f%%|] (100 * d)
-      p_ . toHtml $ [lt|Average Level: %.2f|] a
+      p_ $ do
+        toHtml $ [lt|Kanji Density: %.2f%%|] (100 * d)
+        i_ $ small_ "   ...How much of the source text is Kanji"
+      p_ $ do
+        toHtml $ [lt|Elementary Kanji: %.2f%%|] (100 * e)
+        i_ $ small_ "   ...How much of the Kanji is learned in Elementary School"
+      p_ $ do
+        toHtml $ [lt|Average Level: %.2f|] a
+        i_ $ small_ "   ...The average Level of all Kanji in the text"
       h3_ "Level Densities"
       p_ $ dist ld
       div_ [id_ "nanqchart"] ""
@@ -140,18 +146,3 @@ $(function () {
 
   where datums = mconcat . intersperse "," $ map f rf
         f (r,n) = [st|{name: '%s', y: %f}|] (show r) n
-
--- | Javascript to make a bar chart.
-chart :: Html ()
-chart = script_ $ mconcat
-  [ [st|var data = [5,5,5,5,5,5,5,5,5,5];|]
-  , [st|$(function () { $('#nanqchart').highcharts({|]
-  , [st|chart: { type: 'column' },
-       title: { text: 'Level Densities' },|]
---  , [st|subtitle: { text: 'Source: WorldClimate.com'},|]
-  , [st|xAxis: { categories: [ 'Ten', 'Nine', 'Eight', 'Seven', 'Six',|]
-  , [st|'Five','Four','Three','Pre-Two','Two'], crosshair: true},|]
-  , [st|yAxis: { min: 0, title: { text: 'Density (%%)' }},|]
-  , [st|plotOptions: { column: { pointPadding: 0.2, borderWidth: 0 }},|]
-  , [st|series: [{ name: 'Levels', data}]});});|]
-  ]

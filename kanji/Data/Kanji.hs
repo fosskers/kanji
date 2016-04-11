@@ -30,20 +30,12 @@ module Data.Kanji
        , averageLevel
        ) where
 
+import           Data.Bool (bool)
 import           Data.List (sort, group)
 import qualified Data.Set as S
 import           Lens.Micro
 
-import           Data.Kanji.Level.EighthQ
-import           Data.Kanji.Level.FifthQ
-import           Data.Kanji.Level.FourthQ
-import           Data.Kanji.Level.NinthQ
-import           Data.Kanji.Level.PreSecondQ
-import           Data.Kanji.Level.SecondQ
-import           Data.Kanji.Level.SeventhQ
-import           Data.Kanji.Level.SixthQ
-import           Data.Kanji.Level.TenthQ
-import           Data.Kanji.Level.ThirdQ
+import           Data.Kanji.Levels
 import           Data.Kanji.Types
 
 ---
@@ -51,10 +43,11 @@ import           Data.Kanji.Types
 -- | All Kanji, grouped by their Level (級) in ascending order.
 -- Here, ascending order means from the lowest to the highest level,
 -- meaning from 10 to 1.
-allKanji :: [[Kanji]]
-allKanji =  map asKanji ks
-  where ks = [tenthQ, ninthQ, eighthQ, seventhQ, sixthQ,
-              fifthQ, fourthQ, thirdQ, preSecondQ, secondQ]
+allKanji :: [S.Set Kanji]
+allKanji =  map f ks
+  where f = foldr (\k s -> bool s (S.insert (Kanji k) s) $ isKanji k) mempty
+        ks = [tenth, ninth, eighth, seventh, sixth,
+              fifth, fourth, third, preSecond, second]
 
 -- | Is the `Level` of a given `Kanji` known?
 hasLevel :: Kanji -> Bool
@@ -72,13 +65,9 @@ elementaryKanjiDensity ks = foldl (\acc (_,p) -> acc + p) 0 elementaryQs
   where elementaryQs  = filter (\(qn,_) -> qn `elem` [Five, Six ..]) dists
         dists = levelDist ks
 
-makeLevel :: [Kanji] -> Rank -> Level
-makeLevel ks n = Level (S.fromDistinctAscList ks) n
-
 -- | All `Level`s, with all their `Kanji`, ordered from Level-10 to Level-2.
 levels :: [Level]
-levels = map f $ zip allKanji [Ten ..]
-  where f (ks,n) = makeLevel ks n
+levels = map (uncurry Level) $ zip allKanji [Ten ..]
 
 -- | What `Level` does a Kanji belong to?
 level :: Kanji -> Maybe Level

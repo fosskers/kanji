@@ -24,12 +24,13 @@ executable nanq-site
   -- other-extensions:    
 
   build-depends:       base >=4.8 && <4.9
-                     , aeson >= 0.9 && < 0.10
-                     , http-media >= 0.6.2
+                     , containers
+                     , kanji >= 2 && < 3
                      , lucid >= 2.9.4
                      , servant-server >= 0.6 && < 0.7
                      , servant-lucid >= 0.6 && < 0.7
                      , text >= 1.2 && < 2
+                     , th-printf >= 0.3 && < 0.4
                      , wai >= 3.2.0
                      , warp >= 3.2.2
 

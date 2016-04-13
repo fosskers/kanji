@@ -12,7 +12,7 @@ maintainer:          colingw@gmail.com
 -- category:            
 build-type:          Simple
 
-extra-source-files:  assets/bootstrap.css.min
+extra-source-files:  assets/bootstrap.min.css
                    , assets/highcharts.js
                    , assets/jquery.js
                    , assets/logo.png

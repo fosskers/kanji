@@ -40,7 +40,7 @@ base content = do
               a_ [href_ "https://github.com/fosskers/nanq"] "Github"
               "・"
               a_ [href_ "mailto:colingw@gmail.com"] "Contact"
-            center_ $ img_ [src_ "/assets/logo.png"]
+            center_ $ a_ [href_ "/"] $ img_ [src_ "/assets/logo.png"]
 
 -- | The Home Page, accessible through the `/` endpoint.
 home :: Html ()

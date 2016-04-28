@@ -30,7 +30,7 @@ base content = do
         row_ $
           col6_ [class_ "col-md-offset-3"] $
             div_ [class_ "header clearfix"] $ do
-              h3_ [class_ "text-muted"] "NanQ - Analyse Japanese Text"
+              h3_ [class_ "text-muted"] "NanQ - Analyse Japanese Text・漢字分析"
               hr_ []
         content
         row_ $
@@ -51,7 +51,7 @@ home = row_ $ do
 form :: Html ()
 form = form_ [action_ "/analyse", method_ "POST"] $ do
   div_ [class_ "input"] $ do
-    label_ [for_ "japText"] "Japanese Text"
+    label_ [for_ "japText"] "Japanese Text・日本語入力"
     textarea_ [ id_ "japText"
               , class_ "form-control"
               , name_ "japText"
@@ -67,7 +67,7 @@ explanation = div_ [class_ "jumbotron"] $ do
                         , "You can use this website to analyse Japanese text"
                         , "for its Kanji difficulty."
                         ]
-  p_ $ mconcat [ "日本語のネイティブも勉強者も、日本語の文章の漢字難易度を"
+  p_ $ mconcat [ "日本語のネイティブも学生も、日本語の文章の漢字難易度を"
                , "分析するためにこのサイトを無料に利用できます。" ]
 
 analysis :: [(T.Text,T.Text)] -> Html ()
@@ -91,20 +91,20 @@ analyse t = do
       p_ $ do
         toHtml $ [lt|Average Level: %.2f|] a
         i_ $ small_ "   ...The average Level of all Kanji in the text"
-      h3_ "Level Densities"
+      h3_ "Level Densities・級の密度"
       p_ $ dist ld
       div_ [id_ "nanqchart"] ""
       pie ld
-      h3_ "Kanji per Level"
+      h3_ "Kanji per Level・級別漢字"
       p_ $ splits ks
-      h3_ "Unknown Kanji"
+      h3_ "Unknown Kanji・未確定"
       center_ . h2_ . toHtml . f . intersperse ' ' $ unknowns ks
     where ks = asKanji t
           ld = levelDist ks
           e = elementaryKanjiDensity ks
           d = kanjiDensity (T.length t) ks
           a = averageLevel ks
-          f "" = "None"
+          f "" = "None・無し"
           f x = x
 
 pie :: [(Rank,Float)] -> Html ()

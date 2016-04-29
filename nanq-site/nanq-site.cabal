@@ -12,10 +12,10 @@ maintainer:          colingw@gmail.com
 -- category:            
 build-type:          Simple
 
-extra-source-files:  assets/bootstrap.min.css
-                   , assets/highcharts.js
-                   , assets/jquery.js
-                   , assets/logo.png
+data-files:  assets/bootstrap.min.css
+           , assets/highcharts.js
+           , assets/jquery.js
+           , assets/logo.png
 
 cabal-version:       >=1.10
 

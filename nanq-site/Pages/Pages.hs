@@ -25,12 +25,17 @@ base content = do
             , rel_ "stylesheet"
             , media_ "all"
             , type_ "text/css" ]
-    body_ $ do
+    body_ [style_ "padding-top: 20px;"] $ do
       containerFluid_ $ do
         row_ $
           col6_ [class_ "col-md-offset-3"] $
             div_ [class_ "header clearfix"] $ do
-              h3_ [class_ "text-muted"] "NanQ - Analyse Japanese Text・漢字分析"
+              nav_ $ ul_ [class_ "nav nav-pills pull-right"] $ do
+                li_ [role_ "presentation"] $
+                  a_ [href_ "/about", class_ "btn btn-default"] "About"
+              h3_ [ class_ "text-muted"
+                  , style_ "margin-top: 0;margin-bottom: 0;line-height: 40px;"
+                  ] "NanQ - Analyse Japanese Text・漢字分析"
               hr_ []
         content
         row_ $

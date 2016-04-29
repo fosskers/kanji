@@ -19,9 +19,7 @@ Interested in finding out how hard a "hard" text really is?
 
 [Then head over to the site]()
 
-*This website is written completely in [Haskell](haskell.org) and is
-powered by the [servant]() and [kanji]() libraries.*
-
-Notes
------
-- Use `vegeta` for HTTP load testing
+*This website is written completely in [Haskell](https://www.haskell.org)
+and is powered by the
+[servant](http://haskell-servant.readthedocs.io/en/stable/) and
+[kanji](http://hackage.haskell.org/package/kanji) libraries.*

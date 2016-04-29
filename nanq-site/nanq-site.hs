@@ -18,6 +18,7 @@ import           Servant.HTML.Lucid
 -- | All endpoints for our server.
 type API = "analyse" :> ReqBody '[FormUrlEncoded] [(T.Text,T.Text)]
                      :> Post '[HTML] (Html ())
+           :<|> "about" :> Get '[HTML] (Html ())
            :<|> Get '[HTML] (Html ())
            :<|> "assets" :> Raw
 
@@ -32,5 +33,6 @@ api = Proxy
 
 server :: Server API
 server = pure . base . analysis
+  :<|> pure (base about)
   :<|> pure (base home)
   :<|> serveDirectory "assets"

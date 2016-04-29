@@ -75,6 +75,33 @@ explanation = div_ [class_ "jumbotron"] $ do
   p_ $ mconcat [ "日本語のネイティブも学生も、日本語の文章の漢字難易度を"
                , "分析するためにこのサイトを無料に利用できます。" ]
 
+about :: Html ()
+about = row_ $ col6_ [class_ "col-md-offset-3"] $ do
+  p_ . toHtml $ [lt|This is a website for learners and native speakers of
+                   Japanese to analyse bodies of Japanese text for
+                   difficultly. Here we measure difficulty by a number of
+                   factors:|]
+  ul_ $ do
+    li_ "Density of Kanji vs non-Kanji in the text"
+    li_ "Density of Kanji learned in Japanese elementary school within the text"
+    li_ $ do
+      "Appearance of Kanji from higher levels of the "
+      a_ [href_ "http://www.kanken.or.jp/kanken/"]
+        "Japan Kanji Aptitude Test (Kanken)"
+  p_ . toHtml $ [lt|Want to read a book or manga, and would like to know
+                   up-front what Kanji you'll need to learn?|]
+  p_ "Want to be better prepared for your next Kanken?"
+  p_ "Interested in finding out how hard a 'hard' text really is?"
+  p_ "Then please enjoy this site."
+  p_ $ i_ $ do
+    "This website is written completely in "
+    a_ [href_ "https://www.haskell.org"] "Haskell"
+    " and is powered by the "
+    a_ [href_ "http://haskell-servant.readthedocs.io/en/stable/"] "servant"
+    " and "
+    a_ [href_ "http://hackage.haskell.org/package/kanji"] "kanji"
+    " libraries."
+
 analysis :: [(T.Text,T.Text)] -> Html ()
 analysis [] = analyse ""
 analysis ((_,""):_) = analyse ""

@@ -24,7 +24,9 @@ executable nanq-site
 
   other-modules:       Pages.Pages
                      , Pages.Bootstrap
-                     , Analyse
+                     , Pages.About
+                     , Pages.Analysis
+
   -- other-extensions:    
 
   build-depends:       base >=4.8 && <4.9

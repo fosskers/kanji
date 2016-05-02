@@ -1,15 +1,9 @@
-{-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Pages.Pages where
 
-import           Analyse
-import           Data.Kanji
-import           Data.List (intersperse)
-import qualified Data.Text as T
-import           Lucid
-import           Pages.Bootstrap
-import           Text.Printf.TH
+import Lucid
+import Pages.Bootstrap
 
 ---
 
@@ -74,108 +68,3 @@ explanation = div_ [class_ "jumbotron"] $ do
                         ]
   p_ $ mconcat [ "日本語のネイティブも学生も、日本語の文章の漢字難易度を"
                , "分析するためにこのサイトを無料に利用できます。" ]
-
-about :: Html ()
-about = row_ $ col6_ [class_ "col-md-offset-3"] $ do
-  p_ . toHtml $ [lt|This is a website for learners and native speakers of
-                   Japanese to analyse bodies of Japanese text for
-                   difficultly. Here we measure difficulty by a number of
-                   factors:|]
-  ul_ $ do
-    li_ "Density of Kanji vs non-Kanji in the text"
-    li_ "Density of Kanji learned in Japanese elementary school within the text"
-    li_ $ do
-      "Appearance of Kanji from higher levels of the "
-      a_ [href_ "http://www.kanken.or.jp/kanken/"]
-        "Japan Kanji Aptitude Test (Kanken)"
-  p_ . toHtml $ [lt|Want to read a book or manga, and would like to know
-                   up-front what Kanji you'll need to learn?|]
-  p_ "Want to be better prepared for your next Kanken?"
-  p_ "Interested in finding out how hard a 'hard' text really is?"
-  p_ "Then please enjoy this site."
-  p_ $ i_ $ do
-    "This website is written completely in "
-    a_ [href_ "https://www.haskell.org"] "Haskell"
-    " and is powered by the "
-    a_ [href_ "http://haskell-servant.readthedocs.io/en/stable/"] "servant"
-    " and "
-    a_ [href_ "http://hackage.haskell.org/package/kanji"] "kanji"
-    " libraries."
-
-analysis :: [(T.Text,T.Text)] -> Html ()
-analysis [] = analyse ""
-analysis ((_,""):_) = analyse ""
-analysis ((_,t):_) = analyse t
-
-analyse :: T.Text -> Html ()
-analyse "" = center_ "You didn't give any input."
-analyse t = do
-  script_ [src_ "/assets/jquery.js", charset_ "utf-8"] T.empty
-  script_ [src_ "/assets/highcharts.js", charset_ "utf-8"] T.empty
-  row_ $
-    col10_ [class_ "col-md-offset-1"] $ do
-      p_ $ do
-        toHtml $ [lt|Kanji Density: %.2f%%|] (100 * d)
-        i_ $ small_ "   ...How much of the source text is Kanji"
-      p_ $ do
-        toHtml $ [lt|Elementary Kanji: %.2f%%|] (100 * e)
-        i_ $ small_ "   ...How much of the Kanji is learned in Elementary School"
-      p_ $ do
-        toHtml $ [lt|Average Level: %.2f|] a
-        i_ $ small_ "   ...The average Level of all Kanji in the text"
-      h3_ "Level Densities・級の密度"
-      p_ $ dist ld
-      div_ [id_ "nanqchart"] ""
-      pie ld
-      h3_ "Kanji per Level・級別漢字"
-      p_ $ splits ks
-      h3_ "Unknown Kanji・未確定"
-      center_ . h2_ . toHtml . f . intersperse ' ' $ unknowns ks
-    where ks = asKanji t
-          ld = levelDist ks
-          e = elementaryKanjiDensity ks
-          d = kanjiDensity (T.length t) ks
-          a = averageLevel ks
-          f "" = "None・無し"
-          f x = x
-
-pie :: [(Rank,Float)] -> Html ()
-pie rf = script_ $ [st|
-
-$(function () {
-  $('#nanqchart').highcharts({
-    chart: {
-      plotBackgroundColor: null,
-      plotBorderWidth: null,
-      plotShadow: false,
-      type: 'pie'
-    },
-    title: { text: 'Level Densities' },
-    tooltip: {
-      pointFormat: '{series.name}: <b>{point.percentage:.1f}%%</b>'
-    },
-    plotOptions: {
-      pie: {
-        allowPointSelect: true,
-        cursor: 'pointer',
-        dataLabels: {
-          enabled: true,
-          format: '<b>{point.name}</b>: {point.percentage:.1f} %%',
-          style: {
-            color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
-          }
-        }
-      }
-    },
-    series: [{
-      name: 'Levels',
-      colorByPoint: true,
-      data: [%s]
-    }]
-  });
-});
-
-|] datums
-
-  where datums = mconcat . intersperse "," $ map f rf
-        f (r,n) = [st|{name: '%s', y: %f}|] (show r) n

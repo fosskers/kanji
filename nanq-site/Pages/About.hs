@@ -3,6 +3,7 @@
 
 module Pages.About where
 
+import Data.Foldable
 import Lucid
 import Pages.Bootstrap
 import Text.Printf.TH
@@ -10,12 +11,9 @@ import Text.Printf.TH
 ---
 
 about :: Html ()
-about = row_ $ col6_ [class_ "col-md-offset-3"] $ do
-  theSite
-  hr_ []
-  kanken
-  hr_ []
-  me
+about = row_ $ left *> right
+  where left = col5_ [class_ "col-md-offset-1"] $ fold [ theSite, hr_ [], kanken, hr_ [], me ]
+        right = col5_ $ fold [theSiteJ, kankenJ]
 
 theSite :: Html ()
 theSite = do
@@ -45,6 +43,26 @@ theSite = do
     a_ [href_ "http://hackage.haskell.org/package/kanji"] "kanji"
     " libraries."
 
+theSiteJ :: Html ()
+theSiteJ = do
+  h4_ "本サイトについて"
+  p_ . toHtml $ [lt|このサイトは日本語のネイティブも学生も日本語の
+                   文章の漢字難易度の分析ができるためにある。「難易度」
+                   とは下記の点から定義される：
+                   |]
+  ul_ $ do
+    li_ "文章中の漢字の密度"
+    li_ "小学校で学ぶ漢字の密度"
+    li_ $ do
+      a_ [href_ "http://www.kanken.or.jp/kanken/"] "漢字検定"
+      "の上級の漢字の有無"
+  p_ "このサイトの便利な時："
+  ul_ $ do
+    li_ "本や漫画を読んで、どの知らない漢字出るか知りたい時"
+    li_ "迫る漢検の準備をばっちりにしたい時"
+    li_ "ある文章の本当の難易度が知りたい時"
+  p_ $ i_ "このサイトは全て「Haskell」で作られた。"
+
 kanken :: Html ()
 kanken = do
   h4_ "About the Japan Kanji Aptitude Test"
@@ -71,6 +89,14 @@ kanken = do
        Aptitude Test. This will help learners determine if a certain
        text is above or below their level, and should also prove if
        “Level 2” is the real standard level.|]
+
+kankenJ :: Html ()
+kankenJ = do
+  h4_ "漢字検定について"
+  p_ . toHtml $
+    [lt|漢字検定は日本で年に数回開催される試験である。下の10級から上の1級まで
+       あり、中の準2級と準一級を含んで計12級がある。学級と関連があるよう、
+       下の級は学級別に別れている（例：8級は小学校３年生程度）。|]
 
 me :: Html ()
 me = do

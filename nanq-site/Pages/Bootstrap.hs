@@ -7,6 +7,7 @@ module Pages.Bootstrap
          -- ** Columns
        , col3_
        , col4_
+       , col5_
        , col6_
        , col8_
        , col10_
@@ -34,6 +35,10 @@ col3_ = termWith "div" [class_ " col-md-3 "]
 -- | col-md-4
 col4_ :: Term arg result => arg -> result
 col4_ = termWith "div" [class_ " col-md-4 "]
+
+-- | col-md-5
+col5_ :: Term arg result => arg -> result
+col5_ = termWith "div" [class_ " col-md-5 "]
 
 -- | col-md-6
 col6_ :: Term arg result => arg -> result

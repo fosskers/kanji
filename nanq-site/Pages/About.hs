@@ -13,7 +13,7 @@ import Text.Printf.TH
 about :: Html ()
 about = row_ $ left *> right
   where left = col5_ [class_ "col-md-offset-1"] $ fold [ theSite, hr_ [], kanken, hr_ [], me ]
-        right = col5_ $ fold [theSiteJ, kankenJ]
+        right = col5_ $ fold [theSiteJ, hr_ [], kankenJ, hr_ [], meJ ]
 
 theSite :: Html ()
 theSite = do
@@ -98,7 +98,7 @@ kankenJ = do
        あり、中の準二級と準一級を含んで計12級がある。学級と関連があるよう、
        下の級は学級別に別れている（例：8級は小学校３年生程度）。|]
   p_ . toHtml $
-    [lt|日本漢字検定協会が主張するには、漢検の二級が「高校卒業、または一般程度」
+    [lt|日本漢字検定協会が主張するには、漢検の二級が「高校卒業・大学・または一般程度」
        である。「一般程度」といえど、相当な勉強をしないとネイティブでも
        合格しにくい。|]
   p_ . toHtml $
@@ -120,3 +120,18 @@ me = do
     toHtml [lt|I'm an avid speaker of Kyushu dialects and a fan of Western
               Japanese ones. I currently work as a software developer
               in Vancouver, Canada.|]
+
+meJ :: Html ()
+meJ = do
+  h4_ "自分について"
+  p_ $ do
+    "僕の日本語の旅："
+    ul_ $ do
+      li_ "2006年・市の日本文化センターで週に3時日本語を勉強し始め"
+      li_ "2000年代後半・「Maximum7」というファングループでBLEACHの漫画を翻訳"
+      li_ "2008年から2009年・佐賀国立大学で短期留学"
+      li_ "2010年から2013年・長崎県佐世保市で英語教師として務め"
+      li_ "2011年・日本語能力試験の「N1」を獲得"
+      li_ "2013年・漢検の準二級を獲得"
+    toHtml [lt|西日本の方言が好みで、標準語より佐世保弁を話す。
+              現在カナダでプログラマーとして働きよっとばい！|]

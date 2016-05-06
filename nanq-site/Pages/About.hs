@@ -33,7 +33,9 @@ theSite = do
                    up-front what Kanji you'll need to learn?|]
   p_ "Want to be better prepared for your next Kanken?"
   p_ "Interested in finding out how hard a “hard“ text really is?"
-  p_ "Then please enjoy this site."
+  p_ . toHtml $ [lt|Then please enjoy this site. Please be aware that it
+                   is by no means “done“, and that I have plans for further
+                   development.|]
   p_ $ i_ $ do
     "This website is written completely in "
     a_ [href_ "https://www.haskell.org"] "Haskell"

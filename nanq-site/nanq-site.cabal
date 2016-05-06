@@ -16,6 +16,7 @@ data-files:  assets/bootstrap.min.css
            , assets/highcharts.js
            , assets/jquery.js
            , assets/logo.png
+           , assets/logo-small.png
 
 cabal-version:       >=1.10
 

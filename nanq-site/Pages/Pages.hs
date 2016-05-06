@@ -29,7 +29,9 @@ base content = do
                   a_ [href_ "/about", class_ "btn btn-default"] "About"
               h3_ [ class_ "text-muted"
                   , style_ "margin-top: 0;margin-bottom: 0;line-height: 40px;"
-                  ] "NanQ - Analyse Japanese Text・漢字分析"
+                  ] $ do
+                a_ [href_ "/"] $ img_ [src_ "/assets/logo-small.png"]
+                "・NanQ - Analyse Japanese Text・漢字分析"
               hr_ []
         content
         row_ $

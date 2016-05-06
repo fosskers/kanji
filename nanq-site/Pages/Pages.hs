@@ -3,6 +3,7 @@
 module Pages.Pages where
 
 import Lucid
+import Lucid.Base (makeAttribute)
 import Pages.Bootstrap
 
 ---
@@ -38,10 +39,16 @@ base content = do
           col6_ [class_ "col-md-offset-3"] $ do
             hr_ []
             center_ $ do
-              a_ [href_ "https://github.com/fosskers/nanq"] "Github"
-              "・"
-              a_ [href_ "mailto:colingw@gmail.com"] "Contact"
+              ghButton
             center_ $ a_ [href_ "/"] $ img_ [src_ "/assets/logo.png"]
+
+ghButton :: Html ()
+ghButton = iframe_
+  [ src_ "https://ghbtns.com/github-btn.html?user=fosskers&type=follow&count=true&size=large"
+  , makeAttribute "frameborder" "0"
+  , makeAttribute "scrolling" "0"
+  , width_ "180px"
+  , height_ "30px"] ""
 
 -- | The Home Page, accessible through the `/` endpoint.
 home :: Html ()

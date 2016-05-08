@@ -20,27 +20,26 @@ base content = do
             , rel_ "stylesheet"
             , media_ "all"
             , type_ "text/css" ]
-    body_ [style_ "padding-top: 20px;"] $ do
+    body_ [style_ "padding-top: 20px;"] $
       containerFluid_ $ do
-        row_ $
-          col6_ [class_ "col-md-offset-3"] $
-            div_ [class_ "header clearfix"] $ do
-              nav_ $ ul_ [class_ "nav nav-pills pull-right"] $ do
-                li_ [role_ "presentation"] $
-                  a_ [href_ "/about", class_ "btn btn-default"] "About"
-              h3_ [ class_ "text-muted"
-                  , style_ "margin-top: 0;margin-bottom: 0;line-height: 40px;"
-                  ] $ do
-                a_ [href_ "/"] $ img_ [src_ "/assets/logo-small.png"]
-                "・NanQ - Analyse Japanese Text・漢字分析"
-              hr_ []
-        content
-        row_ $
-          col6_ [class_ "col-md-offset-3"] $ do
+      row_ $
+        col6_ [class_ "col-md-offset-3"] $
+          div_ [class_ "header clearfix"] $ do
+            nav_ $ ul_ [class_ "nav nav-pills pull-right"] $
+              li_ [role_ "presentation"] $
+              a_ [href_ "/about", class_ "btn btn-default"] "About"
+            h3_ [ class_ "text-muted"
+                , style_ "margin-top: 0;margin-bottom: 0;line-height: 40px;"
+                ] $ do
+              a_ [href_ "/"] $ img_ [src_ "/assets/logo-small.png"]
+              "・NanQ - Analyse Japanese Text・漢字分析"
             hr_ []
-            center_ $ do
-              ghButton
-            center_ $ a_ [href_ "/"] $ img_ [src_ "/assets/logo.png"]
+      content
+      row_ $
+        col6_ [class_ "col-md-offset-3"] $ do
+          hr_ []
+          center_ ghButton
+          center_ $ a_ [href_ "/"] $ img_ [src_ "/assets/logo.png"]
 
 ghButton :: Html ()
 ghButton = iframe_
@@ -57,17 +56,17 @@ home = row_ $ do
   col6_ form
 
 form :: Html ()
-form = form_ [action_ "/analyse", method_ "POST"] $ do
+form = form_ [action_ "/analyse", method_ "POST"] $
   div_ [class_ "input"] $ do
-    label_ [for_ "japText"] "Japanese Text・日本語入力"
-    textarea_ [ id_ "japText"
-              , class_ "form-control"
-              , name_ "japText"
-              , rows_ "15"
-              , placeholder_ "Paste your text here."
-              ] ""
-    center_ [style_ "padding-top:15px;"] $
-      button_ [ class_ "btn btn-primary btn-lg", type_ "submit" ] "Analyse・分析"
+  label_ [for_ "japText"] "Japanese Text・日本語入力"
+  textarea_ [ id_ "japText"
+            , class_ "form-control"
+            , name_ "japText"
+            , rows_ "15"
+            , placeholder_ "Paste your text here."
+            ] ""
+  center_ [style_ "padding-top:15px;"] $
+    button_ [ class_ "btn btn-primary btn-lg", type_ "submit" ] "Analyse・分析"
 
 explanation :: Html ()
 explanation = div_ [class_ "jumbotron"] $ do

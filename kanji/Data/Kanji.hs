@@ -31,6 +31,7 @@ module Data.Kanji
        , averageLevel
        ) where
 
+import           Control.Arrow hiding (second)
 import           Data.Bool (bool)
 import           Data.List (sort, group)
 import qualified Data.Set as S
@@ -68,7 +69,7 @@ elementaryKanjiDensity ks = foldl (\acc (_,p) -> acc + p) 0 elementaryQs
 
 -- | All `Level`s, with all their `Kanji`, ordered from Level-10 to Level-2.
 levels :: [Level]
-levels = map (uncurry Level) $ zip allKanji [Ten ..]
+levels = zipWith Level allKanji [Ten ..]
 
 -- | What `Level` does a Kanji belong to?
 level :: Kanji -> Maybe Level
@@ -92,7 +93,7 @@ levelFromRank = levelFromRank' levels
 averageLevel :: [Kanji] -> Float
 averageLevel ks = average ranks
   where ranks = ks ^.. each . to level . _Just . to _rank . to fromRank
-        average ns = (sum ns) / (fromIntegral $ length ns) 
+        average ns = sum ns / fromIntegral (length ns)
 
 -- | How much of each `Level` is represented by a group of Kanji?
 levelDist :: [Kanji] -> [(Rank,Float)]
@@ -111,4 +112,4 @@ percentSpread ks = map getPercent kQuants
 
 -- | Determines how many times each `Kanji` appears in given set of them.
 kanjiQuantities :: [Kanji] -> [(Kanji,Int)]
-kanjiQuantities = map (\ks -> (head ks, length ks)) . group . sort
+kanjiQuantities = map (head &&& length) . group . sort

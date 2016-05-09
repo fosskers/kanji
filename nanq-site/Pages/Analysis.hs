@@ -46,7 +46,7 @@ analyse t = do
       center_ . h2_ . toHtml . f . intersperse ' ' $ unknowns ks
     where ks = asKanji t
           ld = levelDist ks
-          e = elementaryKanjiDensity ks
+          e = elementaryDen ld
           d = kanjiDensity (T.length t) ks
           a = averageLevel ks
           f "" = "None・無し"

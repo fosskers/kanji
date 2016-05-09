@@ -1,5 +1,5 @@
 name:                kanji
-version:             2.0.0
+version:             3.0.0
 synopsis:            Perform 漢字検定 (Japan Kanji Aptitude Test) level analysis on Japanese Kanji.
 description:         Perform 漢字検定 (Japan Kanji Aptitude Test) level analysis on Japanese Kanji.        
 license:             GPL-3

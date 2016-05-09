@@ -80,7 +80,7 @@ density = do
   pure $ object [ "density" .= d ]
 
 elementaryDensity :: Member (Reader Env) r => Eff r Value
-elementaryDensity = ob "elementary" . elementaryKanjiDensity <$> reader _allKs
+elementaryDensity = ob "elementary" . elementaryDen . levelDist <$> reader _allKs
 
 -- | All operations return JSON, to be aggregated into a master Object.
 execOp :: Member (Reader Env) r => Operation -> Eff r Value

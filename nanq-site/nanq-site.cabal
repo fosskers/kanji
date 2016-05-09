@@ -23,7 +23,7 @@ cabal-version:       >=1.10
 executable nanq-site
   main-is:             nanq-site.hs
 
-  other-modules:       Pages.Pages
+  other-modules:       Pages.Base
                      , Pages.Bootstrap
                      , Pages.About
                      , Pages.Analysis
@@ -32,7 +32,7 @@ executable nanq-site
 
   build-depends:       base >=4.8 && <4.9
                      , containers
-                     , kanji >= 2 && < 3
+                     , kanji >= 3 && < 4
                      , lucid >= 2.9.4
                      , servant-server >= 0.6 && < 0.7
                      , servant-lucid >= 0.6 && < 0.7

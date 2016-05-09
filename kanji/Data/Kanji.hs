@@ -1,3 +1,6 @@
+{-# LANGUAGE TupleSections #-}
+{-# LANGUAGE RankNTypes #-}
+
 -- |
 -- Module    : Data.Kanji
 -- Copyright : (c) Colin Woodbury, 2015, 2016
@@ -24,11 +27,15 @@ module Data.Kanji
        , isKanjiInLevel
        , levelFromRank
          -- * Analysis
-       , kanjiDensity
-       , elementaryKanjiDensity
        , percentSpread
        , levelDist
        , averageLevel
+         -- ** Densities
+       , kanjiDensity
+       , elementaryDen
+       , middleDen
+       , highDen
+       , adultDen
        ) where
 
 import           Control.Arrow hiding (second)
@@ -42,7 +49,7 @@ import           Data.Kanji.Types
 
 ---
 
--- | All Kanji, grouped by their Level (級) in ascending order.
+-- | All Japanese Kanji, grouped by their Level (級) in ascending order.
 -- Here, ascending order means from the lowest to the highest level,
 -- meaning from 10 to 1.
 allKanji :: [S.Set Kanji]
@@ -60,12 +67,33 @@ hasLevel k = has _Just $ level k
 kanjiDensity :: Int -> [Kanji] -> Float
 kanjiDensity len ks = fromIntegral (length ks) / fromIntegral len
 
--- | As above, but only Kanji of the first 1006 are counted (those learned
--- in elementary school in Japan).
-elementaryKanjiDensity :: [Kanji] -> Float
-elementaryKanjiDensity ks = foldl (\acc (_,p) -> acc + p) 0 elementaryQs
-  where elementaryQs  = filter (\(qn,_) -> qn `elem` [Five, Six ..]) dists
-        dists = levelDist ks
+-- | How much of the Kanji found are learned in elementary school in Japan?
+--
+-- > elementaryDen . levelDist :: [Kanji] -> Float
+elementaryDen :: [(Rank,Float)] -> Float
+elementaryDen dists = sum $ dists ^.. each . inRank [Five, Six ..]
+
+-- | How much of the Kanji found are learned by the end of middle school?
+--
+-- > middleDen . levelDist :: [Kanji] -> Float
+middleDen :: [(Rank,Float)] -> Float
+middleDen dists = sum $ dists ^.. each . inRank [Three, Four ..]
+
+-- | How much of the Kanji found are learned by the end of high school?
+--
+-- > highDen . levelDist :: [Kanji] -> Float
+highDen :: [(Rank,Float)] -> Float
+highDen dists = sum $ dists ^.. each . inRank [PreTwo, Three ..]
+
+-- | How much of the Kanji found should be able to read by the average person?
+--
+-- > adultDen . levelDist :: [Kanji] -> Float
+adultDen :: [(Rank,Float)] -> Float
+adultDen dists = sum $ dists ^.. each . inRank [Two, PreTwo ..]
+
+inRank :: [Rank] -> Traversal' (Rank,Float) Float
+inRank rs f (r,n) | r `elem` rs = (r,) <$> f n
+                  | otherwise = pure (r,n)
 
 -- | All `Level`s, with all their `Kanji`, ordered from Level-10 to Level-2.
 levels :: [Level]

@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Pages.Pages where
+module Pages.Base where
 
 import Lucid
 import Lucid.Base (makeAttribute)

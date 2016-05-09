@@ -10,8 +10,8 @@ import           Lucid
 import           Network.Wai
 import           Network.Wai.Handler.Warp
 import           Pages.About
+import           Pages.Base
 import           Pages.Analysis
-import           Pages.Pages
 import           Servant
 import           Servant.HTML.Lucid
 

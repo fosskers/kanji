@@ -17,7 +17,7 @@ Want to be better prepared for your next Kanken?
 
 Interested in finding out how hard a "hard" text really is?
 
-[Then head over to the site]()
+[Then head over to the site](http://www.nanq.ca)
 
 *This website is written completely in [Haskell](https://www.haskell.org)
 and is powered by the

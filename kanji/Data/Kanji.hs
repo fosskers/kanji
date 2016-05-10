@@ -30,6 +30,7 @@ module Data.Kanji
        , percentSpread
        , levelDist
        , averageLevel
+       , uniques
          -- ** Densities
        , kanjiDensity
        , elementaryDen
@@ -41,6 +42,7 @@ module Data.Kanji
 import           Control.Arrow hiding (second)
 import           Data.Bool (bool)
 import           Data.List (sort, group)
+import qualified Data.Map.Lazy as M
 import qualified Data.Set as S
 import           Lens.Micro
 
@@ -141,3 +143,8 @@ percentSpread ks = map getPercent kQuants
 -- | Determines how many times each `Kanji` appears in given set of them.
 kanjiQuantities :: [Kanji] -> [(Kanji,Int)]
 kanjiQuantities = map (head &&& length) . group . sort
+
+-- | Which Kanji appeared from each Level in the text?
+uniques :: [Kanji] -> [(Rank,[Kanji])]
+uniques = M.toList . S.foldl h M.empty . S.fromList
+  where h a k = maybe a (\l -> M.insertWith (++) (_rank l) [k] a) $ level k

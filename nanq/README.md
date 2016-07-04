@@ -22,7 +22,6 @@ NanQ is written in Haskell and uses the
 [stack](http://docs.haskellstack.org/en/stable/README.html) tool. Once
 `stack` is installed, move to the source directory and perform:
 
-    stack build
     stack install
 
 USAGE

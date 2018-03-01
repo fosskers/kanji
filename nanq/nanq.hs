@@ -8,6 +8,7 @@ import           Data.Aeson
 import           Data.Aeson.Encode.Pretty
 import           Data.Kanji
 import qualified Data.Map.Lazy as M
+import           Data.Monoid ((<>))
 import qualified Data.Set as S
 import qualified Data.Text as TS
 import qualified Data.Text.Lazy as TL

@@ -1,6 +1,3 @@
-{-# LANGUAGE TupleSections #-}
-{-# LANGUAGE RankNTypes #-}
-
 -- |
 -- Module    : Data.Kanji
 -- Copyright : (c) Colin Woodbury, 2015 - 2018
@@ -53,8 +50,12 @@ allKanji =  M.fromList . zip [ Ten .. ] $ map (S.map Kanji) ks
   where ks = [ tenth, ninth, eighth, seventh, sixth
              , fifth, fourth, third, preSecond, second ]
 
--- | What is the density @d@ of Kanji characters in a given String-like
--- type, where @0 <= d <= 1@?
+-- | What `Level` does a Kanji belong to?
+level :: Kanji -> Maybe Level
+level k = M.foldlWithKey' (\acc l ks -> acc <|> bool Nothing (Just l) (S.member k ks)) Nothing allKanji
+
+-- | Given the length of some String-like type and a list of `Kanji` found therein,
+-- what percentage of them were Kanji?
 kanjiDensity :: Int -> [Kanji] -> Float
 kanjiDensity len ks = fromIntegral (length ks) / fromIntegral len
 
@@ -81,10 +82,6 @@ highDen m = M.foldl' (+) 0 . M.restrictKeys m $ S.fromList [ PreTwo, Three .. ]
 -- > adultDen . levelDist :: [Kanji] -> Float
 adultDen :: M.Map Level Float -> Float
 adultDen m = M.foldl' (+) 0 . M.restrictKeys m $ S.fromList [ Two, PreTwo .. ]
-
--- | What `Level` does a Kanji belong to?
-level :: Kanji -> Maybe Level
-level k = M.foldlWithKey' (\acc l ks -> acc <|> bool Nothing (Just l) (S.member k ks)) Nothing allKanji
 
 -- | Find the average `Level` of a given set of `Kanji`.
 averageLevel :: [Kanji] -> Float

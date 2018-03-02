@@ -1,7 +1,10 @@
 {-# LANGUAGE ImplicitParams #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 
-module Main where
+module Main ( main ) where
 
+import           Data.Aeson
 import           Data.Kanji
 import           Data.Kanji.Types
 import qualified Data.Map.Strict as M
@@ -22,8 +25,18 @@ suite = testGroup "Unit Tests"
     , testCase "levelDist totals 1.0"     $ M.foldl' (+) 0 (levelDist testKanji) @?~ 1.0
     , testCase "levelDist == adultDen"    $ M.foldl' (+) 0 (levelDist testKanji) @?~ adultDen (levelDist testKanji)
     ]
+  , testGroup "JSON"
+    [
+      testCase "Empty String should fail to parse"    $ assert . isError $ fromJSON @Kanji (String "")
+    , testCase "String w/ multiple Kanji should fail" $ assert . isError $ fromJSON @Kanji (String "泥棒猫")
+    , testCase "String w/ one Kanji should succeed"   $ fromJSON (String "猫") @?= Success (Kanji '猫')
+    ]
   ]
   where ?epsilon = 0.001
 
 testKanji :: [Kanji]
 testKanji = map Kanji "本猫机鉛筆紙帽子包丁床天井壁光電気"
+
+isError :: Result a -> Bool
+isError (Error _) = True
+isError _ = False

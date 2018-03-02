@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE DeriveAnyClass, DeriveGeneric #-}
 
 -- |
 -- Module    : Data.Kanji.Types
@@ -12,10 +12,15 @@
 
 module Data.Kanji.Types where
 
+import           Control.DeepSeq (NFData)
+import           Data.Aeson
 import           Data.Bool (bool)
 import           Data.Char (ord)
+import           Data.Hashable
 import qualified Data.Map.Strict as M
 import           Data.Maybe (fromJust)
+import qualified Data.Text as T
+import           GHC.Generics
 
 ---
 
@@ -31,7 +36,16 @@ import           Data.Maybe (fromJust)
 -- * 働 (to do physical labour)
 newtype Kanji = Kanji {
   _kanji :: Char -- ^ The original `Char` of a `Kanji`.
-  } deriving (Eq, Ord, Show)
+  } deriving (Eq, Ord, Show, Generic, Hashable, NFData)
+
+instance ToJSON Kanji where
+  toJSON (Kanji c) = String $ T.singleton c
+
+instance FromJSON Kanji where
+  parseJSON = withText "Kanji" $ \t -> case T.uncons t of
+    Nothing -> fail "No Kanji given"
+    Just (c, t') | not (T.null t') -> fail "More than one Kanji given in a single String"
+                 | otherwise -> pure $ Kanji c
 
 -- | Construct a `Kanji` value from some `Char` if it falls in the correct UTF8 range.
 kanji :: Char -> Maybe Kanji
@@ -53,7 +67,7 @@ kanji c = bool Nothing (Just $ Kanji c) $ isKanji c
 -- Level data for Kanji above Level-2 is currently not provided by
 -- this library.
 data Level = Ten | Nine | Eight | Seven | Six | Five | Four | Three | PreTwo
-           | Two | PreOne | One deriving (Eq, Ord, Enum, Show)
+           | Two | PreOne | One deriving (Eq, Ord, Enum, Show, Generic, Hashable, NFData, ToJSON, FromJSON)
 
 -- | Discover a `Level`'s numeric representation, as a `Float`.
 numericLevel :: Level -> Float

@@ -1,33 +1,32 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TupleSections #-}
-{-# LANGUAGE OverloadedStrings #-}
 
-import           Control.Eff
-import           Control.Eff.Reader.Lazy
+module Main ( main ) where
+
 import           Data.Aeson
 import           Data.Aeson.Encode.Pretty
 import           Data.Kanji
+import qualified Data.Map.Strict as M
 import           Data.Maybe (isNothing)
-import           Data.Monoid ((<>))
 import qualified Data.Set as S
-import qualified Data.Text as TS
-import qualified Data.Text.Lazy as TL
+import qualified Data.Text as T
+import qualified Data.Text.IO as TIO
 import           Data.Text.Lazy.Builder (toLazyText)
-import qualified Data.Text.Lazy.IO as TIO
 import           Lens.Micro
 import           Lens.Micro.Aeson
 import           Lens.Micro.Platform ()
 import           Options.Applicative
+import           Protolude hiding (to)
 
 ---
 
-data Flags = Flags [Operation] (Either FilePath TL.Text) deriving (Eq)
+data Flags = Flags [Operation] (Either FilePath Text) deriving (Eq)
 
 data Operation = Unknowns | Density | Elementary
-  | Distribution | Average | Splits deriving (Eq)
+               | Distribution | Average | Splits deriving (Eq)
 
 data Env = Env { _allKs :: [Kanji]
-               , _original :: TL.Text } deriving Eq
+               , _original :: Text } deriving Eq
 
 -- | Long, Short, Help
 lsh l s h = long l <> short s <> help h
@@ -35,11 +34,11 @@ lsh l s h = long l <> short s <> help h
 flags :: Parser Flags
 flags = Flags <$> operations <*> (file <|> japanese)
   where file = Left <$> strOption (lsh "file" 'f' "Take input from a file")
-        japanese = (Right . TL.pack) <$> argument str (metavar "JAPANESE")
+        japanese = Right <$> argument str (metavar "JAPANESE")
 
 operations :: Parser [Operation]
-operations = (^.. each . _Just) <$> ops
-  where ops = sequenceA $ map optional
+operations = catMaybes <$> ops
+  where ops = traverse optional
           [ flag' Unknowns $
             lsh "unknowns" 'u' "Find Kanji whose Level couldn't be determined"
           , flag' Density $
@@ -54,40 +53,32 @@ operations = (^.. each . _Just) <$> ops
             lsh "splits" 's' "Show which Level each Kanji belongs to" ]
 
 -- | Shortcut for singleton objects
-ob :: ToJSON v => TS.Text -> v -> Value
+ob :: ToJSON v => Text -> v -> Value
 ob k v = object [ k .= v ]
 
-averageLev :: Member (Reader Env) r => Eff r Value
-averageLev = ob "average" . averageLevel <$> reader _allKs
+averageLev :: Reader Env Value
+averageLev = ob "average" . averageLevel <$> asks _allKs
 
-splits :: Member (Reader Env) r => Eff r Value
-splits = undefined
--- splits = do
---   ks <- map g . M.toList . S.foldl f M.empty . S.fromList <$> reader _allKs
---   pure $ object [ "levelSplit" .= object ks ]
---     where f a k = maybe a (\l -> M.insertWith (++) (_rank l) [k] a) $ level k
---           g (r,ks) = TS.pack (show r) .= map _kanji ks
+splits :: Reader Env Value
+splits = ob "levelSplit" . S.foldl' f mempty . S.fromList <$> asks _allKs
+  where f a k = maybe a (\l -> M.insertWith (++) l [k] a) $ level k
 
-unknowns :: Member (Reader Env) r => Eff r Value
-unknowns = do
-  ks <- S.filter (isNothing . level) . S.fromList <$> reader _allKs
-  pure $ object [ "unknowns" .= map _kanji (S.toList ks) ]
+unknowns :: Reader Env Value
+unknowns = ob "unknowns" . S.map _kanji . S.filter (isNothing . level) . S.fromList <$> asks _allKs
 
-distribution :: Member (Reader Env) r => Eff r Value
-distribution = undefined
--- distribution = ob "distributions" . object . map f . levelDist <$> reader _allKs
-    where f (r,v) = TS.pack (show r) .= v
+distribution :: Reader Env Value
+distribution = ob "distributions" . levelDist <$> asks _allKs
 
-density :: Member (Reader Env) r => Eff r Value
+density :: Reader Env Value
 density = do
-  d <- kanjiDensity <$> reader (fromIntegral . TL.length . _original) <*> reader _allKs
-  pure $ object [ "density" .= d ]
+  d <- kanjiDensity <$> asks (T.length . _original) <*> asks _allKs
+  pure $ ob "density" d
 
-elementaryDensity :: Member (Reader Env) r => Eff r Value
-elementaryDensity = ob "elementary" . elementaryDen . levelDist <$> reader _allKs
+elementaryDensity :: Reader Env Value
+elementaryDensity = ob "elementary" . elementaryDen . levelDist <$> asks _allKs
 
 -- | All operations return JSON, to be aggregated into a master Object.
-execOp :: Member (Reader Env) r => Operation -> Eff r Value
+execOp :: Operation -> Reader Env Value
 execOp Unknowns = unknowns
 execOp Density = density
 execOp Elementary = elementaryDensity
@@ -96,18 +87,18 @@ execOp Average = averageLev
 execOp Splits = splits
 
 output :: Value -> IO ()
-output = TIO.putStrLn . toLazyText . encodePrettyToTextBuilder
+output = putLText . toLazyText . encodePrettyToTextBuilder
 
 -- | Dispatch on each `Operation` given. Aggregates the resulting JSON.
 work :: (Env, [Operation]) -> Value
-work (e,os) = Object $ vals ^. each . _Object
-  where vals = run $ runReader (mapM execOp os) e
+work (e, os) = Object $ vals ^. each . _Object
+  where vals = runReader (traverse execOp os) e
 
 env :: Flags -> IO (Env, [Operation])
-env (Flags os (Right t)) = pure (Env (t ^.. each . to kanji . _Just) t, os)
-env (Flags os (Left f)) = do
-  t <- TIO.readFile f
-  pure (Env (t ^.. each . to kanji . _Just) t, os)
+env (Flags os inp) = case inp of
+  Right t -> pure (e t, os)
+  Left  f -> (, os) . e <$> TIO.readFile f
+  where e t = Env (t ^.. each . to kanji . _Just) t
 
 main :: IO ()
 main = execParser opts >>= env >>= output . work

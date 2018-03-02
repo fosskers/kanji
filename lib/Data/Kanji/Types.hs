@@ -67,7 +67,8 @@ kanji c = bool Nothing (Just $ Kanji c) $ isKanji c
 -- Level data for Kanji above Level-2 is currently not provided by
 -- this library.
 data Level = Ten | Nine | Eight | Seven | Six | Five | Four | Three | PreTwo
-           | Two | PreOne | One deriving (Eq, Ord, Enum, Show, Generic, Hashable, NFData, ToJSON, FromJSON)
+           | Two | PreOne | One
+           deriving (Eq, Ord, Enum, Show, Generic, Hashable, NFData, ToJSON, ToJSONKey, FromJSON)
 
 -- | Discover a `Level`'s numeric representation, as a `Float`.
 numericLevel :: Level -> Float

@@ -64,11 +64,16 @@ executables:
     source-dirs: nanq
     main: nanq.hs
     other-modules: []
+    default-extensions:
+      - NoImplicitPrelude
+      - OverloadedStrings
+    ghc-options:
+      - -O2
     dependencies:
       - kanji
       - aeson-pretty
-      - extensible-effects >= 2.1 && < 2.2
       - microlens >= 0.4 && < 0.5
       - microlens-platform
       - microlens-aeson >= 2.2 && < 2.3
       - optparse-applicative >= 0.14 && < 0.15
+      - protolude >= 0.2 && < 0.3

@@ -6,8 +6,9 @@
 -- License   : GPL3
 -- Maintainer: Colin Woodbury <colingw@gmail.com>
 --
--- Types for this library. Note that typeclass instances for `ByteString`s
--- are not provided, as `SB.pack` garbles characters above 0xFF.
+-- Types for this library. While a constructor for `Kanji` is made available
+-- here, you should prefer the `kanji` "smart constructor" unless you know
+-- for sure that the `Char` in question falls within the correct UTF8 range.
 
 module Data.Kanji.Types where
 
@@ -28,7 +29,9 @@ import           Data.Maybe (fromJust)
 -- * 畑 (a type of rice field)
 -- * 峠 (a narrow mountain pass)
 -- * 働 (to do physical labour)
-newtype Kanji = Kanji { _kanji :: Char } deriving (Eq, Ord, Show)
+newtype Kanji = Kanji {
+  _kanji :: Char -- ^ The original `Char` of a `Kanji`.
+  } deriving (Eq, Ord, Show)
 
 -- | Construct a `Kanji` value from some `Char` if it falls in the correct UTF8 range.
 kanji :: Char -> Maybe Kanji

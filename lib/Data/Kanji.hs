@@ -18,7 +18,6 @@ module Data.Kanji
        , kanji, _kanji
        , allKanji
        , isKanji
-       , hasLevel
          -- * Levels
        , Level(..)
        , level
@@ -38,11 +37,12 @@ module Data.Kanji
 import           Control.Applicative ((<|>))
 import           Control.Arrow hiding (second)
 import           Data.Bool (bool)
+import           Data.Foldable (foldl')
 import           Data.Kanji.Levels
 import           Data.Kanji.Types
 import           Data.List (sort, group)
 import qualified Data.Map.Strict as M
-import           Data.Maybe (isJust)
+import           Data.Maybe (catMaybes)
 import qualified Data.Set as S
 
 ---
@@ -53,10 +53,6 @@ allKanji =  M.fromList . zip [ Ten .. ] $ map (S.map Kanji) ks
   where ks = [ tenth, ninth, eighth, seventh, sixth
              , fifth, fourth, third, preSecond, second ]
 
--- | Is the `Level` of a given `Kanji` known?
-hasLevel :: Kanji -> Bool
-hasLevel = isJust . level
-
 -- | What is the density @d@ of Kanji characters in a given String-like
 -- type, where @0 <= d <= 1@?
 kanjiDensity :: Int -> [Kanji] -> Float
@@ -66,33 +62,25 @@ kanjiDensity len ks = fromIntegral (length ks) / fromIntegral len
 --
 -- > elementaryDen . levelDist :: [Kanji] -> Float
 elementaryDen :: M.Map Level Float -> Float
-elementaryDen = undefined
--- elementaryDen dists = sum $ dists ^.. each . inRank [Five, Six ..]
+elementaryDen m = M.foldl' (+) 0 . M.restrictKeys m $ S.fromList [ Five, Six .. ]
 
 -- | How much of the Kanji found are learnt by the end of middle school?
 --
 -- > middleDen . levelDist :: [Kanji] -> Float
 middleDen :: M.Map Level Float -> Float
-middleDen = undefined
--- middleDen dists = sum $ dists ^.. each . inRank [Three, Four ..]
+middleDen m = M.foldl' (+) 0 . M.restrictKeys m $ S.fromList [ Three, Four .. ]
 
 -- | How much of the Kanji found are learnt by the end of high school?
 --
 -- > highDen . levelDist :: [Kanji] -> Float
 highDen :: M.Map Level Float -> Float
-highDen = undefined
--- highDen dists = sum $ dists ^.. each . inRank [PreTwo, Three ..]
+highDen m = M.foldl' (+) 0 . M.restrictKeys m $ S.fromList [ PreTwo, Three .. ]
 
--- | How much of the Kanji found should be able to read by the average person?
+-- | How much of the Kanji found should be able to be read by the average person?
 --
 -- > adultDen . levelDist :: [Kanji] -> Float
 adultDen :: M.Map Level Float -> Float
-adultDen = undefined
--- adultDen dists = sum $ dists ^.. each . inRank [Two, PreTwo ..]
-
--- inRank :: [Rank] -> Traversal' (Rank,Float) Float
--- inRank rs f (r,n) | r `elem` rs = (r,) <$> f n
---                   | otherwise = pure (r,n)
+adultDen m = M.foldl' (+) 0 . M.restrictKeys m $ S.fromList [ Two, PreTwo .. ]
 
 -- | What `Level` does a Kanji belong to?
 level :: Kanji -> Maybe Level
@@ -100,18 +88,15 @@ level k = M.foldlWithKey' (\acc l ks -> acc <|> bool Nothing (Just l) (S.member 
 
 -- | Find the average `Level` of a given set of `Kanji`.
 averageLevel :: [Kanji] -> Float
-averageLevel = undefined
--- averageLevel ks = average ranks
---   where ranks = undefined -- ks ^.. each . to level . _Just . to _rank . to numericLevel
---         average ns = sum ns / fromIntegral (length ns)
+averageLevel ks = average . map numericLevel . catMaybes $ map level ks
+  where average ns = foldl' (+) 0 ns / fromIntegral (length ns)
 
 -- | How much of each `Level` is represented by a group of Kanji?
+-- The distribution values must sum to 1.
 levelDist :: [Kanji] -> M.Map Level Float
-levelDist = undefined
--- levelDist ks = map toNumPercentPair $ group sortedRanks
---   where sortedRanks = undefined -- sort $ ks ^.. each . to level . _Just . to _rank
---         toNumPercentPair qns = (head qns, length' qns / length' ks)
---         length' n = fromIntegral $ length n
+levelDist ks = M.fromList . map percentPair . group . sort . catMaybes $ map level ks
+  where percentPair qns = (head qns, fromIntegral (length qns) / totalKs)
+        totalKs = fromIntegral $ length ks
 
 -- | The distribution of each `Kanji` in a set of them.
 -- The distribution values must sum to 1.

@@ -7,7 +7,7 @@ import           Control.Eff.Reader.Lazy
 import           Data.Aeson
 import           Data.Aeson.Encode.Pretty
 import           Data.Kanji
-import qualified Data.Map.Lazy as M
+import           Data.Maybe (isNothing)
 import           Data.Monoid ((<>))
 import qualified Data.Set as S
 import qualified Data.Text as TS
@@ -15,8 +15,8 @@ import qualified Data.Text.Lazy as TL
 import           Data.Text.Lazy.Builder (toLazyText)
 import qualified Data.Text.Lazy.IO as TIO
 import           Lens.Micro
-import           Lens.Micro.Platform ()
 import           Lens.Micro.Aeson
+import           Lens.Micro.Platform ()
 import           Options.Applicative
 
 ---
@@ -70,7 +70,7 @@ splits = undefined
 
 unknowns :: Member (Reader Env) r => Eff r Value
 unknowns = do
-  ks <- S.filter (not . hasLevel) . S.fromList <$> reader _allKs
+  ks <- S.filter (isNothing . level) . S.fromList <$> reader _allKs
   pure $ object [ "unknowns" .= map _kanji (S.toList ks) ]
 
 distribution :: Member (Reader Env) r => Eff r Value

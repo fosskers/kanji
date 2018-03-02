@@ -15,6 +15,7 @@ import qualified Data.Text.Lazy as TL
 import           Data.Text.Lazy.Builder (toLazyText)
 import qualified Data.Text.Lazy.IO as TIO
 import           Lens.Micro
+import           Lens.Micro.Platform ()
 import           Lens.Micro.Aeson
 import           Options.Applicative
 
@@ -60,11 +61,12 @@ averageLev :: Member (Reader Env) r => Eff r Value
 averageLev = ob "average" . averageLevel <$> reader _allKs
 
 splits :: Member (Reader Env) r => Eff r Value
-splits = do
-  ks <- map g . M.toList . S.foldl f M.empty . S.fromList <$> reader _allKs
-  pure $ object [ "levelSplit" .= object ks ]
-    where f a k = maybe a (\l -> M.insertWith (++) (_rank l) [k] a) $ level k
-          g (r,ks) = TS.pack (show r) .= map _kanji ks
+splits = undefined
+-- splits = do
+--   ks <- map g . M.toList . S.foldl f M.empty . S.fromList <$> reader _allKs
+--   pure $ object [ "levelSplit" .= object ks ]
+--     where f a k = maybe a (\l -> M.insertWith (++) (_rank l) [k] a) $ level k
+--           g (r,ks) = TS.pack (show r) .= map _kanji ks
 
 unknowns :: Member (Reader Env) r => Eff r Value
 unknowns = do
@@ -72,7 +74,8 @@ unknowns = do
   pure $ object [ "unknowns" .= map _kanji (S.toList ks) ]
 
 distribution :: Member (Reader Env) r => Eff r Value
-distribution = ob "distributions" . object . map f . levelDist <$> reader _allKs
+distribution = undefined
+-- distribution = ob "distributions" . object . map f . levelDist <$> reader _allKs
     where f (r,v) = TS.pack (show r) .= v
 
 density :: Member (Reader Env) r => Eff r Value
@@ -101,10 +104,10 @@ work (e,os) = Object $ vals ^. each . _Object
   where vals = run $ runReader (mapM execOp os) e
 
 env :: Flags -> IO (Env, [Operation])
-env (Flags os (Right t)) = pure (Env (asKanji t) t, os)
+env (Flags os (Right t)) = pure (Env (t ^.. each . to kanji . _Just) t, os)
 env (Flags os (Left f)) = do
   t <- TIO.readFile f
-  pure (Env (asKanji t) t, os)
+  pure (Env (t ^.. each . to kanji . _Just) t, os)
 
 main :: IO ()
 main = execParser opts >>= env >>= output . work

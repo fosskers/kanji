@@ -1,6 +1,6 @@
 -- |
 -- Module    : Data.Kanji.Levels
--- Copyright : (c) Colin Woodbury, 2015, 2016
+-- Copyright : (c) Colin Woodbury, 2015 - 2018
 -- License   : GPL3
 -- Maintainer: Colin Woodbury <colingw@gmail.com>
 --

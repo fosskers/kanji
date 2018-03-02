@@ -24,7 +24,6 @@ ghc-options:
 dependencies:
   - base >= 4.7 && < 5
   - containers
-  - microlens >= 0.4 && < 0.5
   - text
 
 library:
@@ -35,10 +34,13 @@ executables:
   kanji:
     source-dirs: nanq
     main: nanq.hs
+    other-modules: []
     dependencies:
       - kanji
       - aeson >= 1.2 && < 1.3
       - aeson-pretty
       - extensible-effects >= 2.1 && < 2.2
+      - microlens >= 0.4 && < 0.5
+      - microlens-platform
       - microlens-aeson >= 2.2 && < 2.3
       - optparse-applicative >= 0.14 && < 0.15

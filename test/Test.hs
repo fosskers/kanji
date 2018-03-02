@@ -35,7 +35,7 @@ suite = testGroup "Unit Tests"
   where ?epsilon = 0.001
 
 testKanji :: [Kanji]
-testKanji = map Kanji "本猫机鉛筆紙帽子包丁床天井壁光電気"
+testKanji = map Kanji "本猫机鉛筆紙帽子包丁床天井壁光電気棚箱靴家階段戸屋根地面"
 
 isError :: Result a -> Bool
 isError (Error _) = True

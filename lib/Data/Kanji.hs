@@ -40,6 +40,7 @@ import           Data.Kanji.Types
 import           Data.List (sort, group)
 import qualified Data.Map.Strict as M
 import           Data.Maybe (catMaybes)
+import           Data.Semigroup ((<>))
 import qualified Data.Set as S
 
 ---
@@ -108,6 +109,6 @@ kanjiQuantities :: [Kanji] -> M.Map Kanji Int
 kanjiQuantities = M.fromList . map (head &&& length) . group . sort
 
 -- | Which Kanji appeared from each Level in the text?
-uniques :: [Kanji] -> M.Map Level [Kanji]
+uniques :: [Kanji] -> M.Map Level (S.Set Kanji)
 uniques = S.foldl' h M.empty . S.fromList
-  where h a k = maybe a (\l -> M.insertWith (++) l [k] a) $ level k
+  where h a k = maybe a (\l -> M.insertWith (<>) l (S.singleton k) a) $ level k

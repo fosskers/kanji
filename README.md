@@ -1,24 +1,22 @@
-NANQ
+Kanji
 ====
-Author:  Colin Woodbury <colingw@gmail.com>
 
-NanQ is a Japanese Kanji analysation program written in Haskell. Its main
+`kanji` is a Japanese Kanji library and analysation program written in Haskell. Its main
 function is to tell what Kanji belong to what Level of the Japanese National
 Kanji Examination (漢字検定).
 
-NanQ can be used to:
+`kanji` can be used to:
  - determine what Level individual Kanji belong to
- - determine the average Level (difficulty, in other words)
-   of a group of Kanji
+ - determine the average Level (difficulty, in other words) of a group of Kanji
  - apply the above to whole files of Japanese
 
-INSTALLING NANQ
+INSTALLING `kanji`
 ---------------
 First, get the source files from:
 
-https://github.com/fosskers/nanq
+https://github.com/fosskers/kanji
 
-NanQ is written in Haskell and uses the
+`kanji` is written in Haskell and uses the
 [stack](http://docs.haskellstack.org/en/stable/README.html) tool. Once
 `stack` is installed, move to the source directory and perform:
 
@@ -29,22 +27,20 @@ USAGE
 Assuming you've made it so that you can run the executable, the following
 command-line options are available:
 
-#### ANALYSIS OPTIONS
- Short  | Long   | Description
- -----  | ------ | -----------
- -a | --average  | Given Japanese input, finds the average Level of all Kanji present
- -u | --unknowns | Reports Kanji whose Level could not be determined
- -h | --help     | Prints a message explaining these options
- -l | --leveldist | Find the % distribution of Levels in given Japanese
- -s | --splits   | Show what Level each Kanji belongs to
- -d | --density  | Determines how much of the input is made up of Kanji
- -e | --elementary | Determines how much of the input is made up of Kanji learned in Japanese Elementary School
+```
+Usage: kanji [-u|--unknowns] [-d|--density] [-e|--elementary] [-l|--leveldist]
+             [-a|--average] [-s|--splits] ((-f|--file ARG) | JAPANESE)
 
-#### INPUT SOURCE OPTIONS
- Short  | Long   | Description
- -----  | ------ | -----------
- *none* | *none* | Analyse a String of Japanese given from the command line
- -f     | --file | Get input from a given file
+Available options:
+  -h,--help                Show this help text
+  -u,--unknowns            Find Kanji whose Level couldn't be determined
+  -d,--density             Find how much of the input is made of Kanji
+  -e,--elementary          Find density of Kanji learnt in elementary school
+  -l,--leveldist           Find the distribution of Kanji levels
+  -a,--average             Find the average Level of all Kanji present
+  -s,--splits              Show which Level each Kanji belongs to
+  -f,--file ARG            Take input from a file
+```
 
 #### NOTES ON CLOs
  * All options above can be mixed to include their analysis result
@@ -55,40 +51,42 @@ command-line options are available:
 #### Examples
 *Single Kanji*
 ```
-$> nanq -s 日
+$> kanji -s 日
 {
-  "levelSplit": {
-    "Ten": "日"
-  }
+    "levelSplit": {
+        "Ten": [
+            "日"
+        ]
+    }
 }
 ```
 
 *A Japanese sentence*
 ```
-$> nanq -s これは日本語
+$> kanji -s これは日本語
 {
     "levelSplit": {
-      "Nine": "語",
-      "Ten": "本日"
+        "Nine": ["語"],
+        "Ten": ["本", "日"]
     }
 }
 ```
 
 *All options*
 ```
-$> nanq -leadus これは日本語
+$> kanji -leadus これは日本語
 {
     "levelSplit": {
-      "Nine": "語",
-      "Ten": "本日"
+        "Nine": ["語"],
+        "Ten": ["本", "日"]
     },
     "elementary": 1,
     "average": 9.666667,
     "density": 0.5,
-    "unknowns": "",
+    "unknowns": [],
     "distributions": {
-      "Nine": 0.33333334,
-      "Ten": 0.6666667
+        "Nine": 0.33333334,
+        "Ten": 0.6666667
     }
 }
 ```

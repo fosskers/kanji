@@ -14,6 +14,7 @@ module Data.Kanji.Types where
 
 import           Control.DeepSeq (NFData)
 import           Data.Aeson
+import           Data.Aeson.Encoding (text)
 import           Data.Bool (bool)
 import           Data.Char (ord)
 import           Data.Hashable
@@ -68,7 +69,12 @@ kanji c = bool Nothing (Just $ Kanji c) $ isKanji c
 -- this library.
 data Level = Ten | Nine | Eight | Seven | Six | Five | Four | Three | PreTwo
            | Two | PreOne | One
-           deriving (Eq, Ord, Enum, Show, Generic, Hashable, NFData, ToJSON, ToJSONKey, FromJSON)
+           deriving (Eq, Ord, Enum, Show, Generic, Hashable, NFData, ToJSON, FromJSON)
+
+instance ToJSONKey Level where
+  toJSONKey = ToJSONKeyText f g
+    where f = T.pack . show
+          g = text . T.pack . show
 
 -- | Discover a `Level`'s numeric representation, as a `Float`.
 numericLevel :: Level -> Float

@@ -95,7 +95,7 @@ averageLevel ks = average . map numericLevel . catMaybes $ map level ks
   where average ns = foldl' (+) 0 ns / fromIntegral (length ns)
 
 -- | How much of each `Level` is represented by a group of Kanji?
--- The distribution values must sum to 1.
+-- The distribution values will sum to <= 1.
 levelDist :: [Kanji] -> M.Map Level Float
 levelDist ks = M.fromList . map percentPair . group . sort . catMaybes $ map level ks
   where percentPair qns = (head qns, fromIntegral (length qns) / totalKs)

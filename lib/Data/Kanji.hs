@@ -1,3 +1,5 @@
+{-# LANGUAGE TupleSections #-}
+
 -- |
 -- Module    : Data.Kanji
 -- Copyright : (c) Colin Woodbury, 2015 - 2018
@@ -31,10 +33,8 @@ module Data.Kanji
        , adultDen
        ) where
 
-import           Control.Applicative ((<|>))
 import           Control.Arrow hiding (second)
-import           Data.Bool (bool)
-import           Data.Foldable (foldl')
+import           Data.Foldable (foldl', fold)
 import           Data.Kanji.Levels
 import           Data.Kanji.Types
 import           Data.List (sort, group)
@@ -45,15 +45,20 @@ import qualified Data.Set as S
 
 ---
 
--- | All Japanese Kanji, grouped by their Level (級).
+-- | All Japanese `Kanji`, grouped by their Level (級).
 allKanji :: M.Map Level (S.Set Kanji)
 allKanji =  M.fromList . zip [ Ten .. ] $ map (S.map Kanji) ks
   where ks = [ tenth, ninth, eighth, seventh, sixth
              , fifth, fourth, third, preSecond, second ]
 
+-- | All Japanese `Kanji` with their `Level`.
+allKanji' :: M.Map Kanji Level
+allKanji' = M.fromList . S.toList . fold $ M.mapWithKey (\k v -> S.map (,k) v) allKanji
+
 -- | What `Level` does a Kanji belong to?
 level :: Kanji -> Maybe Level
-level k = M.foldlWithKey' (\acc l ks -> acc <|> bool Nothing (Just l) (S.member k ks)) Nothing allKanji
+level k = M.lookup k allKanji'
+{-# INLINE level #-}
 
 -- | Given the length of some String-like type and a list of `Kanji` found therein,
 -- what percentage of them were Kanji?

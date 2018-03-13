@@ -1,3 +1,7 @@
+## 3.1.0.1
+
+- Performance improvements
+
 ## 3.1.0
 
 - Overall simplification of library and reduction in boilerplate

@@ -26,8 +26,10 @@ suite = testGroup "Unit Tests"
     ]
   , testGroup "JSON"
     [
-      testCase "Empty String should fail to parse"    $ assert . isError $ fromJSON @Kanji (String "")
-    , testCase "String w/ multiple Kanji should fail" $ assert . isError $ fromJSON @Kanji (String "泥棒猫")
+      testCase "Empty String should fail to parse"
+      $ assertBool "An empty String somehow parsed" . isError $ fromJSON @Kanji (String "")
+    , testCase "String w/ multiple Kanji should fail"
+      $ assertBool "A String of multiple Kanji somehow parsed" . isError $ fromJSON @Kanji (String "泥棒猫")
     , testCase "String w/ one Kanji should succeed"   $ fromJSON (String "猫") @?= Success (Kanji '猫')
     ]
   ]

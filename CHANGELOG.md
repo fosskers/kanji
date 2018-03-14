@@ -1,3 +1,7 @@
+## 3.2.0
+
+- `averageLevel` isn't total, and so now returns in `Maybe`
+
 ## 3.1.0.1
 
 - Performance improvements

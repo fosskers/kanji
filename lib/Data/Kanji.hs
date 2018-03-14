@@ -90,8 +90,9 @@ adultDen :: M.Map Level Float -> Float
 adultDen m = M.foldl' (+) 0 . M.restrictKeys m $ S.fromList [ Two, PreTwo .. ]
 
 -- | Find the average `Level` of a given set of `Kanji`.
-averageLevel :: [Kanji] -> Float
-averageLevel ks = average . map numericLevel . catMaybes $ map level ks
+averageLevel :: [Kanji] -> Maybe Float
+averageLevel [] = Nothing
+averageLevel ks = Just . average . map numericLevel . catMaybes $ map level ks
   where average ns = foldl' (+) 0 ns / fromIntegral (length ns)
 
 -- | How much of each `Level` is represented by a group of Kanji?

@@ -35,18 +35,11 @@ import           GHC.Generics
 -- * 畑 (a type of rice field)
 -- * 峠 (a narrow mountain pass)
 -- * 働 (to do physical labour)
-newtype Kanji = Kanji {
-  _kanji :: Char -- ^ The original `Char` of a `Kanji`.
-  } deriving (Eq, Ord, Show, Generic, Hashable, NFData)
+newtype Kanji = Kanji Char deriving (Eq, Ord, Show, Generic, ToJSON, FromJSON, Hashable, NFData)
 
-instance ToJSON Kanji where
-  toJSON (Kanji c) = String $ T.singleton c
-
-instance FromJSON Kanji where
-  parseJSON = withText "Kanji" $ \t -> case T.uncons t of
-    Nothing -> fail "No Kanji given"
-    Just (c, t') | not (T.null t') -> fail "More than one Kanji given in a single String"
-                 | otherwise -> pure $ Kanji c
+-- | The original `Char` of a `Kanji`.
+_kanji :: Kanji -> Char
+_kanji (Kanji k) = k
 
 -- | Construct a `Kanji` value from some `Char` if it falls in the correct UTF8 range.
 kanji :: Char -> Maybe Kanji

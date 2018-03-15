@@ -1,3 +1,8 @@
+## 3.2.1
+
+- `ToJSON` and `FromJSON` instances for `Kanji` derived via `Generic`
+  instead of being hand-written.
+
 ## 3.2.0
 
 - `averageLevel` isn't total, and so now returns in `Maybe`

@@ -31,6 +31,8 @@ suite = testGroup "Unit Tests"
     , testCase "String w/ multiple Kanji should fail"
       $ assertBool "A String of multiple Kanji somehow parsed" . isError $ fromJSON @Kanji (String "泥棒猫")
     , testCase "String w/ one Kanji should succeed"   $ fromJSON (String "猫") @?= Success (Kanji '猫')
+    , testCase "Isomorphism" $ fromJSON (toJSON $ Kanji '猫') @?= Success (Kanji '猫')
+    , testCase "newtype generic encoding" $ toJSON (Kanji '猫') @?= String "猫"
     ]
   ]
   where ?epsilon = 0.001

@@ -1,5 +1,5 @@
 name:                kanji
-version:             3.2.1
+version:             3.3.0
 synopsis:            Perform 漢字検定 (Japan Kanji Aptitude Test) level analysis on Japanese Kanji
 description:         Perform 漢字検定 (Japan Kanji Aptitude Test) level analysis on Japanese Kanji.
 homepage:            https://github.com/fosskers/kanji

@@ -28,16 +28,14 @@ Assuming you've made it so that you can run the executable, the following
 command-line options are available:
 
 ```
-Usage: kanji [-u|--unknowns] [-d|--density] [-e|--elementary] [-l|--leveldist]
-             [-a|--average] [-s|--splits] ((-f|--file ARG) | JAPANESE)
+Usage: kanji [-d|--density] [-e|--elementary] [-l|--leveldist] [-s|--splits]
+             ((-f|--file ARG) | JAPANESE)
 
 Available options:
   -h,--help                Show this help text
-  -u,--unknowns            Find Kanji whose Level couldn't be determined
   -d,--density             Find how much of the input is made of Kanji
   -e,--elementary          Find density of Kanji learnt in elementary school
   -l,--leveldist           Find the distribution of Kanji levels
-  -a,--average             Find the average Level of all Kanji present
   -s,--splits              Show which Level each Kanji belongs to
   -f,--file ARG            Take input from a file
 ```
@@ -74,19 +72,21 @@ $> kanji -s これは日本語
 
 *All options*
 ```
-$> kanji -leadus これは日本語
+$> kanji -sled これは日本語。串と糞
 {
     "levelSplit": {
         "Nine": ["語"],
-        "Ten": ["本", "日"]
+        "Ten": ["本", "日"],
+        "Unknown": ["糞"],
+        "Two": ["串"]
     },
-    "elementary": 1,
-    "average": 9.666667,
+    "elementary": 0.6,
     "density": 0.5,
-    "unknowns": [],
     "distributions": {
-        "Nine": 0.33333334,
-        "Ten": 0.6666667
+        "Nine": 0.2,
+        "Ten": 0.4,
+        "Unknown": 0.2,
+        "Two": 0.2
     }
 }
 ```

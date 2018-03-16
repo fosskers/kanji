@@ -1,3 +1,9 @@
+## 3.3.0
+
+- New `Unknown` level for Kanji above level `Two`
+- `level` is now a total function
+- Removed `averageLevel`, as it wasn't correct nor useful
+
 ## 3.2.1
 
 - `ToJSON` and `FromJSON` instances for `Kanji` derived via `Generic`

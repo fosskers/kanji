@@ -18,8 +18,6 @@ import           Data.Aeson.Encoding (text)
 import           Data.Bool (bool)
 import           Data.Char (ord)
 import           Data.Hashable
-import qualified Data.Map.Strict as M
-import           Data.Maybe (fromJust)
 import qualified Data.Text as T
 import           GHC.Generics
 
@@ -61,21 +59,13 @@ kanji c = bool Nothing (Just $ Kanji c) $ isKanji c
 -- Level data for Kanji above Level-2 is currently not provided by
 -- this library.
 data Level = Ten | Nine | Eight | Seven | Six | Five | Four | Three | PreTwo
-           | Two | PreOne | One
+           | Two | PreOne | One | Unknown
            deriving (Eq, Ord, Enum, Show, Generic, Hashable, NFData, ToJSON, FromJSON)
 
 instance ToJSONKey Level where
   toJSONKey = ToJSONKeyText f g
     where f = T.pack . show
           g = text . T.pack . show
-
--- | Discover a `Level`'s numeric representation, as a `Float`.
-numericLevel :: Level -> Float
-numericLevel = fromJust . flip M.lookup rankMap
-
--- | A mapping of Ranks to their numeric representation.
-rankMap :: M.Map Level Float
-rankMap = M.fromList $ zip [Ten ..] [10,9,8,7,6,5,4,3,2.5,2,1.5,1]
 
 -- | Legal Kanji appear between UTF8 characters 19968 and 40959.
 isKanji :: Char -> Bool

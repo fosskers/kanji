@@ -7,7 +7,6 @@ import           Data.Aeson
 import           Data.Aeson.Encode.Pretty
 import           Data.Kanji
 import qualified Data.Map.Strict as M
-import           Data.Maybe (isNothing)
 import qualified Data.Set as S
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
@@ -22,8 +21,7 @@ import           Protolude hiding (to)
 
 data Flags = Flags [Operation] (Either FilePath Text) deriving (Eq)
 
-data Operation = Unknowns | Density | Elementary
-               | Distribution | Average | Splits deriving (Eq)
+data Operation = Density | Elementary | Distribution | Splits deriving (Eq)
 
 data Env = Env { _allKs :: [Kanji]
                , _original :: Text } deriving Eq
@@ -39,16 +37,12 @@ flags = Flags <$> operations <*> (file <|> japanese)
 operations :: Parser [Operation]
 operations = catMaybes <$> ops
   where ops = traverse optional
-          [ flag' Unknowns $
-            lsh "unknowns" 'u' "Find Kanji whose Level couldn't be determined"
-          , flag' Density $
+          [ flag' Density $
             lsh "density" 'd' "Find how much of the input is made of Kanji"
           , flag' Elementary $
             lsh "elementary" 'e' "Find density of Kanji learnt in elementary school"
           , flag' Distribution $
             lsh "leveldist" 'l' "Find the distribution of Kanji levels"
-          , flag' Average $
-            lsh "average" 'a' "Find the average Level of all Kanji present"
           , flag' Splits $
             lsh "splits" 's' "Show which Level each Kanji belongs to" ]
 
@@ -56,15 +50,9 @@ operations = catMaybes <$> ops
 ob :: ToJSON v => Text -> v -> Value
 ob k v = object [ k .= v ]
 
-averageLev :: Reader Env Value
-averageLev = ob "average" . averageLevel <$> asks _allKs
-
 splits :: Reader Env Value
 splits = ob "levelSplit" . S.foldl' f mempty . S.fromList <$> asks _allKs
-  where f a k = maybe a (\l -> M.insertWith (++) l [k] a) $ level k
-
-unknowns :: Reader Env Value
-unknowns = ob "unknowns" . S.map _kanji . S.filter (isNothing . level) . S.fromList <$> asks _allKs
+  where f a k = (\l -> M.insertWith (++) l [k] a) $ level k
 
 distribution :: Reader Env Value
 distribution = ob "distributions" . levelDist <$> asks _allKs
@@ -79,11 +67,9 @@ elementaryDensity = ob "elementary" . elementaryDen . levelDist <$> asks _allKs
 
 -- | All operations return JSON, to be aggregated into a master Object.
 execOp :: Operation -> Reader Env Value
-execOp Unknowns = unknowns
 execOp Density = density
 execOp Elementary = elementaryDensity
 execOp Distribution = distribution
-execOp Average = averageLev
 execOp Splits = splits
 
 output :: Value -> IO ()

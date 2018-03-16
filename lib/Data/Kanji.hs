@@ -23,7 +23,6 @@ module Data.Kanji
          -- * Analysis
        , percentSpread
        , levelDist
-       , averageLevel
        , uniques
          -- ** Densities
        , kanjiDensity
@@ -34,12 +33,11 @@ module Data.Kanji
        ) where
 
 import           Control.Arrow hiding (second)
-import           Data.Foldable (foldl', fold)
+import           Data.Foldable (fold)
 import           Data.Kanji.Levels
 import           Data.Kanji.Types
 import           Data.List (sort, group)
 import qualified Data.Map.Strict as M
-import           Data.Maybe (catMaybes)
 import           Data.Semigroup ((<>))
 import qualified Data.Set as S
 
@@ -55,9 +53,9 @@ allKanji =  M.fromList . zip [ Ten .. ] $ map (S.map Kanji) ks
 allKanji' :: M.Map Kanji Level
 allKanji' = M.fromList . S.toList . fold $ M.mapWithKey (\k v -> S.map (,k) v) allKanji
 
--- | What `Level` does a Kanji belong to?
-level :: Kanji -> Maybe Level
-level k = M.lookup k allKanji'
+-- | What `Level` does a Kanji belong to? `Unknown` for Kanji above level `Two`.
+level :: Kanji -> Level
+level k = maybe Unknown id $ M.lookup k allKanji'
 {-# INLINE level #-}
 
 -- | Given the length of some String-like type and a list of `Kanji` found therein,
@@ -89,16 +87,10 @@ highDen m = M.foldl' (+) 0 . M.restrictKeys m $ S.fromList [ PreTwo, Three .. ]
 adultDen :: M.Map Level Float -> Float
 adultDen m = M.foldl' (+) 0 . M.restrictKeys m $ S.fromList [ Two, PreTwo .. ]
 
--- | Find the average `Level` of a given set of `Kanji`.
-averageLevel :: [Kanji] -> Maybe Float
-averageLevel [] = Nothing
-averageLevel ks = Just . average . map numericLevel . catMaybes $ map level ks
-  where average ns = foldl' (+) 0 ns / fromIntegral (length ns)
-
 -- | How much of each `Level` is represented by a group of Kanji?
--- The distribution values will sum to <= 1.
+-- The distribution values will sum to 1.
 levelDist :: [Kanji] -> M.Map Level Float
-levelDist ks = M.fromList . map percentPair . group . sort . catMaybes $ map level ks
+levelDist ks = M.fromList . map percentPair . group . sort $ map level ks
   where percentPair qns = (head qns, fromIntegral (length qns) / totalKs)
         totalKs = fromIntegral $ length ks
 
@@ -117,4 +109,4 @@ kanjiQuantities = M.fromList . map (head &&& length) . group . sort
 -- | Which Kanji appeared from each Level in the text?
 uniques :: [Kanji] -> M.Map Level (S.Set Kanji)
 uniques = S.foldl' h M.empty . S.fromList
-  where h a k = maybe a (\l -> M.insertWith (<>) l (S.singleton k) a) $ level k
+  where h a k = (\l -> M.insertWith (<>) l (S.singleton k) a) $ level k

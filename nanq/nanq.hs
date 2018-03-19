@@ -3,19 +3,22 @@
 
 module Main ( main ) where
 
+import           Control.Monad.Trans.Reader
 import           Data.Aeson
 import           Data.Aeson.Encode.Pretty
 import           Data.Kanji
 import qualified Data.Map.Strict as M
+import           Data.Maybe (catMaybes, mapMaybe)
+import           Data.Monoid ((<>))
 import qualified Data.Set as S
+import           Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import           Data.Text.Lazy.Builder (toLazyText)
+import           Data.Text.Lazy.IO as TLIO
 import           Lens.Micro
 import           Lens.Micro.Aeson
-import           Lens.Micro.Platform ()
 import           Options.Applicative
-import           Protolude hiding (to)
 
 ---
 
@@ -59,7 +62,7 @@ distribution = ob "distributions" . levelDist <$> asks _allKs
 
 density :: Reader Env Value
 density = do
-  d <- kanjiDensity <$> asks (T.length . _original) <*> asks _allKs
+  d <- maybe 0 id . M.lookup Hanzi . densities <$> asks _original
   pure $ ob "density" d
 
 elementaryDensity :: Reader Env Value
@@ -73,7 +76,7 @@ execOp Distribution = distribution
 execOp Splits = splits
 
 output :: Value -> IO ()
-output = putLText . toLazyText . encodePrettyToTextBuilder
+output = TLIO.putStrLn . toLazyText . encodePrettyToTextBuilder
 
 -- | Dispatch on each `Operation` given. Aggregates the resulting JSON.
 work :: (Env, [Operation]) -> Value
@@ -84,7 +87,7 @@ env :: Flags -> IO (Env, [Operation])
 env (Flags os inp) = case inp of
   Right t -> pure (e t, os)
   Left  f -> (, os) . e <$> TIO.readFile f
-  where e t = Env (t ^.. each . to kanji . _Just) t
+  where e t = Env (mapMaybe kanji $ T.unpack t) t
 
 main :: IO ()
 main = execParser opts >>= env >>= output . work

@@ -3,6 +3,8 @@
 - New `Unknown` level for Kanji above level `Two`
 - `level` is now a total function
 - Removed `averageLevel`, as it wasn't correct nor useful
+- New `densities` function with associated type `CharCat` for getting more
+  interesting character density information
 
 ## 3.2.1
 

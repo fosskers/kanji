@@ -17,7 +17,7 @@ import           Control.DeepSeq (NFData)
 import           Data.Aeson
 import           Data.Aeson.Encoding (text)
 import           Data.Bool (bool)
-import           Data.Char (ord)
+import           Data.Char (ord, isLetter, isNumber, isPunctuation)
 import           Data.Hashable
 import qualified Data.Text as T
 import           GHC.Generics
@@ -83,14 +83,22 @@ isKatakana :: Char -> Bool
 isKatakana (ord -> c) = 0x30a0 <= c && c <= 0x30ff
 {-# INLINE isKatakana #-}
 
-data CharCat = Hanzi | Hiragana | Katakana | Other
+-- | General categories for characters, at least as is useful for thinking about
+-- Japanese.
+--
+-- Japanese "full-width" numbers and letters will be counted as `Numeral`
+-- and `RomanLetter` respectively, alongside their usual ASCII forms.
+data CharCat = Hanzi | Hiragana | Katakana | Numeral | RomanLetter | Punctuation | Other
   deriving (Eq, Ord, Show, Generic, Hashable, NFData, ToJSON, FromJSON)
 
 category :: Char -> CharCat
-category c | isKanji c    = Hanzi
-           | isHiragana c = Hiragana
-           | isKatakana c = Katakana
-           | otherwise    = Other
+category c | isKanji c       = Hanzi
+           | isHiragana c    = Hiragana
+           | isKatakana c    = Katakana
+           | isLetter c      = RomanLetter
+           | isNumber c      = Numeral
+           | isPunctuation c = Punctuation
+           | otherwise       = Other
 
 instance ToJSONKey CharCat where
   toJSONKey = ToJSONKeyText f g

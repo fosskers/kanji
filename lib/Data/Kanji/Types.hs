@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveAnyClass, DeriveGeneric #-}
+{-# LANGUAGE ViewPatterns #-}
 
 -- |
 -- Module    : Data.Kanji.Types
@@ -67,9 +68,31 @@ instance ToJSONKey Level where
     where f = T.pack . show
           g = text . T.pack . show
 
--- | Legal Kanji appear between UTF8 characters 19968 and 40959.
+-- | Legal Kanji appear between UTF-8 characters 19968 and 40959.
 isKanji :: Char -> Bool
-isKanji c = lowLimit <= c' && c' <= highLimit
-    where c' = ord c
-          lowLimit  = 19968  -- This is `一`
-          highLimit = 40959  -- I don't have the right fonts to display this.
+isKanji (ord -> c) = 19968 <= c && c <= 40959
+{-# INLINE isKanji #-}
+
+-- | あ to ん.
+isHiragana :: Char -> Bool
+isHiragana (ord -> c) = 0x3040 <= c && c <= 0x309f
+{-# INLINE isHiragana #-}
+
+-- | ア to ン.
+isKatakana :: Char -> Bool
+isKatakana (ord -> c) = 0x30a0 <= c && c <= 0x30ff
+{-# INLINE isKatakana #-}
+
+data CharCat = Hanzi | Hiragana | Katakana | Other
+  deriving (Eq, Ord, Show, Generic, Hashable, NFData, ToJSON, FromJSON)
+
+category :: Char -> CharCat
+category c | isKanji c    = Hanzi
+           | isHiragana c = Hiragana
+           | isKatakana c = Katakana
+           | otherwise    = Other
+
+instance ToJSONKey CharCat where
+  toJSONKey = ToJSONKeyText f g
+    where f = T.pack . show
+          g = text . T.pack . show

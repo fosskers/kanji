@@ -16,7 +16,10 @@ module Data.Kanji
          Kanji
        , kanji, _kanji
        , allKanji
-       , isKanji
+       , isKanji, isHiragana, isKatakana
+         -- * Character Categories
+       , CharCat(..)
+       , category
          -- * Levels
        , Level(..)
        , level
@@ -25,7 +28,7 @@ module Data.Kanji
        , levelDist
        , uniques
          -- ** Densities
-       , kanjiDensity
+       , densities
        , elementaryDen
        , middleDen
        , highDen
@@ -40,6 +43,7 @@ import           Data.List (sort, group)
 import qualified Data.Map.Strict as M
 import           Data.Semigroup ((<>))
 import qualified Data.Set as S
+import qualified Data.Text as T
 
 ---
 
@@ -58,10 +62,11 @@ level :: Kanji -> Level
 level k = maybe Unknown id $ M.lookup k allKanji'
 {-# INLINE level #-}
 
--- | Given the length of some String-like type and a list of `Kanji` found therein,
--- what percentage of them were Kanji?
-kanjiDensity :: Int -> [Kanji] -> Float
-kanjiDensity len ks = fromIntegral (length ks) / fromIntegral len
+-- | Percentage of appearance of each `CharCat` in the source text.
+-- The percentages will sum to 1.0.
+densities :: T.Text -> M.Map CharCat Float
+densities t = M.fromList . map (head &&& f) . group . sort . map category $ T.unpack t
+  where f xs = fromIntegral (length xs) / fromIntegral (T.length t)
 
 -- | How much of the Kanji found are learnt in elementary school in Japan?
 --

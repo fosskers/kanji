@@ -23,7 +23,7 @@ suite = testGroup "Unit Tests"
     [
       testCase "percentSpread totals 1.0" $ M.foldl' (+) 0 (percentSpread testKanji) @?~ 1.0
     , testCase "levelDist totals 1.0"     $ M.foldl' (+) 0 (levelDist testKanji) @?~ 1.0
-    , testCase "levelDist == adultDen"    $ M.foldl' (+) 0 (levelDist testKanji) @?~ adultDen (levelDist testKanji)
+    , testCase "levelDist == highDen"     $ M.foldl' (+) 0 (levelDist testKanji) @?~ highDen (levelDist testKanji)
     ]
   , testGroup "JSON"
     [
@@ -31,7 +31,7 @@ suite = testGroup "Unit Tests"
       $ assertBool "An empty String somehow parsed" . isError $ fromJSON @Kanji (String "")
     , testCase "String w/ multiple Kanji should fail"
       $ assertBool "A String of multiple Kanji somehow parsed" . isError $ fromJSON @Kanji (String "泥棒猫")
-    , testCase "String w/ one Kanji should succeed"   $ fromJSON (String "猫") @?= Success (Kanji '猫')
+    , testCase "String w/ one Kanji should succeed" $ fromJSON (String "猫") @?= Success (Kanji '猫')
     , testCase "Isomorphism" $ fromJSON (toJSON $ Kanji '猫') @?= Success (Kanji '猫')
     , testCase "newtype generic encoding" $ toJSON (Kanji '猫') @?= String "猫"
     ]

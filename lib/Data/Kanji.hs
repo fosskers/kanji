@@ -32,7 +32,6 @@ module Data.Kanji
        , elementaryDen
        , middleDen
        , highDen
-       , adultDen
        ) where
 
 import           Control.Arrow hiding (second)
@@ -84,13 +83,7 @@ middleDen m = M.foldl' (+) 0 . M.restrictKeys m $ S.fromList [ Three, Four .. ]
 --
 -- > highDen . levelDist :: [Kanji] -> Float
 highDen :: M.Map Level Float -> Float
-highDen m = M.foldl' (+) 0 . M.restrictKeys m $ S.fromList [ PreTwo, Three .. ]
-
--- | How much of the Kanji found should be able to be read by the average person?
---
--- > adultDen . levelDist :: [Kanji] -> Float
-adultDen :: M.Map Level Float -> Float
-adultDen m = M.foldl' (+) 0 . M.restrictKeys m $ S.fromList [ Two, PreTwo .. ]
+highDen m = M.foldl' (+) 0 . M.restrictKeys m $ S.fromList [ Two, PreTwo .. ]
 
 -- | How much of each `Level` is represented by a group of Kanji?
 -- The distribution values will sum to 1.

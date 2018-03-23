@@ -1,3 +1,7 @@
+## 3.4.0
+
+- Removed `adultDen` and fixed the level range for `highDen`.
+
 ## 3.3.0
 
 - New `Unknown` level for Kanji above level `Two`

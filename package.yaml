@@ -57,7 +57,7 @@ benchmarks:
       - -O2
     dependencies:
       - kanji
-      - criterion >= 1.1 && < 1.5
+      - criterion >= 1.1 && < 1.6
 
 executables:
   kanji:

@@ -14,12 +14,10 @@ extra-source-files:
   - CHANGELOG.md
 
 ghc-options:
-  - -fwarn-unused-imports
-  - -fwarn-unused-binds
-  - -fwarn-name-shadowing
-  - -fwarn-unused-matches
-  - -fwarn-incomplete-patterns
-  - -fwarn-incomplete-uni-patterns
+  - -Wall
+  - -Wincomplete-record-updates
+  - -Wincomplete-uni-patterns
+  - -Wredundant-constraints
 
 dependencies:
   - base >= 4.7 && < 5

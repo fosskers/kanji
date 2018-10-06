@@ -30,6 +30,7 @@ data Env = Env { _allKs :: [Kanji]
                , _original :: Text } deriving Eq
 
 -- | Long, Short, Help
+lsh :: HasName f => String -> Char -> String -> Mod f a
 lsh l s h = long l <> short s <> help h
 
 flags :: Parser Flags

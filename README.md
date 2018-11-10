@@ -1,9 +1,7 @@
 Kanji
 ====
 
-`kanji` is a Japanese Kanji library and analysation program written in Haskell. Its main
-function is to tell what Kanji belong to what Level of the Japanese National
-Kanji Examination (漢字検定).
+`kanji` is a Japanese Kanji library and analysation program written in Haskell. `kanji` can output the Level of the Japanese National Kanji Examination (漢字検定) a given Kanji character belongs in.
 
 `kanji` can be used to:
  - determine what Level individual Kanji belong to

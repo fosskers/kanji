@@ -1,8 +1,8 @@
 -- |
 -- Module    : Data.Kanji.Levels
--- Copyright : (c) Colin Woodbury, 2015 - 2018
+-- Copyright : (c) Colin Woodbury, 2015 - 2019
 -- License   : GPL3
--- Maintainer: Colin Woodbury <colingw@gmail.com>
+-- Maintainer: Colin Woodbury <colin@fosskers.ca>
 --
 -- All Kanji from levels 10 to Pre-2.
 

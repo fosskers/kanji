@@ -1,5 +1,5 @@
-{-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes       #-}
 
 module Pages.About where
 
@@ -122,7 +122,7 @@ me = do
     toHtml [lt|I'm an avid speaker of Kyushu dialects and a fan of Western
               Japanese ones. I currently work as a software developer
               in Vancouver, Canada.|]
-    " I can be reached at " *> a_ [href_ "mailto:colingw@gmail.com"] "colingw@gmail.com"
+    " I can be reached at " *> a_ [href_ "mailto:colin@fosskers.ca"] "colin@fosskers.ca"
 
 meJ :: Html ()
 meJ = do

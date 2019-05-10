@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name:         kanji
-version:      3.4.0.1
+version:      3.4.0.2
 synopsis:     Perform 漢字検定 (Japan Kanji Aptitude Test) level analysis on Japanese Kanji
 description:  Perform 漢字検定 (Japan Kanji Aptitude Test) level analysis on Japanese Kanji.
 category:     Data
@@ -26,9 +26,8 @@ common commons
     , text
   ghc-options:
       -Wall
-      -Wincomplete-record-updates
-      -Wincomplete-uni-patterns
-      -Wredundant-constraints
+      -fwarn-incomplete-record-updates
+      -fwarn-incomplete-uni-patterns
 
 library
   import: commons

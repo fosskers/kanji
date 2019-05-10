@@ -1,3 +1,7 @@
+## 3.4.0.2
+
+- Massaging bounds to support more GHC versions.
+
 ## 3.4.0
 
 - Removed `adultDen` and fixed the level range for `highDen`.

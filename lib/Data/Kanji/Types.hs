@@ -1,11 +1,12 @@
-{-# LANGUAGE DeriveAnyClass, DeriveGeneric #-}
-{-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric  #-}
+{-# LANGUAGE ViewPatterns   #-}
 
 -- |
 -- Module    : Data.Kanji.Types
 -- Copyright : (c) Colin Woodbury, 2015, 2016
 -- License   : GPL3
--- Maintainer: Colin Woodbury <colingw@gmail.com>
+-- Maintainer: Colin Woodbury <colin@fosskers.ca>
 --
 -- Types for this library. While a constructor for `Kanji` is made available
 -- here, you should prefer the `kanji` "smart constructor" unless you know
@@ -17,7 +18,7 @@ import           Control.DeepSeq (NFData)
 import           Data.Aeson
 import           Data.Aeson.Encoding (text)
 import           Data.Bool (bool)
-import           Data.Char (ord, isLetter, isNumber, isPunctuation)
+import           Data.Char (isLetter, isNumber, isPunctuation, ord)
 import           Data.Hashable
 import qualified Data.Text as T
 import           GHC.Generics

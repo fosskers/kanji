@@ -2,43 +2,43 @@
 
 -- |
 -- Module    : Data.Kanji
--- Copyright : (c) Colin Woodbury, 2015 - 2018
+-- Copyright : (c) Colin Woodbury, 2015 - 2019
 -- License   : GPL3
--- Maintainer: Colin Woodbury <colingw@gmail.com>
+-- Maintainer: Colin Woodbury <colin@fosskers.ca>
 --
 -- A library for analysing the density of Kanji in given texts,
 -- according to their "Level" classification, as defined by the
 -- Japan Kanji Aptitude Testing Foundation (日本漢字能力検定協会).
 
 module Data.Kanji
-       (
-         -- * Kanji
-         Kanji
-       , kanji, _kanji
-       , allKanji
-       , isKanji, isHiragana, isKatakana
-         -- * Character Categories
-       , CharCat(..)
-       , category
-         -- * Levels
-       , Level(..)
-       , level
-         -- * Analysis
-       , percentSpread
-       , levelDist
-       , uniques
-         -- ** Densities
-       , densities
-       , elementaryDen
-       , middleDen
-       , highDen
-       ) where
+  (
+    -- * Kanji
+    Kanji
+  , kanji, _kanji
+  , allKanji
+  , isKanji, isHiragana, isKatakana
+    -- * Character Categories
+  , CharCat(..)
+  , category
+    -- * Levels
+  , Level(..)
+  , level
+    -- * Analysis
+  , percentSpread
+  , levelDist
+  , uniques
+    -- ** Densities
+  , densities
+  , elementaryDen
+  , middleDen
+  , highDen
+  ) where
 
 import           Control.Arrow hiding (second)
 import           Data.Foldable (fold)
 import           Data.Kanji.Levels
 import           Data.Kanji.Types
-import           Data.List (sort, group)
+import           Data.List (group, sort)
 import qualified Data.Map.Strict as M
 import           Data.Semigroup ((<>))
 import qualified Data.Set as S

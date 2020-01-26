@@ -1,3 +1,8 @@
+## 3.4.1
+
+- Drop support for GHC versions that haven't implemented the Semigroup-Monoid
+  Proposal.
+
 ## 3.4.0.2
 
 - Massaging bounds to support more GHC versions.

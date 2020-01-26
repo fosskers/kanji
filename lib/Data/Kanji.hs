@@ -2,7 +2,7 @@
 
 -- |
 -- Module    : Data.Kanji
--- Copyright : (c) Colin Woodbury, 2015 - 2019
+-- Copyright : (c) Colin Woodbury, 2015 - 2020
 -- License   : GPL3
 -- Maintainer: Colin Woodbury <colin@fosskers.ca>
 --
@@ -40,7 +40,6 @@ import           Data.Kanji.Levels
 import           Data.Kanji.Types
 import           Data.List (group, sort)
 import qualified Data.Map.Strict as M
-import           Data.Semigroup ((<>))
 import qualified Data.Set as S
 import qualified Data.Text as T
 

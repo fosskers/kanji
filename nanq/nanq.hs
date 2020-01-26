@@ -10,7 +10,6 @@ import           Data.Aeson.Encode.Pretty
 import           Data.Kanji
 import qualified Data.Map.Strict as M
 import           Data.Maybe (catMaybes, mapMaybe)
-import           Data.Monoid ((<>))
 import qualified Data.Set as S
 import           Data.Text (Text)
 import qualified Data.Text as T

@@ -14,14 +14,12 @@
 
 module Data.Kanji.Types where
 
-import           Control.DeepSeq (NFData)
-import           Data.Aeson
-import           Data.Aeson.Encoding (text)
-import           Data.Bool (bool)
-import           Data.Char (isLetter, isNumber, isPunctuation, ord)
-import           Data.Hashable
-import qualified Data.Text as T
-import           GHC.Generics
+import Control.DeepSeq (NFData)
+import Data.Aeson
+import Data.Bool (bool)
+import Data.Char (isLetter, isNumber, isPunctuation, ord)
+import Data.Hashable
+import GHC.Generics
 
 ---
 
@@ -62,12 +60,7 @@ kanji c = bool Nothing (Just $ Kanji c) $ isKanji c
 -- this library.
 data Level = Ten | Nine | Eight | Seven | Six | Five | Four | Three | PreTwo
            | Two | PreOne | One | Unknown
-           deriving (Eq, Ord, Enum, Show, Generic, Hashable, NFData, ToJSON, FromJSON)
-
-instance ToJSONKey Level where
-  toJSONKey = ToJSONKeyText f g
-    where f = T.pack . show
-          g = text . T.pack . show
+           deriving (Eq, Ord, Enum, Show, Generic, Hashable, NFData, ToJSON, FromJSON, ToJSONKey)
 
 -- | Legal Kanji appear between UTF-8 characters 19968 and 40959.
 isKanji :: Char -> Bool
@@ -90,7 +83,7 @@ isKatakana (ord -> c) = 0x30a0 <= c && c <= 0x30ff
 -- Japanese "full-width" numbers and letters will be counted as `Numeral`
 -- and `RomanLetter` respectively, alongside their usual ASCII forms.
 data CharCat = Hanzi | Hiragana | Katakana | Numeral | RomanLetter | Punctuation | Other
-  deriving (Eq, Ord, Show, Generic, Hashable, NFData, ToJSON, FromJSON)
+  deriving (Eq, Ord, Show, Generic, Hashable, NFData, ToJSON, FromJSON, ToJSONKey)
 
 category :: Char -> CharCat
 category c | isKanji c       = Hanzi
@@ -100,8 +93,3 @@ category c | isKanji c       = Hanzi
            | isNumber c      = Numeral
            | isPunctuation c = Punctuation
            | otherwise       = Other
-
-instance ToJSONKey CharCat where
-  toJSONKey = ToJSONKeyText f g
-    where f = T.pack . show
-          g = text . T.pack . show

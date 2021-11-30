@@ -1,3 +1,8 @@
+## 3.5.0
+
+- Support for `aeson-2.0`.
+- Removed the `kanji` executable.
+
 ## 3.4.1
 
 - Drop support for GHC versions that haven't implemented the Semigroup-Monoid

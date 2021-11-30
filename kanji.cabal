@@ -1,6 +1,6 @@
 cabal-version:      2.2
 name:               kanji
-version:            3.4.1
+version:            3.5.0
 synopsis:
   Perform 漢字検定 (Japan Kanji Aptitude Test) level analysis on Japanese Kanji
 
